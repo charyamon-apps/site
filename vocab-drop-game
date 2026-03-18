@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocab Drop</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #111827, #1f2937);
+      color: #f9fafb;
+      overflow: hidden;
+    }
+
+    .hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(17, 24, 39, 0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 20;
+    }
+
+    .hud-left,
+    .hud-right {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      font-size: 15px;
+    }
+
+    .game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .word {
+      position: absolute;
+      top: -40px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      user-select: none;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.22);
+    }
+
+    .word.matched {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.6);
+    }
+
+    .word.urgent {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.6);
+    }
+
+    .bottom-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 16px;
+      background: rgba(17, 24, 39, 0.95);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      z-index: 25;
+    }
+
+    .input-row {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    #typedInput {
+      flex: 1;
+      font-size: 22px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      background: #f9fafb;
+      color: #111827;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      background: #60a5fa;
+      color: #0f172a;
+    }
+
+    button:hover {
+      opacity: 0.95;
+    }
+
+    .message {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.45);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 18px;
+      z-index: 30;
+      display: none;
+    }
+
+    .game-over {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .game-over-card {
+      width: min(92vw, 520px);
+      background: #111827;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    .game-over-card h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 36px;
+    }
+
+    .game-over-card p {
+      font-size: 18px;
+      color: #d1d5db;
+    }
+
+    .small-note {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <div class="hud-left">
+      <div><strong>Score:</strong> <span id="score">0</span></div>
+      <div><strong>Typed:</strong> <span id="typedCount">0</span></div>
+      <div><strong>Missed:</strong> <span id="missed">0</span> / <span id="maxMisses">5</span></div>
+    </div>
+    <div class="hud-right">
+      <div><strong>Level:</strong> <span id="level">1</span></div>
+      <div><strong>Streak:</strong> <span id="streak">0</span></div>
+    </div>
+  </div>
+
+  <div id="message" class="message"></div>
+  <div id="gameArea" class="game-area"></div>
+
+  <div class="bottom-panel">
+    <div class="input-row">
+      <input id="typedInput" type="text" placeholder="Type the falling word and press Enter" autofocus />
+      <button id="restartBtn">Restart</button>
+    </div>
+    <div class="input-row" style="margin-top:10px;">
+      <div class="small-note">
+        Rare words only. Because apparently ordinary words were too easy for your terrifyingly fast fingers.
+      </div>
+    </div>
+  </div>
+
+  <div id="gameOver" class="game-over">
+    <div class="game-over-card">
+      <h1>Game Over</h1>
+      <p>Your score: <strong id="finalScore">0</strong></p>
+      <p>Words typed: <strong id="finalTyped">0</strong></p>
+      <p>Highest streak: <strong id="finalStreak">0</strong></p>
+      <button id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    const vocabularyWords = [
+      "abstruse", "acumen", "antediluvian", "apocryphal", "approbation",
+      "arcane", "assiduous", "auspicious", "avarice", "bellicose",
+      "calumny", "capricious", "cogent", "conflagration", "coruscate",
+      "credulous", "deleterious", "demure", "desultory", "diaphanous",
+      "ebullient", "eclectic", "effulgent", "egregious", "enervate",
+      "ephemeral", "equanimity", "equivocate", "erstwhile", "esoteric",
+      "exculpate", "fastidious", "fecund", "fortuitous", "garrulous",
+      "gregarious", "harangue", "iconoclast", "idiosyncrasy", "impecunious",
+      "imperturbable", "inchoate", "indefatigable", "ineffable", "ingenuous",
+      "insouciant", "inveterate", "laconic", "legerdemain", "loquacious",
+      "magnanimous", "malediction", "mellifluous", "munificent", "nefarious",
+      "obdurate", "obfuscate", "obsequious", "parsimonious", "pellucid",
+      "penurious", "perfunctory", "perspicacious", "pertinacious", "phlegmatic",
+      "platitudinous", "plethora", "precocious", "probity", "profligate",
+      "propitious", "pulchritude", "pusillanimous", "querulous", "quotidian",
+      "recalcitrant", "recondite", "redolent", "sagacious", "salubrious",
+      "sanguine", "scurrilous", "serendipity", "solipsistic", "spurious",
+      "stentorian", "surreptitious", "tenuous", "torpid", "trenchant",
+      "ubiquitous", "umbrage", "unctuous", "vacillate", "verisimilitude",
+      "vituperative", "vociferous", "winsome", "zeitgeist"
+    ];
+
+    const gameArea = document.getElementById("gameArea");
+    const typedInput = document.getElementById("typedInput");
+    const scoreEl = document.getElementById("score");
+    const typedCountEl = document.getElementById("typedCount");
+    const missedEl = document.getElementById("missed");
+    const maxMissesEl = document.getElementById("maxMisses");
+    const levelEl = document.getElementById("level");
+    const streakEl = document.getElementById("streak");
+    const messageEl = document.getElementById("message");
+    const gameOverEl = document.getElementById("gameOver");
+    const finalScoreEl = document.getElementById("finalScore");
+    const finalTypedEl = document.getElementById("finalTyped");
+    const finalStreakEl = document.getElementById("finalStreak");
+    const restartBtn = document.getElementById("restartBtn");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+
+    let activeWords = [];
+    let score = 0;
+    let typedCount = 0;
+    let missed = 0;
+    let maxMisses = 5;
+    let level = 1;
+    let streak = 0;
+    let bestStreak = 0;
+    let animationId = null;
+    let spawnTimer = null;
+    let gameRunning = false;
+    let lastFrame = 0;
+
+    function showMessage(text) {
+      messageEl.textContent = text;
+      messageEl.style.display = "block";
+      clearTimeout(showMessage._timer);
+      showMessage._timer = setTimeout(() => {
+        messageEl.style.display = "none";
+      }, 1200);
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    let wordPool = shuffle(vocabularyWords);
+
+    function getNextWord() {
+      if (wordPool.length === 0) {
+        wordPool = shuffle(vocabularyWords);
+      }
+      return wordPool.pop();
+    }
+
+    function updateHUD() {
+      scoreEl.textContent = score;
+      typedCountEl.textContent = typedCount;
+      missedEl.textContent = missed;
+      maxMissesEl.textContent = maxMisses;
+      levelEl.textContent = level;
+      streakEl.textContent = streak;
+    }
+
+    function getSpawnInterval() {
+      return Math.max(700, 1800 - (level - 1) * 120);
+    }
+
+    function getFallSpeed() {
+      return 45 + (level - 1) * 9;
+    }
+
+    function spawnWord() {
+      if (!gameRunning) return;
+
+      const text = getNextWord();
+      const el = document.createElement("div");
+      el.className = "word";
+      el.textContent = text;
+
+      gameArea.appendChild(el);
+
+      const wordWidth = el.offsetWidth || 120;
+      const maxX = Math.max(20, window.innerWidth - wordWidth - 20);
+      const x = Math.random() * maxX;
+
+      el.style.left = `${x}px`;
+      el.style.top = `70px`;
+
+      activeWords.push({
+        text,
+        x,
+        y: 70,
+        speed: getFallSpeed() + Math.random() * 18,
+        element: el
+      });
+    }
+
+    function scheduleSpawnLoop() {
+      clearTimeout(spawnTimer);
+
+      function loop() {
+        if (!gameRunning) return;
+        spawnWord();
+        spawnTimer = setTimeout(loop, getSpawnInterval());
+      }
+
+      spawnTimer = setTimeout(loop, getSpawnInterval());
+    }
+
+    function removeWord(wordObj) {
+      if (wordObj.element && wordObj.element.parentNode) {
+        wordObj.element.parentNode.removeChild(wordObj.element);
+      }
+      activeWords = activeWords.filter(w => w !== wordObj);
+    }
+
+    function animate(timestamp) {
+      if (!gameRunning) return;
+
+      if (!lastFrame) lastFrame = timestamp;
+      const delta = (timestamp - lastFrame) / 1000;
+      lastFrame = timestamp;
+
+      const bottomDangerLine = window.innerHeight - 140;
+
+      for (let i = activeWords.length - 1; i >= 0; i--) {
+        const word = activeWords[i];
+        word.y += word.speed * delta;
+        word.element.style.top = `${word.y}px`;
+
+        if (word.y > bottomDangerLine - 120) {
+          word.element.classList.add("urgent");
+        } else {
+          word.element.classList.remove("urgent");
+        }
+
+        const currentInput = typedInput.value.trim().toLowerCase();
+        if (currentInput && word.text.startsWith(currentInput)) {
+          word.element.classList.add("matched");
+        } else {
+          word.element.classList.remove("matched");
+        }
+
+        if (word.y >= bottomDangerLine) {
+          removeWord(word);
+          missed++;
+          streak = 0;
+          updateHUD();
+          showMessage(`Missed: ${word.text}`);
+
+          if (missed >= maxMisses) {
+            endGame();
+            return;
+          }
+        }
+      }
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(score / 100) + 1;
+      if (newLevel !== level) {
+        level = newLevel;
+        showMessage(`Level ${level}`);
+        scheduleSpawnLoop();
+        updateHUD();
+      }
+    }
+
+    function submitTypedWord() {
+      const input = typedInput.value.trim().toLowerCase();
+      if (!input) return;
+
+      const match = activeWords.find(w => w.text.toLowerCase() === input);
+
+      if (match) {
+        const bonus = Math.max(10, match.text.length * 2);
+        score += bonus;
+        typedCount++;
+        streak++;
+        bestStreak = Math.max(bestStreak, streak);
+        removeWord(match);
+        typedInput.value = "";
+        updateHUD();
+        checkLevelUp();
+      } else {
+        streak = 0;
+        updateHUD();
+        showMessage("Nope. That word is either wrong or already dead.");
+      }
+    }
+
+    function clearGame() {
+      activeWords.forEach(w => {
+        if (w.element && w.element.parentNode) {
+          w.element.parentNode.removeChild(w.element);
+        }
+      });
+      activeWords = [];
+      clearTimeout(spawnTimer);
+      cancelAnimationFrame(animationId);
+      animationId = null;
+      lastFrame = 0;
+    }
+
+    function startGame() {
+      clearGame();
+
+      score = 0;
+      typedCount = 0;
+      missed = 0;
+      level = 1;
+      streak = 0;
+      bestStreak = 0;
+      wordPool = shuffle(vocabularyWords);
+
+      gameRunning = true;
+      gameOverEl.style.display = "none";
+      typedInput.value = "";
+      typedInput.focus();
+      updateHUD();
+
+      // Start with a few words so the screen doesn't feel emotionally vacant
+      spawnWord();
+      setTimeout(spawnWord, 400);
+      setTimeout(spawnWord, 900);
+
+      scheduleSpawnLoop();
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      clearTimeout(spawnTimer);
+      cancelAnimationFrame(animationId);
+
+      finalScoreEl.textContent = score;
+      finalTypedEl.textContent = typedCount;
+      finalStreakEl.textContent = bestStreak;
+      gameOverEl.style.display = "flex";
+    }
+
+    typedInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        submitTypedWord();
+      }
+    });
+
+    restartBtn.addEventListener("click", startGame);
+    playAgainBtn.addEventListener("click", startGame);
+
+    window.addEventListener("resize", () => {
+      activeWords.forEach(word => {
+        const wordWidth = word.element.offsetWidth || 120;
+        const maxX = Math.max(20, window.innerWidth - wordWidth - 20);
+        if (word.x > maxX) {
+          word.x = maxX;
+          word.element.style.left = `${word.x}px`;
+        }
+      });
+    });
+
+    startGame();
+  </script>
+</body>
+</html>
