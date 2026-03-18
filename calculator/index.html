@@ -4,18 +4,7 @@
   const expression = document.getElementById("expression");
   const indicators = document.getElementById("indicators");
   const buttons = document.querySelectorAll("button");
-
-  let sass = document.getElementById("sass");
-  if (!sass) {
-    sass = document.createElement("div");
-    sass.id = "sass";
-    sass.style.textAlign = "center";
-    sass.style.fontSize = "0.8rem";
-    sass.style.color = "rgba(255,255,255,0.75)";
-    sass.style.marginTop = "10px";
-    sass.style.minHeight = "20px";
-    document.querySelector(".calculator").appendChild(sass);
-  }
+  const sass = document.getElementById("sass");
 
   const sarcasticMessages = [
     "Well, that was thrilling.",
@@ -233,4 +222,3 @@
 
   updateDisplay();
 </script>
-<div id="sass" class="footer-note"></div>
