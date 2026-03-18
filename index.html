@@ -1,11 +1,254 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Charyamon</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Char Yamon | Tiny Apps</title>
+  <style>
+    :root {
+      --bg: #fffdf8;
+      --text: #1f1f1f;
+      --muted: #6b6b6b;
+      --link: #1f1f1f;
+      --line: #ded8cc;
+      --accent: #8a6f4d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 20px 80px;
+    }
+
+    nav {
+      margin-bottom: 18px;
+      font-size: 15px;
+    }
+
+    nav a {
+      color: var(--link);
+      text-decoration: underline;
+      margin-right: 14px;
+    }
+
+    h1 {
+      font-size: 44px;
+      margin: 12px 0 20px;
+      font-weight: 700;
+    }
+
+    .intro {
+      font-size: 25px;
+      max-width: 680px;
+      margin-bottom: 10px;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-bottom: 28px;
+      font-size: 16px;
+    }
+
+    .worm-track {
+      position: relative;
+      height: 54px;
+      margin: 18px 0 34px;
+      overflow: hidden;
+      border-top: 1px solid transparent;
+    }
+
+    .worm {
+      position: absolute;
+      left: -180px;
+      top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      animation: crawl 16s linear infinite;
+    }
+
+    .segment {
+      width: 16px;
+      height: 16px;
+      background: #b38b59;
+      border-radius: 50%;
+      box-shadow: inset -2px -2px 0 rgba(0,0,0,0.08);
+      animation: wiggle 0.9s ease-in-out infinite;
+    }
+
+    .segment:nth-child(2) { animation-delay: 0.05s; }
+    .segment:nth-child(3) { animation-delay: 0.1s; }
+    .segment:nth-child(4) { animation-delay: 0.15s; }
+    .segment:nth-child(5) { animation-delay: 0.2s; }
+    .segment:nth-child(6) { animation-delay: 0.25s; }
+    .segment:nth-child(7) { animation-delay: 0.3s; }
+    .segment:nth-child(8) { animation-delay: 0.35s; }
+
+    .head {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      background: #8a6f4d;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .head::before,
+    .head::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      width: 3px;
+      height: 3px;
+      background: #111;
+      border-radius: 50%;
+    }
+
+    .head::before { left: 4px; }
+    .head::after { right: 4px; }
+
+    .project-heading {
+      font-size: 28px;
+      margin: 0 0 14px;
+    }
+
+    .today {
+      margin-bottom: 18px;
+      font-size: 18px;
+    }
+
+    .today a,
+    .project-list a {
+      color: var(--link);
+      text-decoration: underline;
+    }
+
+    .project-list {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    .project-item {
+      margin: 6px 0;
+      font-size: 18px;
+    }
+
+    .day {
+      display: inline-block;
+      width: 72px;
+      color: var(--muted);
+    }
+
+    .note {
+      margin-top: 34px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    @keyframes crawl {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(calc(100vw + 260px));
+      }
+    }
+
+    @keyframes wiggle {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(4px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 34px;
+      }
+
+      .intro {
+        font-size: 21px;
+      }
+
+      .project-item {
+        font-size: 17px;
+      }
+
+      .day {
+        width: 64px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Charyamon</h1>
-  <p>My tiny apps</p>
-  <a href="https://charyamon-apps.github.io/site/calculator/">Go to Calculator</a>
+  <div class="wrap">
+    <nav>
+      <a href="/">Home</a>
+      <a href="https://github.com/charyamon-apps/site" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+
+    <h1>Hi.</h1>
+
+    <div class="intro">
+      I’m <strong>Char Yamon</strong> and I’m dabbling in making little apps I can actually use with AI.
+    </div>
+
+    <div class="intro">
+      I’m a mum of 2, with a full-time job, and not enough spare brain cells to lovingly hand-code everything from scratch.
+    </div>
+
+    <div class="intro">
+      There’s already AI. So I use it, make the thing, and move on.
+    </div>
+
+    <p class="sub">
+      This is where I’m collecting the odd little tools I’ve made between work, laundry, and general life admin.
+    </p>
+
+    <div class="worm-track" aria-hidden="true">
+      <div class="worm">
+        <div class="head"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+      </div>
+    </div>
+
+    <h2 class="project-heading">Apps</h2>
+
+    <div class="today">
+      Current app:
+      <a href="https://charyamon-apps.github.io/site/calculator/">Calculator</a>
+    </div>
+
+    <div class="project-list">
+      <div class="project-item"><span class="day">Day 1</span> <a href="/calculator/">Calculator</a></div>
+      <div class="project-item"><span class="day">Day 2</span> Word Search Generator</div>
+      <div class="project-item"><span class="day">Day 3</span> Etsy Title Helper</div>
+      <div class="project-item"><span class="day">Day 4</span> Sight Word App</div>
+    </div>
+
+    <p class="note">
+      Some of these will be useful. Some will be weird. Some will probably exist because I was avoiding folding clothes.
+    </p>
+  </div>
 </body>
 </html>
