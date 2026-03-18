@@ -4,195 +4,133 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Char Yamon | Tiny Apps</title>
-  <style>
-    :root {
-      --bg: #fffdf8;
-      --text: #1f1f1f;
-      --muted: #6b6b6b;
-      --link: #1f1f1f;
-      --line: #ded8cc;
-      --accent: #8a6f4d;
-    }
+ <style>
+  :root {
+    --bg: #fffdf8;
+    --text: #1f1f1f;
+    --muted: #6b6b6b;
+    --link: #1f1f1f;
+    --line: #ded8cc;
+    --accent: #6ec1ff; /* light blue */
+    --worm: #4caf50; /* green */
+  }
 
-    * {
-      box-sizing: border-box;
-    }
+  * {
+    box-sizing: border-box;
+  }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Georgia, "Times New Roman", serif;
-      line-height: 1.5;
-    }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Aptos", Arial, sans-serif;
+    line-height: 1.5;
+  }
 
-    .wrap {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 28px 20px 80px;
-    }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
 
-    nav {
-      margin-bottom: 18px;
-      font-size: 15px;
-    }
+  nav {
+    margin-bottom: 18px;
+    font-size: 15px;
+  }
 
-    nav a {
-      color: var(--link);
-      text-decoration: underline;
-      margin-right: 14px;
-    }
+  nav a {
+    color: var(--link);
+    text-decoration: underline;
+    margin-right: 14px;
+  }
 
-    h1 {
-      font-size: 44px;
-      margin: 12px 0 20px;
-      font-weight: 700;
-    }
+  h1 {
+    font-size: 44px;
+    margin: 12px 0 20px;
+    font-weight: 700;
+    color: var(--accent);
+  }
 
-    .intro {
-      font-size: 25px;
-      max-width: 680px;
-      margin-bottom: 10px;
-    }
+  .intro strong {
+    color: var(--accent);
+  }
 
-    .sub {
-      color: var(--muted);
-      margin-bottom: 28px;
-      font-size: 16px;
-    }
+  .intro {
+    font-size: 25px;
+    max-width: 680px;
+    margin-bottom: 10px;
+  }
 
-    .worm-track {
-      position: relative;
-      height: 54px;
-      margin: 18px 0 34px;
-      overflow: hidden;
-      border-top: 1px solid transparent;
-    }
+  .sub {
+    color: var(--muted);
+    margin-bottom: 28px;
+    font-size: 16px;
+  }
 
-    .worm {
-      position: absolute;
-      left: -180px;
-      top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      animation: crawl 16s linear infinite;
-    }
+  /* WORM */
+  .worm-track {
+    position: relative;
+    height: 70px;
+    margin: 18px 0 34px;
+    overflow: hidden;
+  }
 
-    .segment {
-      width: 16px;
-      height: 16px;
-      background: #b38b59;
-      border-radius: 50%;
-      box-shadow: inset -2px -2px 0 rgba(0,0,0,0.08);
-      animation: wiggle 0.9s ease-in-out infinite;
-    }
+  .worm {
+    position: absolute;
+    left: -220px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: crawl 14s linear infinite;
+  }
 
-    .segment:nth-child(2) { animation-delay: 0.05s; }
-    .segment:nth-child(3) { animation-delay: 0.1s; }
-    .segment:nth-child(4) { animation-delay: 0.15s; }
-    .segment:nth-child(5) { animation-delay: 0.2s; }
-    .segment:nth-child(6) { animation-delay: 0.25s; }
-    .segment:nth-child(7) { animation-delay: 0.3s; }
-    .segment:nth-child(8) { animation-delay: 0.35s; }
+  .segment {
+    width: 22px;
+    height: 22px;
+    background: var(--worm);
+    border-radius: 50%;
+    animation: wiggle 0.8s ease-in-out infinite;
+  }
 
-    .head {
-      position: relative;
-      width: 18px;
-      height: 18px;
-      background: #8a6f4d;
-      border-radius: 50%;
-      flex: 0 0 auto;
-    }
+  .head {
+    width: 24px;
+    height: 24px;
+    background: #2e7d32;
+    border-radius: 50%;
+  }
 
-    .head::before,
-    .head::after {
-      content: "";
-      position: absolute;
-      top: 4px;
-      width: 3px;
-      height: 3px;
-      background: #111;
-      border-radius: 50%;
-    }
+  .project-heading {
+    font-size: 28px;
+    margin: 0 0 14px;
+  }
 
-    .head::before { left: 4px; }
-    .head::after { right: 4px; }
+  .project-list {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
 
-    .project-heading {
-      font-size: 28px;
-      margin: 0 0 14px;
-    }
+  .project-item {
+    margin: 6px 0;
+    font-size: 18px;
+  }
 
-    .today {
-      margin-bottom: 18px;
-      font-size: 18px;
-    }
+  .label {
+    display: inline-block;
+    width: 90px;
+    color: var(--muted);
+  }
 
-    .today a,
-    .project-list a {
-      color: var(--link);
-      text-decoration: underline;
-    }
+  @keyframes crawl {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 300px)); }
+  }
 
-    .project-list {
-      border-top: 1px solid var(--line);
-      padding-top: 16px;
-    }
-
-    .project-item {
-      margin: 6px 0;
-      font-size: 18px;
-    }
-
-    .day {
-      display: inline-block;
-      width: 72px;
-      color: var(--muted);
-    }
-
-    .note {
-      margin-top: 34px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    @keyframes crawl {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(calc(100vw + 260px));
-      }
-    }
-
-    @keyframes wiggle {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(4px);
-      }
-    }
-
-    @media (max-width: 640px) {
-      h1 {
-        font-size: 34px;
-      }
-
-      .intro {
-        font-size: 21px;
-      }
-
-      .project-item {
-        font-size: 17px;
-      }
-
-      .day {
-        width: 64px;
-      }
-    }
-  </style>
+  @keyframes wiggle {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(5px); }
+  }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -240,10 +178,10 @@
     </div>
 
     <div class="project-list">
-      <div class="project-item"><span class="day">Day 1</span> <a href="/calculator/">Calculator</a></div>
-      <div class="project-item"><span class="day">Day 2</span> Word Search Generator</div>
-      <div class="project-item"><span class="day">Day 3</span> Etsy Title Helper</div>
-      <div class="project-item"><span class="day">Day 4</span> Sight Word App</div>
+      <div class="project-item"><span class="day">Project 1</span> <a href="/calculator/">Calculator</a></div>
+      <div class="project-item"><span class="day">Project 2</span> Word Search Generator</div>
+      <div class="project-item"><span class="day">Project 3</span> Etsy Title Helper</div>
+      <div class="project-item"><span class="day">Project 4</span> Sight Word App</div>
     </div>
 
     <p class="note">
