@@ -1,224 +1,498 @@
-<div id="sass" class="footer-note"></div>
-<script>
-  const display = document.getElementById("display");
-  const expression = document.getElementById("expression");
-  const indicators = document.getElementById("indicators");
-  const buttons = document.querySelectorAll("button");
-  const sass = document.getElementById("sass");
-
-  const sarcasticMessages = [
-    "Well, that was thrilling.",
-    "Groundbreaking arithmetic.",
-    "You could've done that in your head. Maybe.",
-    "A calculator was absolutely required for this.",
-    "Congrats on the number.",
-    "Incredible scenes in basic maths.",
-    "You really showed those digits.",
-    "That better have been worth it.",
-    "Elite button pressing.",
-    "Math, but make it dramatic.",
-    "Somehow we've arrived at this.",
-    "Beautiful. Utterly pointless, but beautiful.",
-    "Your Year 4 teacher would be relieved.",
-    "There. A number. Try not to spiral.",
-    "Honestly, iconic use of a calculator."
-  ];
-
-  let current = "0";
-  let previous = null;
-  let operator = null;
-  let waitingForNext = false;
-  let memory = 0;
-
-  function randomSass() {
-    const msg = sarcasticMessages[Math.floor(Math.random() * sarcasticMessages.length)];
-    sass.textContent = msg;
-  }
-
-  function clearSass() {
-    sass.textContent = "";
-  }
-
-  function formatNumber(value) {
-    if (value === "Error") return value;
-    const num = Number(value);
-    if (!Number.isFinite(num)) return "Error";
-    return Number.isInteger(num)
-      ? num.toLocaleString("en-US")
-      : num.toLocaleString("en-US", { maximumFractionDigits: 10 });
-  }
-
-  function updateDisplay() {
-    display.textContent = current === "Error" ? "Error" : formatNumber(current);
-    expression.textContent =
-      previous !== null && operator
-        ? `${formatNumber(previous)} ${symbolFor(operator)}`
-        : "";
-    indicators.textContent = memory !== 0 ? "M" : "";
-  }
-
-  function symbolFor(op) {
-    return { "/": "÷", "*": "×", "-": "−", "+": "+" }[op] || op;
-  }
-
-  function inputDigit(digit) {
-    if (current === "Error") current = "0";
-
-    if (waitingForNext) {
-      current = digit;
-      waitingForNext = false;
-    } else {
-      current = current === "0" ? digit : current + digit;
-    }
-    clearSass();
-    updateDisplay();
-  }
-
-  function inputDecimal() {
-    if (current === "Error") current = "0";
-
-    if (waitingForNext) {
-      current = "0.";
-      waitingForNext = false;
-    } else if (!current.includes(".")) {
-      current += ".";
-    }
-    clearSass();
-    updateDisplay();
-  }
-
-  function chooseOperator(nextOperator) {
-    if (current === "Error") return;
-
-    const inputValue = parseFloat(current.replace(/,/g, ""));
-
-    if (previous === null) {
-      previous = inputValue;
-    } else if (operator && !waitingForNext) {
-      const result = performCalculation(previous, inputValue, operator);
-      current = result === "Error" ? "Error" : String(result);
-      previous = result === "Error" ? null : result;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Char Yamon Calculator</title>
+  <style>
+    :root {
+      --body-dark: #2b2b2f;
+      --body-mid: #3a3a40;
+      --body-light: #5a5b62;
+      --screen-bg: #cfd8b8;
+      --screen-text: #1b2416;
+      --btn-dark: #34363c;
+      --btn-dark-top: #4b4e56;
+      --btn-grey: #686c74;
+      --btn-grey-top: #858993;
+      --btn-orange: #c85f2f;
+      --btn-orange-top: #e37a4d;
+      --shadow: rgba(0,0,0,0.28);
     }
 
-    operator = nextOperator;
-    waitingForNext = true;
-    clearSass();
-    updateDisplay();
-  }
-
-  function performCalculation(a, b, op) {
-    if (op === "+") return a + b;
-    if (op === "-") return a - b;
-    if (op === "*") return a * b;
-    if (op === "/") return b === 0 ? "Error" : a / b;
-    return b;
-  }
-
-  function calculateResult() {
-    if (operator === null || previous === null || waitingForNext) return;
-
-    const inputValue = parseFloat(current.replace(/,/g, ""));
-    const result = performCalculation(previous, inputValue, operator);
-
-    current = result === "Error" ? "Error" : String(result);
-    previous = null;
-    operator = null;
-    waitingForNext = true;
-    updateDisplay();
-
-    if (current === "Error") {
-      sass.textContent = "Even the calculator has standards.";
-    } else {
-      randomSass();
+    * {
+      box-sizing: border-box;
     }
-  }
 
-  function clearAll() {
-    current = "0";
-    previous = null;
-    operator = null;
-    waitingForNext = false;
-    clearSass();
-    updateDisplay();
-  }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #f4f4f4, #dddddd 58%, #d4d4d4);
+      font-family: Aptos, Arial, sans-serif;
+      padding: 24px;
+    }
 
-  function clearEntry() {
-    current = "0";
-    clearSass();
-    updateDisplay();
-  }
+    .calculator {
+      width: 320px;
+      padding: 16px 16px 18px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, var(--body-light), var(--body-mid) 12%, var(--body-dark) 100%);
+      box-shadow:
+        0 16px 32px var(--shadow),
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        inset 0 -3px 8px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
 
-  function toggleSign() {
-    if (current === "0" || current === "Error") return;
-    current = String(parseFloat(current) * -1);
-    clearSass();
-    updateDisplay();
-  }
+    .calculator::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
 
-  function percent() {
-    if (current === "Error") return;
-    current = String(parseFloat(current) / 100);
-    clearSass();
-    updateDisplay();
-  }
+    .brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 8px;
+      color: white;
+      padding: 2px 4px 0;
+    }
 
-  function memoryAdd() {
-    if (current === "Error") return;
-    memory += parseFloat(current);
-    clearSass();
-    updateDisplay();
-  }
+    .brand {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
 
-  function memorySubtract() {
-    if (current === "Error") return;
-    memory -= parseFloat(current);
-    clearSass();
-    updateDisplay();
-  }
+    .model {
+      text-align: right;
+      font-size: 0.72rem;
+      line-height: 1.15;
+      opacity: 0.92;
+    }
 
-  function memoryRecall() {
-    current = String(memory);
-    waitingForNext = false;
-    clearSass();
-    updateDisplay();
-  }
+    .solar {
+      height: 18px;
+      width: 96px;
+      border-radius: 4px;
+      margin: 6px 0 10px auto;
+      background:
+        linear-gradient(90deg,
+          #5d4a2f 0 16%,
+          #3f3422 16% 32%,
+          #5d4a2f 32% 48%,
+          #3f3422 48% 64%,
+          #5d4a2f 64% 80%,
+          #3f3422 80% 100%);
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,0.1),
+        inset 0 -1px 3px rgba(0,0,0,0.35);
+    }
 
-  function memoryClear() {
-    memory = 0;
-    clearSass();
-    updateDisplay();
-  }
+    .screen-wrap {
+      background: linear-gradient(180deg, #b9bda8, #d8dfc8 18%, #c2caae 100%);
+      padding: 10px 10px 8px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow:
+        inset 0 2px 5px rgba(255,255,255,0.24),
+        inset 0 -2px 5px rgba(0,0,0,0.18);
+    }
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      button.classList.add("pressed");
-      setTimeout(() => button.classList.remove("pressed"), 80);
+    .indicators {
+      display: flex;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: #31402a;
+      margin-bottom: 4px;
+      min-height: 16px;
+    }
 
-      const value = button.dataset.value;
-      const action = button.dataset.action;
+    .screen {
+      background: var(--screen-bg);
+      color: var(--screen-text);
+      min-height: 54px;
+      border-radius: 4px;
+      padding: 8px 10px;
+      text-align: right;
+      font-family: "Courier New", monospace;
+      box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.18),
+        inset 0 -2px 4px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
 
-      if (value !== undefined) {
-        if (value === ".") {
-          inputDecimal();
-        } else if (["+", "-", "*", "/"].includes(value)) {
-          chooseOperator(value);
-        } else {
-          inputDigit(value);
-        }
-        return;
+    .expression {
+      min-height: 18px;
+      font-size: 0.92rem;
+      opacity: 0.75;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .display {
+      font-size: 2rem;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+
+    .display::-webkit-scrollbar {
+      display: none;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 10px;
+      height: 48px;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(180deg, var(--btn-dark-top), var(--btn-dark));
+      box-shadow:
+        0 3px 0 rgba(0,0,0,0.4),
+        0 7px 10px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+      cursor: pointer;
+      transition: transform 0.04s ease, box-shadow 0.04s ease, filter 0.12s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+    }
+
+    button:active,
+    button.pressed {
+      transform: translateY(2px);
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.4),
+        0 3px 6px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .btn-grey {
+      background: linear-gradient(180deg, var(--btn-grey-top), var(--btn-grey));
+    }
+
+    .btn-orange {
+      background: linear-gradient(180deg, var(--btn-orange-top), var(--btn-orange));
+    }
+
+    .btn-wide {
+      grid-column: span 2;
+    }
+
+    .small {
+      font-size: 0.88rem;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.78);
+      margin-top: 12px;
+      min-height: 22px;
+      padding: 0 4px;
+    }
+
+    @media (max-width: 380px) {
+      .calculator {
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="brand-row">
+      <div class="brand">CHARIO</div>
+      <div class="model">CY-108<br>12 DIGITS</div>
+    </div>
+
+    <div class="solar"></div>
+
+    <div class="screen-wrap">
+      <div class="indicators" id="indicators"></div>
+      <div class="screen">
+        <div class="expression" id="expression"></div>
+        <div class="display" id="display">0</div>
+      </div>
+    </div>
+
+    <div class="keys">
+      <button class="btn-grey small" data-action="mc">MC</button>
+      <button class="btn-grey small" data-action="mr">MR</button>
+      <button class="btn-grey small" data-action="mminus">M−</button>
+      <button class="btn-grey small" data-action="mplus">M+</button>
+      <button class="btn-grey" data-action="percent">%</button>
+
+      <button class="btn-grey" data-action="sign">+/−</button>
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="btn-grey" data-value="/">÷</button>
+
+      <button class="btn-orange small" data-action="clear-entry">CE</button>
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button class="btn-grey" data-value="*">×</button>
+
+      <button class="btn-orange small" data-action="clear">C/AC</button>
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button class="btn-grey" data-value="-">−</button>
+
+      <button class="btn-wide" data-value="0">0</button>
+      <button data-value=".">.</button>
+      <button class="btn-grey" data-action="equals">=</button>
+      <button class="btn-grey" data-value="+">+</button>
+    </div>
+
+    <div id="sass" class="footer-note"></div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const expression = document.getElementById("expression");
+    const indicators = document.getElementById("indicators");
+    const buttons = document.querySelectorAll("button");
+    const sass = document.getElementById("sass");
+
+    const sarcasticMessages = [
+      "Well, that was thrilling.",
+      "Groundbreaking arithmetic.",
+      "You could've done that in your head. Maybe.",
+      "A calculator was absolutely required for this.",
+      "Congrats on the number.",
+      "Incredible scenes in basic maths.",
+      "You really showed those digits.",
+      "That better have been worth it.",
+      "Elite button pressing.",
+      "Math, but make it dramatic.",
+      "Somehow we've arrived at this.",
+      "Beautiful. Utterly pointless, but beautiful.",
+      "Your Year 4 teacher would be relieved.",
+      "There. A number. Try not to spiral.",
+      "Honestly, iconic use of a calculator."
+    ];
+
+    let current = "0";
+    let previous = null;
+    let operator = null;
+    let waitingForNext = false;
+    let memory = 0;
+
+    function randomSass() {
+      const msg = sarcasticMessages[Math.floor(Math.random() * sarcasticMessages.length)];
+      sass.textContent = msg;
+    }
+
+    function clearSass() {
+      sass.textContent = "";
+    }
+
+    function formatNumber(value) {
+      if (value === "Error") return value;
+      const num = Number(value);
+      if (!Number.isFinite(num)) return "Error";
+      return Number.isInteger(num)
+        ? num.toLocaleString("en-US")
+        : num.toLocaleString("en-US", { maximumFractionDigits: 10 });
+    }
+
+    function updateDisplay() {
+      display.textContent = current === "Error" ? "Error" : formatNumber(current);
+      expression.textContent =
+        previous !== null && operator
+          ? `${formatNumber(previous)} ${symbolFor(operator)}`
+          : "";
+      indicators.textContent = memory !== 0 ? "M" : "";
+    }
+
+    function symbolFor(op) {
+      return { "/": "÷", "*": "×", "-": "−", "+": "+" }[op] || op;
+    }
+
+    function inputDigit(digit) {
+      if (current === "Error") current = "0";
+
+      if (waitingForNext) {
+        current = digit;
+        waitingForNext = false;
+      } else {
+        current = current === "0" ? digit : current + digit;
+      }
+      clearSass();
+      updateDisplay();
+    }
+
+    function inputDecimal() {
+      if (current === "Error") current = "0";
+
+      if (waitingForNext) {
+        current = "0.";
+        waitingForNext = false;
+      } else if (!current.includes(".")) {
+        current += ".";
+      }
+      clearSass();
+      updateDisplay();
+    }
+
+    function chooseOperator(nextOperator) {
+      if (current === "Error") return;
+
+      const inputValue = parseFloat(current.replace(/,/g, ""));
+
+      if (previous === null) {
+        previous = inputValue;
+      } else if (operator && !waitingForNext) {
+        const result = performCalculation(previous, inputValue, operator);
+        current = result === "Error" ? "Error" : String(result);
+        previous = result === "Error" ? null : result;
       }
 
-      if (action === "equals") calculateResult();
-      if (action === "clear") clearAll();
-      if (action === "clear-entry") clearEntry();
-      if (action === "sign") toggleSign();
-      if (action === "percent") percent();
-      if (action === "mplus") memoryAdd();
-      if (action === "mminus") memorySubtract();
-      if (action === "mr") memoryRecall();
-      if (action === "mc") memoryClear();
-    });
-  });
+      operator = nextOperator;
+      waitingForNext = true;
+      clearSass();
+      updateDisplay();
+    }
 
-  updateDisplay();
-</script>
+    function performCalculation(a, b, op) {
+      if (op === "+") return a + b;
+      if (op === "-") return a - b;
+      if (op === "*") return a * b;
+      if (op === "/") return b === 0 ? "Error" : a / b;
+      return b;
+    }
+
+    function calculateResult() {
+      if (operator === null || previous === null || waitingForNext) return;
+
+      const inputValue = parseFloat(current.replace(/,/g, ""));
+      const result = performCalculation(previous, inputValue, operator);
+
+      current = result === "Error" ? "Error" : String(result);
+      previous = null;
+      operator = null;
+      waitingForNext = true;
+      updateDisplay();
+
+      if (current === "Error") {
+        sass.textContent = "Even the calculator has standards.";
+      } else {
+        randomSass();
+      }
+    }
+
+    function clearAll() {
+      current = "0";
+      previous = null;
+      operator = null;
+      waitingForNext = false;
+      clearSass();
+      updateDisplay();
+    }
+
+    function clearEntry() {
+      current = "0";
+      clearSass();
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      if (current === "0" || current === "Error") return;
+      current = String(parseFloat(current) * -1);
+      clearSass();
+      updateDisplay();
+    }
+
+    function percent() {
+      if (current === "Error") return;
+      current = String(parseFloat(current) / 100);
+      clearSass();
+      updateDisplay();
+    }
+
+    function memoryAdd() {
+      if (current === "Error") return;
+      memory += parseFloat(current);
+      clearSass();
+      updateDisplay();
+    }
+
+    function memorySubtract() {
+      if (current === "Error") return;
+      memory -= parseFloat(current);
+      clearSass();
+      updateDisplay();
+    }
+
+    function memoryRecall() {
+      current = String(memory);
+      waitingForNext = false;
+      clearSass();
+      updateDisplay();
+    }
+
+    function memoryClear() {
+      memory = 0;
+      clearSass();
+      updateDisplay();
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        button.classList.add("pressed");
+        setTimeout(() => button.classList.remove("pressed"), 80);
+
+        const value = button.dataset.value;
+        const action = button.dataset.action;
+
+        if (value !== undefined) {
+          if (value === ".") {
+            inputDecimal();
+          } else if (["+", "-", "*", "/"].includes(value)) {
+            chooseOperator(value);
+          } else {
+            inputDigit(value);
+          }
+          return;
+        }
+
+        if (action === "equals") calculateResult();
+        if (action === "clear") clearAll();
+        if (action === "clear-entry") clearEntry();
+        if (action === "sign") toggleSign();
+        if (action === "percent") percent();
+        if (action === "mplus") memoryAdd();
+        if (action === "mminus") memorySubtract();
+        if (action === "mr") memoryRecall();
+        if (action === "mc") memoryClear();
+      });
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
