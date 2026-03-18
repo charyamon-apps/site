@@ -1,34 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Calculator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+
+<style>
+  body {
+    background: #f2f2f2;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .calculator {
+    width: 260px;
+    background: #2f2f2f;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+
+  .screen {
+    background: #dfe7d8;
+    height: 50px;
+    margin-bottom: 10px;
+    padding: 10px;
+    text-align: right;
+    font-size: 22px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  button {
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    background: #444;
+    color: white;
+    cursor: pointer;
+  }
+
+  button.operator {
+    background: #ff9500;
+  }
+
+  button.equal {
+    background: #28a745;
+  }
+
+  button.clear {
+    background: #d9534f;
+  }
+
+  button:active {
+    transform: scale(0.95);
+  }
+</style>
 </head>
+
 <body>
-  <h1>Calculator</h1>
 
-  <input id="num1" placeholder="Number 1">
-  <input id="num2" placeholder="Number 2">
+<div class="calculator">
+  <div id="screen" class="screen">0</div>
 
-  <button onclick="calc('+')">+</button>
-  <button onclick="calc('-')">-</button>
-  <button onclick="calc('*')">*</button>
-  <button onclick="calc('/')">/</button>
+  <div class="buttons">
+    <button class="clear" onclick="clearScreen()">C</button>
+    <button onclick="append('%')">%</button>
+    <button onclick="append('/')">÷</button>
+    <button class="operator" onclick="append('*')">×</button>
 
-  <p id="result"></p>
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button class="operator" onclick="append('-')">−</button>
 
-  <script>
-    function calc(op) {
-      let a = parseFloat(document.getElementById('num1').value);
-      let b = parseFloat(document.getElementById('num2').value);
-      let r;
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button class="operator" onclick="append('+')">+</button>
 
-      if (op === '+') r = a + b;
-      if (op === '-') r = a - b;
-      if (op === '*') r = a * b;
-      if (op === '/') r = b !== 0 ? a / b : 'Error';
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button class="equal" onclick="calculate()">=</button>
 
-      document.getElementById('result').innerText = r;
+    <button onclick="append('0')">0</button>
+    <button onclick="append('00')">00</button>
+    <button onclick="append('.')">.</button>
+  </div>
+</div>
+
+<script>
+  let screen = document.getElementById("screen");
+
+  function append(value) {
+    if (screen.innerText === "0") {
+      screen.innerText = value;
+    } else {
+      screen.innerText += value;
     }
-  </script>
+  }
+
+  function clearScreen() {
+    screen.innerText = "0";
+  }
+
+  function calculate() {
+    try {
+      screen.innerText = eval(screen.innerText);
+    } catch {
+      screen.innerText = "Error";
+    }
+  }
+</script>
+
 </body>
 </html>
