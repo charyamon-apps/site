@@ -3,190 +3,925 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Char Yamon | Tiny Apps</title>
- <style>
-  :root {
-    --bg: #fffdf8;
-    --text: #1f1f1f;
-    --muted: #6b6b6b;
-    --link: #1f1f1f;
-    --line: #ded8cc;
-    --accent: #6ec1ff; /* light blue */
-    --worm: #4caf50; /* green */
-  }
+  <title>Vocab Drop Deluxe</title>
+  <style>
+    * { box-sizing: border-box; }
 
-  * {
-    box-sizing: border-box;
-  }
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --panel: rgba(15, 23, 42, 0.92);
+      --card: rgba(255,255,255,0.08);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #93c5fd;
+      --good: #86efac;
+      --bad: #fca5a5;
+      --warn: #fcd34d;
+    }
 
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Aptos", Arial, sans-serif;
-    line-height: 1.5;
-  }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow: hidden;
+    }
 
-  .wrap {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 28px 20px 80px;
-  }
+    button, select, input {
+      font: inherit;
+    }
 
-  nav {
-    margin-bottom: 18px;
-    font-size: 15px;
-  }
+    .screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(6px);
+    }
 
-  nav a {
-    color: var(--link);
-    text-decoration: underline;
-    margin-right: 14px;
-  }
+    .screen.show {
+      display: flex;
+    }
 
-  h1 {
-    font-size: 44px;
-    margin: 12px 0 20px;
-    font-weight: 700;
-    color: var(--accent);
-  }
+    .card {
+      width: min(760px, 95vw);
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
 
-  .intro strong {
-    color: var(--accent);
-  }
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
 
-  .intro {
-    font-size: 25px;
-    max-width: 680px;
-    margin-bottom: 10px;
-  }
+    .title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 8px;
+    }
 
-  .sub {
-    color: var(--muted);
-    margin-bottom: 28px;
-    font-size: 16px;
-  }
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
 
-  /* WORM */
-  .worm-track {
-    position: relative;
-    height: 70px;
-    margin: 18px 0 34px;
-    overflow: hidden;
-  }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
 
-  .worm {
-    position: absolute;
-    left: -220px;
-    top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    animation: crawl 14s linear infinite;
-  }
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 16px;
+    }
 
-  .segment {
-    width: 22px;
-    height: 22px;
-    background: var(--worm);
-    border-radius: 50%;
-    animation: wiggle 0.8s ease-in-out infinite;
-  }
+    .panel label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
 
-  .head {
-    width: 24px;
-    height: 24px;
-    background: #2e7d32;
-    border-radius: 50%;
-  }
+    select, .big-btn, .small-btn {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #e2e8f0;
+      color: #0f172a;
+    }
 
-  .project-heading {
-    font-size: 28px;
-    margin: 0 0 14px;
-  }
+    .big-btn {
+      background: var(--accent);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.05rem;
+      margin-top: 10px;
+    }
 
-  .project-list {
-    border-top: 1px solid var(--line);
-    padding-top: 16px;
-  }
+    .small-btn {
+      width: auto;
+      cursor: pointer;
+      background: #cbd5e1;
+      padding: 10px 14px;
+    }
 
-  .project-item {
-    margin: 6px 0;
-    font-size: 18px;
-  }
+    .hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 20;
+      padding: 12px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-  .label {
-    display: inline-block;
-    width: 90px;
-    color: var(--muted);
-  }
+    .hud-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      align-items: center;
+      font-size: 0.95rem;
+    }
 
-  @keyframes crawl {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(calc(100vw + 300px)); }
-  }
+    .game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-  @keyframes wiggle {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(5px); }
-  }
-</style>
+    .word {
+      position: absolute;
+      top: -50px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+      font-size: clamp(18px, 2vw, 24px);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .word.partial {
+      outline: 2px solid rgba(147, 197, 253, 0.75);
+    }
+
+    .word.urgent {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(248, 113, 113, 0.8);
+    }
+
+    .bottom-panel {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      z-index: 21;
+      padding: 14px;
+      background: var(--panel);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .input-row {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #typedInput {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      font-size: 1.2rem;
+      background: white;
+      color: #0f172a;
+    }
+
+    .meta-note {
+      max-width: 980px;
+      margin: 8px auto 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .message {
+      position: fixed;
+      top: 78px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      display: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .stats-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 14px 0 18px;
+    }
+
+    .stat-box {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat-box .label {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+    }
+
+    .stat-box .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tiny {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      .input-row {
+        flex-wrap: wrap;
+      }
+
+      .input-row > * {
+        width: 100%;
+      }
+
+      .small-btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <nav>
-      <a href="/">Home</a>
-      <a href="https://github.com/charyamon-apps/site" target="_blank" rel="noopener noreferrer">GitHub</a>
-    </nav>
+  <!-- START SCREEN -->
+  <div id="startScreen" class="screen show">
+    <div class="card">
+      <h1 class="title">Vocab Drop Deluxe</h1>
+      <p class="subtitle">
+        Type the falling words before they hit the bottom. Because apparently normal hobbies were unavailable.
+      </p>
 
-    <h1>Hi.</h1>
+      <div class="grid">
+        <div class="panel">
+          <label for="difficultySelect">Difficulty</label>
+          <select id="difficultySelect">
+            <option value="scholar">Scholar</option>
+            <option value="menace">Menace</option>
+            <option value="champion">Unemployed Spelling Bee Champion</option>
+          </select>
+        </div>
 
-    <div class="intro">
-      I’m <strong>Char Yamon</strong> and I’m dabbling in making little apps I can actually use with AI.
+        <div class="panel">
+          <label for="categorySelect">Category</label>
+          <select id="categorySelect">
+            <option value="sat">SAT Words</option>
+            <option value="obscure">Obscure English</option>
+            <option value="medical">Medical Terms</option>
+            <option value="legal">Legal Terms</option>
+            <option value="shakespeare">Shakespearean Insults</option>
+            <option value="mixed">Mixed Chaos</option>
+          </select>
+        </div>
+
+        <div class="panel">
+          <label>Saved High Score</label>
+          <div id="savedHighScore" style="font-size: 1.6rem; font-weight: 700;">0</div>
+          <div class="tiny" id="savedHighScoreMeta">No glory yet.</div>
+        </div>
+      </div>
+
+      <button id="startGameBtn" class="big-btn">Start Game</button>
+      <p class="tiny" style="margin-top: 12px;">
+        Tip: click anywhere or press the button so sound can work. Browsers are fussy little bureaucrats.
+      </p>
     </div>
+  </div>
 
-    <div class="intro">
-      I’m a mum of 2, with a full-time job, and not enough spare brain cells to lovingly hand-code everything from scratch.
-    </div>
+  <!-- GAME OVER SCREEN -->
+  <div id="gameOverScreen" class="screen">
+    <div class="card">
+      <h2>Game Over</h2>
+      <p class="subtitle">The words won. Briefly. Let’s not make this a pattern.</p>
 
-    <div class="intro">
-      There’s already AI. So I use it, make the thing, and move on.
-    </div>
+      <div class="stats-list">
+        <div class="stat-box">
+          <div class="label">Score</div>
+          <div class="value" id="finalScore">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Words Typed</div>
+          <div class="value" id="finalTyped">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Best Streak</div>
+          <div class="value" id="finalStreak">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">High Score</div>
+          <div class="value" id="finalHighScore">0</div>
+        </div>
+      </div>
 
-    <p class="sub">
-      This is where I’m collecting the odd little tools I’ve made between work, laundry, and general life admin.
-    </p>
-
-    <div class="worm-track" aria-hidden="true">
-      <div class="worm">
-        <div class="head"></div>
-        <div class="segment"></div>
-        <div class="segment"></div>
-        <div class="segment"></div>
-        <div class="segment"></div>
-        <div class="segment"></div>
-        <div class="segment"></div>
-        <div class="segment"></div>
+      <div class="footer-actions">
+        <button id="playAgainBtn" class="big-btn" style="margin-top:0;">Play Again</button>
+        <button id="backToMenuBtn" class="small-btn">Back to Menu</button>
       </div>
     </div>
-
-    <h2 class="project-heading">Apps</h2>
-
-    <div class="today">
-      Current app:
-      <a href="https://charyamon-apps.github.io/site/vocab/">Vocab Drop Game</a>
-    </div>
-
-    <div class="project-list">
-      <div class="project-item"><span class="day">Project 1</span> <a href="/calculator/">Calculator</a></div>
-      <div class="project-item"><span class="day">Project 2</span> <a href="/vocab/">Vocab Drop Game</a></div>
-      <div class="project-item"><span class="day">Project 3</span> Etsy Title Helper</div>
-      <div class="project-item"><span class="day">Project 4</span> Sight Word App</div>
-    </div>
-
-    <p class="note">
-      Some of these will be useful. Some will be weird. Some will probably exist because I was avoiding folding clothes.
-    </p>
   </div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-group">
+      <div><strong>Score:</strong> <span id="score">0</span></div>
+      <div><strong>Typed:</strong> <span id="typedCount">0</span></div>
+      <div><strong>Missed:</strong> <span id="missed">0</span>/<span id="maxMisses">5</span></div>
+      <div><strong>Streak:</strong> <span id="streak">0</span></div>
+      <div><strong>Level:</strong> <span id="level">1</span></div>
+    </div>
+    <div class="hud-group">
+      <div><strong>Mode:</strong> <span id="hudDifficulty">Scholar</span></div>
+      <div><strong>Category:</strong> <span id="hudCategory">SAT Words</span></div>
+      <div><strong>High Score:</strong> <span id="hudHighScore">0</span></div>
+    </div>
+  </div>
+
+  <div id="message" class="message"></div>
+  <div id="gameArea" class="game-area"></div>
+
+  <!-- INPUT -->
+  <div class="bottom-panel">
+    <div class="input-row">
+      <input id="typedInput" type="text" placeholder="Type word and press Enter" autocomplete="off" spellcheck="false" />
+      <button id="restartBtn" class="small-btn">Restart</button>
+    </div>
+    <div class="meta-note">
+      Categories: SAT, obscure English, medical, legal, Shakespearean insults. Because your hobbies deserve range.
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------
+    // WORD LISTS
+    // ------------------------------
+    const WORDS = {
+      sat: [
+        "abate","aberration","abhor","acrimony","advocate","aesthetic","alacrity","ambivalent","amiable","anomaly",
+        "antipathy","appease","arcane","articulate","assuage","austere","banal","benevolent","candid","capricious",
+        "censure","coerce","complacent","concur","condone","conspicuous","deleterious","demur","deride","diligent",
+        "discord","disdain","disparate","disseminate","elated","eloquent","embezzle","emulate","enigma","ephemeral",
+        "equivocate","erudite","esoteric","exasperate","exemplary","fastidious","fortuitous","frugal","gregarious","hackneyed",
+        "iconoclast","impartial","impeccable","impetuous","inane","incisive","indolent","ineffable","ingenuous","innocuous",
+        "insipid","intrepid","laconic","lucid","magnanimous","mitigate","novice","obdurate","obfuscate","ostentatious",
+        "paradox","perfunctory","precocious","prodigal","prudent","quell","reticent","sagacious","scrutinize","spurious",
+        "superfluous","tenacious","trepidation","ubiquitous","vindicate","venerate","verbose","vociferous","wary","zealous"
+      ],
+      obscure: [
+        "abstruse","antediluvian","apocryphal","approbation","assiduous","auspicious","avarice","bellicose","calumny","cogent",
+        "conflagration","coruscate","credulous","desultory","diaphanous","ebullient","effulgent","egregious","enervate","equanimity",
+        "erstwhile","exculpate","fecund","garrulous","harangue","idiosyncrasy","impecunious","imperturbable","inchoate","indefatigable",
+        "insouciant","inveterate","legerdemain","loquacious","malediction","mellifluous","munificent","nefarious","obsequious","pellucid",
+        "penurious","perspicacious","pertinacious","phlegmatic","platitudinous","plethora","probity","profligate","propitious","pulchritude",
+        "pusillanimous","querulous","quotidian","recalcitrant","recondite","redolent","salubrious","sanguine","scurrilous","solipsistic",
+        "stentorian","surreptitious","tenuous","torpid","trenchant","umbrage","unctuous","vacillate","verisimilitude","vituperative",
+        "winsome","zeitgeist"
+      ],
+      medical: [
+        "analgesia","anastomosis","arrhythmia","arthralgia","auscultation","bradycardia","cachexia","cyanosis","diaphoresis","dysphagia",
+        "dyspnea","ecchymosis","edema","embolism","erythema","etiology","febrile","hematology","hemorrhage","hypertension",
+        "hyperglycemia","hypoglycemia","iatrogenic","idiopathic","ischemia","jaundice","laparoscopy","leukocyte","malignant","metastasis",
+        "myalgia","necrosis","neurology","oncology","orthopnea","osteoporosis","palpitation","pathology","peristalsis","phlebitis",
+        "prognosis","pulmonary","resuscitate","rhinorrhea","sepsis","sphygmomanometer","sternocleidomastoid","subcutaneous","syncope","tachycardia",
+        "thrombosis","tracheotomy","ventricular","vertigo","xiphoid"
+      ],
+      legal: [
+        "affidavit","allegation","amortization","appellant","arbitration","breach","caveat","codicil","damages","deposition",
+        "discovery","easement","embezzlement","estoppel","executor","fiduciary","foreclosure","garnishment","hearsay","indemnity",
+        "injunction","jurisdiction","litigation","liability","laches","malfeasance","misdemeanor","negligence","notwithstanding","ordinance",
+        "parole","perjury","plaintiff","precedent","probate","proviso","recusal","replevin","statute","subpoena",
+        "testamentary","tortfeasor","usufruct","venue","verdict","warranty","writ"
+      ],
+      shakespeare: [
+        "artless","bawdy","beslubbering","bootless","churlish","clouted","cockered","craven","currish","dankish",
+        "dissembling","droning","errant","fawning","fobbing","frothy","gleeking","goatish","gorbellied","impertinent",
+        "infectious","jarring","loggerheaded","lumpish","mammering","mangled","mewling","paunchy","peevish","puking",
+        "puny","qualling","rank","reeky","roguish","ruttish","saucy","spleeny","spongy","surly",
+        "tottering","unmuzzled","vain","venomed","villainous","warped","wayward","weedy","yeasty"
+      ]
+    };
+
+    // ------------------------------
+    // DIFFICULTY SETTINGS
+    // ------------------------------
+    const DIFFICULTIES = {
+      scholar: {
+        label: "Scholar",
+        spawnStart: 1800,
+        spawnMin: 900,
+        spawnLevelStep: 90,
+        speedBase: 42,
+        speedLevelStep: 7,
+        missesAllowed: 7,
+        scorePerChar: 2
+      },
+      menace: {
+        label: "Menace",
+        spawnStart: 1300,
+        spawnMin: 650,
+        spawnLevelStep: 110,
+        speedBase: 58,
+        speedLevelStep: 9,
+        missesAllowed: 5,
+        scorePerChar: 3
+      },
+      champion: {
+        label: "Unemployed Spelling Bee Champion",
+        spawnStart: 1000,
+        spawnMin: 480,
+        spawnLevelStep: 120,
+        speedBase: 72,
+        speedLevelStep: 11,
+        missesAllowed: 4,
+        scorePerChar: 4
+      }
+    };
+
+    // ------------------------------
+    // DOM
+    // ------------------------------
+    const startScreen = document.getElementById("startScreen");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const startGameBtn = document.getElementById("startGameBtn");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+    const backToMenuBtn = document.getElementById("backToMenuBtn");
+    const difficultySelect = document.getElementById("difficultySelect");
+    const categorySelect = document.getElementById("categorySelect");
+    const savedHighScore = document.getElementById("savedHighScore");
+    const savedHighScoreMeta = document.getElementById("savedHighScoreMeta");
+
+    const scoreEl = document.getElementById("score");
+    const typedCountEl = document.getElementById("typedCount");
+    const missedEl = document.getElementById("missed");
+    const maxMissesEl = document.getElementById("maxMisses");
+    const streakEl = document.getElementById("streak");
+    const levelEl = document.getElementById("level");
+    const hudDifficulty = document.getElementById("hudDifficulty");
+    const hudCategory = document.getElementById("hudCategory");
+    const hudHighScore = document.getElementById("hudHighScore");
+
+    const finalScore = document.getElementById("finalScore");
+    const finalTyped = document.getElementById("finalTyped");
+    const finalStreak = document.getElementById("finalStreak");
+    const finalHighScore = document.getElementById("finalHighScore");
+
+    const gameArea = document.getElementById("gameArea");
+    const typedInput = document.getElementById("typedInput");
+    const restartBtn = document.getElementById("restartBtn");
+    const messageEl = document.getElementById("message");
+
+    // ------------------------------
+    // GAME STATE
+    // ------------------------------
+    let activeWords = [];
+    let wordPool = [];
+    let gameRunning = false;
+    let animationId = null;
+    let spawnTimer = null;
+    let lastFrame = 0;
+
+    let score = 0;
+    let typedCount = 0;
+    let missed = 0;
+    let streak = 0;
+    let bestStreak = 0;
+    let level = 1;
+    let maxMisses = 5;
+
+    let currentDifficultyKey = "scholar";
+    let currentCategoryKey = "sat";
+
+    const STORAGE_KEY = "vocabDropHighScores";
+
+    // ------------------------------
+    // HELPERS
+    // ------------------------------
+    function categoryLabel(key) {
+      const map = {
+        sat: "SAT Words",
+        obscure: "Obscure English",
+        medical: "Medical Terms",
+        legal: "Legal Terms",
+        shakespeare: "Shakespearean Insults",
+        mixed: "Mixed Chaos"
+      };
+      return map[key] || key;
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getWordListForCategory(key) {
+      if (key === "mixed") {
+        return shuffle([
+          ...WORDS.sat,
+          ...WORDS.obscure,
+          ...WORDS.medical,
+          ...WORDS.legal,
+          ...WORDS.shakespeare
+        ]);
+      }
+      return shuffle(WORDS[key] || WORDS.sat);
+    }
+
+    function getDifficultyConfig() {
+      return DIFFICULTIES[currentDifficultyKey];
+    }
+
+    function getHighScoreMap() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function getHighScoreKey() {
+      return `${currentDifficultyKey}__${currentCategoryKey}`;
+    }
+
+    function getSavedHighScoreForSelection() {
+      const scores = getHighScoreMap();
+      return scores[getHighScoreKey()] || 0;
+    }
+
+    function saveHighScoreIfNeeded(value) {
+      const scores = getHighScoreMap();
+      const key = getHighScoreKey();
+      const old = scores[key] || 0;
+      if (value > old) {
+        scores[key] = value;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
+      }
+    }
+
+    function refreshMenuHighScore() {
+      currentDifficultyKey = difficultySelect.value;
+      currentCategoryKey = categorySelect.value;
+      const high = getSavedHighScoreForSelection();
+      savedHighScore.textContent = high;
+      savedHighScoreMeta.textContent = `${DIFFICULTIES[currentDifficultyKey].label} • ${categoryLabel(currentCategoryKey)}`;
+      hudHighScore.textContent = high;
+    }
+
+    function showMessage(text) {
+      messageEl.textContent = text;
+      messageEl.classList.add("show");
+      clearTimeout(showMessage.timer);
+      showMessage.timer = setTimeout(() => {
+        messageEl.classList.remove("show");
+      }, 1100);
+    }
+
+    function updateHUD() {
+      scoreEl.textContent = score;
+      typedCountEl.textContent = typedCount;
+      missedEl.textContent = missed;
+      maxMissesEl.textContent = maxMisses;
+      streakEl.textContent = streak;
+      levelEl.textContent = level;
+      hudDifficulty.textContent = DIFFICULTIES[currentDifficultyKey].label;
+      hudCategory.textContent = categoryLabel(currentCategoryKey);
+      hudHighScore.textContent = getSavedHighScoreForSelection();
+    }
+
+    function getSpawnInterval() {
+      const cfg = getDifficultyConfig();
+      return Math.max(cfg.spawnMin, cfg.spawnStart - (level - 1) * cfg.spawnLevelStep);
+    }
+
+    function getFallSpeed() {
+      const cfg = getDifficultyConfig();
+      return cfg.speedBase + (level - 1) * cfg.speedLevelStep;
+    }
+
+    function refillPoolIfNeeded() {
+      if (wordPool.length === 0) {
+        wordPool = getWordListForCategory(currentCategoryKey);
+      }
+    }
+
+    function getNextWord() {
+      refillPoolIfNeeded();
+      return wordPool.pop();
+    }
+
+    // ------------------------------
+    // SOUND
+    // ------------------------------
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function beep(freq = 440, duration = 0.08, type = "sine", volume = 0.03) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = volume;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playCorrectSound() {
+      beep(740, 0.05, "triangle", 0.035);
+      setTimeout(() => beep(950, 0.07, "triangle", 0.03), 45);
+    }
+
+    function playMissSound() {
+      beep(220, 0.11, "sawtooth", 0.03);
+    }
+
+    function playGameOverSound() {
+      beep(300, 0.12, "square", 0.03);
+      setTimeout(() => beep(240, 0.14, "square", 0.03), 80);
+      setTimeout(() => beep(180, 0.18, "square", 0.03), 170);
+    }
+
+    function playLevelUpSound() {
+      beep(520, 0.05, "triangle", 0.03);
+      setTimeout(() => beep(660, 0.05, "triangle", 0.03), 50);
+      setTimeout(() => beep(820, 0.07, "triangle", 0.03), 100);
+    }
+
+    // ------------------------------
+    // GAME LOGIC
+    // ------------------------------
+    function spawnWord() {
+      if (!gameRunning) return;
+
+      const text = getNextWord();
+      const el = document.createElement("div");
+      el.className = "word";
+      el.textContent = text;
+      gameArea.appendChild(el);
+
+      const wordWidth = el.offsetWidth || 140;
+      const maxX = Math.max(10, window.innerWidth - wordWidth - 10);
+      const x = Math.random() * maxX;
+
+      el.style.left = `${x}px`;
+      el.style.top = `72px`;
+
+      activeWords.push({
+        text,
+        x,
+        y: 72,
+        speed: getFallSpeed() + Math.random() * 18,
+        element: el
+      });
+    }
+
+    function scheduleSpawnLoop() {
+      clearTimeout(spawnTimer);
+      function loop() {
+        if (!gameRunning) return;
+        spawnWord();
+        spawnTimer = setTimeout(loop, getSpawnInterval());
+      }
+      spawnTimer = setTimeout(loop, getSpawnInterval());
+    }
+
+    function removeWord(wordObj) {
+      if (wordObj.element && wordObj.element.parentNode) {
+        wordObj.element.parentNode.removeChild(wordObj.element);
+      }
+      activeWords = activeWords.filter(w => w !== wordObj);
+    }
+
+    function animate(timestamp) {
+      if (!gameRunning) return;
+      if (!lastFrame) lastFrame = timestamp;
+      const delta = (timestamp - lastFrame) / 1000;
+      lastFrame = timestamp;
+
+      const bottomDangerLine = window.innerHeight - 140;
+      const currentInput = typedInput.value.trim().toLowerCase();
+
+      for (let i = activeWords.length - 1; i >= 0; i--) {
+        const word = activeWords[i];
+        word.y += word.speed * delta;
+        word.element.style.top = `${word.y}px`;
+
+        word.element.classList.toggle("urgent", word.y > bottomDangerLine - 120);
+        word.element.classList.toggle("partial", currentInput && word.text.startsWith(currentInput));
+
+        if (word.y >= bottomDangerLine) {
+          removeWord(word);
+          missed++;
+          streak = 0;
+          updateHUD();
+          showMessage(`Missed: ${word.text}`);
+          playMissSound();
+
+          if (missed >= maxMisses) {
+            endGame();
+            return;
+          }
+        }
+      }
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(score / 120) + 1;
+      if (newLevel > level) {
+        level = newLevel;
+        showMessage(`Level ${level}`);
+        playLevelUpSound();
+        scheduleSpawnLoop();
+        updateHUD();
+      }
+    }
+
+    function submitTypedWord() {
+      const input = typedInput.value.trim().toLowerCase();
+      if (!input) return;
+
+      const match = activeWords.find(w => w.text.toLowerCase() === input);
+
+      if (match) {
+        const cfg = getDifficultyConfig();
+        const points = Math.max(10, match.text.length * cfg.scorePerChar);
+        score += points;
+        typedCount++;
+        streak++;
+        bestStreak = Math.max(bestStreak, streak);
+
+        removeWord(match);
+        typedInput.value = "";
+        playCorrectSound();
+        updateHUD();
+        checkLevelUp();
+      } else {
+        streak = 0;
+        updateHUD();
+        showMessage("Incorrect. The dictionary remains undefeated.");
+        playMissSound();
+      }
+    }
+
+    function clearGame() {
+      activeWords.forEach(word => {
+        if (word.element && word.element.parentNode) {
+          word.element.parentNode.removeChild(word.element);
+        }
+      });
+      activeWords = [];
+      clearTimeout(spawnTimer);
+      cancelAnimationFrame(animationId);
+      lastFrame = 0;
+    }
+
+    function startGame() {
+      ensureAudio();
+      clearGame();
+
+      currentDifficultyKey = difficultySelect.value;
+      currentCategoryKey = categorySelect.value;
+
+      const cfg = getDifficultyConfig();
+      maxMisses = cfg.missesAllowed;
+      wordPool = getWordListForCategory(currentCategoryKey);
+
+      score = 0;
+      typedCount = 0;
+      missed = 0;
+      streak = 0;
+      bestStreak = 0;
+      level = 1;
+
+      gameRunning = true;
+      startScreen.classList.remove("show");
+      gameOverScreen.classList.remove("show");
+
+      typedInput.value = "";
+      typedInput.focus();
+
+      updateHUD();
+
+      spawnWord();
+      setTimeout(() => spawnWord(), 350);
+      setTimeout(() => spawnWord(), 750);
+
+      scheduleSpawnLoop();
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      clearTimeout(spawnTimer);
+      cancelAnimationFrame(animationId);
+
+      saveHighScoreIfNeeded(score);
+      const high = getSavedHighScoreForSelection();
+
+      finalScore.textContent = score;
+      finalTyped.textContent = typedCount;
+      finalStreak.textContent = bestStreak;
+      finalHighScore.textContent = high;
+
+      updateHUD();
+      refreshMenuHighScore();
+      playGameOverSound();
+
+      gameOverScreen.classList.add("show");
+    }
+
+    function backToMenu() {
+      clearGame();
+      gameRunning = false;
+      gameOverScreen.classList.remove("show");
+      startScreen.classList.add("show");
+      refreshMenuHighScore();
+    }
+
+    // ------------------------------
+    // EVENTS
+    // ------------------------------
+    startGameBtn.addEventListener("click", startGame);
+    playAgainBtn.addEventListener("click", startGame);
+    backToMenuBtn.addEventListener("click", backToMenu);
+    restartBtn.addEventListener("click", startGame);
+
+    difficultySelect.addEventListener("change", refreshMenuHighScore);
+    categorySelect.addEventListener("change", refreshMenuHighScore);
+
+    typedInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        submitTypedWord();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      activeWords.forEach(word => {
+        const wordWidth = word.element.offsetWidth || 140;
+        const maxX = Math.max(10, window.innerWidth - wordWidth - 10);
+        if (word.x > maxX) {
+          word.x = maxX;
+          word.element.style.left = `${word.x}px`;
+        }
+      });
+    });
+
+    window.addEventListener("pointerdown", ensureAudio, { once: true });
+
+    // Initial setup
+    refreshMenuHighScore();
+    updateHUD();
+  </script>
 </body>
 </html>
