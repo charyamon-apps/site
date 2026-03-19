@@ -17,10 +17,7 @@
       color: white;
     }
 
-    .game-wrap {
-      width: min(100vw, 900px);
-      padding: 12px;
-    }
+    .game-wrap { width: min(100vw, 900px); padding: 12px; }
 
     canvas {
       width: 100%;
@@ -28,482 +25,164 @@
       display: block;
       border-radius: 16px;
       box-shadow: 0 12px 35px rgba(0,0,0,0.35);
-      /* Use your Miami Heat wallpaper */
-      background: url('miami-heat.jpg') center/cover no-repeat;
+      background: #000;
     }
 
     .info {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
       margin-top: 10px;
       font-size: 14px;
-      opacity: 0.9;
-      flex-wrap: wrap;
-    }
-
-    .hint {
-      margin-top: 8px;
-      font-size: 13px;
-      opacity: 0.75;
-      line-height: 1.4;
     }
 
     .mobile-controls {
       margin-top: 12px;
-      display: grid;
-      grid-template-columns: 60px 1fr;
-      gap: 8px 12px;
-      align-items: center;
       background: rgba(255,255,255,0.08);
       padding: 12px;
-      border-radius: 14px;
-    }
-
-    .mobile-controls label {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .mobile-controls input[type="range"] {
-      width: 100%;
-    }
-
-    .mobile-controls button {
-      grid-column: 1 / -1;
-      border: 0;
       border-radius: 12px;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      background: #ffffff;
-      color: #111;
-      cursor: pointer;
     }
 
-    @media (min-width: 821px) {
-      .mobile-controls {
-        max-width: 420px;
-      }
+    input { width: 100%; }
+
+    button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="game-wrap">
     <canvas id="game" width="900" height="550"></canvas>
+
     <div class="info">
-      <div><strong>Score:</strong> <span id="score">0</span></div>
-      <div><strong>Shots:</strong> <span id="shots">0</span></div>
-      <div><strong>Hit Rate:</strong> <span id="rate">0%</span></div>
+      <div>Score: <span id="score">0</span></div>
+      <div>Shots: <span id="shots">0</span></div>
     </div>
-    <div class="hint">
-      Drag from the paper ball to aim, then release to shoot. On mobile, use the big shoot button and power slider, because your thumb deserves rights.
-    </div>
+
     <div class="mobile-controls">
-      <label for="angle">Angle</label>
-      <input id="angle" type="range" min="25" max="75" value="48" />
-      <label for="power">Power</label>
-      <input id="power" type="range" min="8" max="22" value="14" />
+      Angle <input id="angle" type="range" min="25" max="75" value="45" />
+      Power <input id="power" type="range" min="10" max="25" value="15" />
       <button id="shootBtn">Shoot</button>
     </div>
   </div>
 
   <script>
-    // Canvas setup
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
 
     const scoreEl = document.getElementById('score');
     const shotsEl = document.getElementById('shots');
-    const rateEl = document.getElementById('rate');
+
     const angleEl = document.getElementById('angle');
     const powerEl = document.getElementById('power');
     const shootBtn = document.getElementById('shootBtn');
 
     let score = 0;
     let shots = 0;
-    let flashTimer = 0;
 
-    // Paper ball state
-    const ball = {
-      x: 140,
-      y: 460,
-      r: 18,
-      vx: 0,
-      vy: 0,
-      flying: false,
-      trail: []
-    };
+    // LOAD IMAGE (this is the important fix)
+    const bg = new Image();
+    bg.src = 'miami-heat.jpg';
 
-    // Moving bin state
-    const bin = {
-      x: 620,
-      y: 390,
-      w: 100,
-      h: 110,
-      rimInset: 8,
-      speed: 2.2,
-      dir: 1
-    };
+    const ball = { x: 150, y: 480, r: 15, vx: 0, vy: 0, flying: false };
 
-    // Aiming state
-    let aiming = false;
-    let dragStart = null;
-    let dragCurrent = null;
-
-    // Tiny sound system using the Web Audio API
-    let audioReady = false;
-    let audioCtx = null;
-
-    function initAudio() {
-      if (audioReady) return;
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      audioCtx = new AudioContextClass();
-      audioReady = true;
-    }
-
-    function playTone(freq, duration, type = 'sine', volume = 0.04) {
-      if (!audioReady || !audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.value = volume;
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-      osc.stop(audioCtx.currentTime + duration);
-    }
-
-    function playCheer() {
-      if (!audioReady || !audioCtx) return;
-      playTone(523, 0.12, 'triangle', 0.05);
-      setTimeout(() => playTone(659, 0.14, 'triangle', 0.05), 90);
-      setTimeout(() => playTone(784, 0.18, 'triangle', 0.06), 180);
-      setTimeout(() => playTone(988, 0.28, 'triangle', 0.06), 300);
-    }
-
-    function playThrow() {
-      if (!audioReady || !audioCtx) return;
-      playTone(220, 0.08, 'sawtooth', 0.025);
-    }
-
-    function updateStats() {
-      scoreEl.textContent = score;
-      shotsEl.textContent = shots;
-      const rate = shots === 0 ? 0 : Math.round((score / shots) * 100);
-      rateEl.textContent = rate + '%';
-    }
-
-    function getPointerPos(evt) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-
-      return {
-        x: (evt.clientX - rect.left) * scaleX,
-        y: (evt.clientY - rect.top) * scaleY
-      };
-    }
-
-    function resetBall() {
-      ball.x = 140;
-      ball.y = 460;
-      ball.vx = 0;
-      ball.vy = 0;
-      ball.flying = false;
-      ball.trail = [];
-    }
-
-    function shootBall(vx, vy) {
-      if (ball.flying) return;
-      initAudio();
-      ball.vx = vx;
-      ball.vy = vy;
-      ball.flying = true;
-      shots++;
-      updateStats();
-      playThrow();
-    }
+    const bin = { x: 600, y: 380, w: 100, h: 100, dir: 1 };
 
     function drawBackground() {
-      // Draw wallpaper if available
-      if (bgImage.complete && bgImage.naturalWidth > 0) {
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      if (bg.complete && bg.naturalWidth !== 0) {
+        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
       } else {
-        // Fallback so the game still works if the image can't be found
-        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        grad.addColorStop(0, '#240507');
-        grad.addColorStop(1, '#111');
-        ctx.fillStyle = grad;
+        ctx.fillStyle = '#222';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      // Dark overlay so game elements stay visible
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Floor overlay for depth
-      const floorGrad = ctx.createLinearGradient(0, 420, 0, canvas.height);
-      floorGrad.addColorStop(0, 'rgba(0,0,0,0.15)');
-      floorGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
-      ctx.fillStyle = floorGrad;
-      ctx.fillRect(0, 420, canvas.width, 130);
-
-      // Floor line
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, 420);
-      ctx.lineTo(canvas.width, 420);
-      ctx.stroke();
-
-      // Tiny debug message if image is missing
-      if (!bgImage.complete || bgImage.naturalWidth === 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        ctx.font = '14px Arial';
-        ctx.fillText('Background image not found: put miami-heat.jpg beside index.html', 20, canvas.height - 20);
-      }
-    }
-
-    function drawBin() {
-      // Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.beginPath();
-      ctx.ellipse(bin.x + bin.w / 2, bin.y + bin.h + 12, bin.w / 2, 12, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Rim
-      ctx.fillStyle = '#d2d6da';
-      ctx.beginPath();
-      ctx.ellipse(bin.x + bin.w / 2, bin.y, bin.w / 2, 14, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Inner opening (target area visually)
-      ctx.fillStyle = '#1c1c1c';
-      ctx.beginPath();
-      ctx.ellipse(bin.x + bin.w / 2, bin.y + 1, bin.w / 2 - 14, 8, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Body
-      const bodyGrad = ctx.createLinearGradient(bin.x, bin.y, bin.x + bin.w, bin.y + bin.h);
-      bodyGrad.addColorStop(0, '#aeb5bb');
-      bodyGrad.addColorStop(1, '#7b858d');
-      ctx.fillStyle = bodyGrad;
-      ctx.beginPath();
-      ctx.moveTo(bin.x + 14, bin.y + 8);
-      ctx.lineTo(bin.x + bin.w - 14, bin.y + 8);
-      ctx.lineTo(bin.x + bin.w - 2, bin.y + bin.h);
-      ctx.lineTo(bin.x + 2, bin.y + bin.h);
-      ctx.closePath();
-      ctx.fill();
-
-      // Little bin lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-      ctx.lineWidth = 2;
-      for (let i = 1; i <= 3; i++) {
-        const lx = bin.x + 18 + i * 18;
-        ctx.beginPath();
-        ctx.moveTo(lx, bin.y + 18);
-        ctx.lineTo(lx + 6, bin.y + bin.h - 4);
-        ctx.stroke();
-      }
     }
 
     function drawBall() {
-      // Trail
-      for (let i = 0; i < ball.trail.length; i++) {
-        const t = ball.trail[i];
-        ctx.save();
-        ctx.globalAlpha = t.a;
-        ctx.fillStyle = '#e5e5e5';
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.18)';
-      ctx.beginPath();
-      ctx.ellipse(ball.x + 5, 490, 18, 8, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Crumpled paper
-      ctx.fillStyle = '#efefef';
+      ctx.fillStyle = '#fff';
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
       ctx.fill();
-
-      ctx.strokeStyle = '#cfcfcf';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(ball.x - 3, ball.y - 2, 6, 0.2, 5.1);
-      ctx.moveTo(ball.x - 8, ball.y + 4);
-      ctx.lineTo(ball.x + 5, ball.y - 7);
-      ctx.moveTo(ball.x - 5, ball.y - 8);
-      ctx.lineTo(ball.x + 7, ball.y + 3);
-      ctx.stroke();
     }
 
-    function drawAimLine() {
-      if (!aiming || !dragCurrent || ball.flying) return;
-
-      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([8, 6]);
-      ctx.beginPath();
-      ctx.moveTo(ball.x, ball.y);
-      ctx.lineTo(dragCurrent.x, dragCurrent.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('Aim', dragCurrent.x + 10, dragCurrent.y - 10);
-    }
-
-    function updateBin() {
-      bin.x += bin.speed * bin.dir;
-      if (bin.x < 520 || bin.x + bin.w > 860) {
-        bin.dir *= -1;
-      }
+    function drawBin() {
+      ctx.fillStyle = '#ccc';
+      ctx.fillRect(bin.x, bin.y, bin.w, bin.h);
     }
 
     function updateBall() {
       if (!ball.flying) return;
 
-      // Add gravity
-      ball.vy += 0.28;
+      ball.vy += 0.3;
       ball.x += ball.vx;
       ball.y += ball.vy;
 
-      // Trail for a tiny bit of drama
-      ball.trail.push({ x: ball.x, y: ball.y, r: ball.r * 0.55, a: 0.18 });
-      if (ball.trail.length > 10) ball.trail.shift();
-      ball.trail.forEach(t => t.a *= 0.9);
-
-      // Hit detection near the opening of the bin
-      const rimLeft = bin.x + 16;
-      const rimRight = bin.x + bin.w - 16;
-      const rimY = bin.y + 4;
-
-      if (
-        ball.y + ball.r > rimY - 4 &&
-        ball.y - ball.r < rimY + 14 &&
-        ball.x > rimLeft &&
-        ball.x < rimRight &&
-        ball.vy > 0
-      ) {
+      // score
+      if (ball.x > bin.x && ball.x < bin.x + bin.w && ball.y > bin.y) {
         score++;
-        flashTimer = 14;
-        updateStats();
-        playCheer();
         resetBall();
-        return;
       }
 
-      // Missed shot / out of bounds / landed
-      if (ball.y > 520 || ball.x > canvas.width + 50 || ball.x < -50 || ball.y < -60) {
-        setTimeout(() => resetBall(), 120);
-      }
+      if (ball.y > 550) resetBall();
     }
 
-    function drawHUD() {
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      ctx.fillRect(18, 18, 290, 86);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 22px Arial';
-      ctx.fillText('Paper Shot', 30, 48);
-      ctx.font = '14px Arial';
-      ctx.fillText('Moving bin. Fragile ego. Great combo.', 30, 74);
-
-      if (flashTimer > 0) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(255,255,255,0.12)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 44px Arial';
-        ctx.fillText('SWISH!', canvas.width / 2 - 85, 90);
-        ctx.restore();
-      }
+    function resetBall() {
+      ball.x = 150;
+      ball.y = 480;
+      ball.vx = 0;
+      ball.vy = 0;
+      ball.flying = false;
+      scoreEl.textContent = score;
     }
 
-    function animate() {
+    function shoot() {
+      if (ball.flying) return;
+
+      const angle = angleEl.value * Math.PI / 180;
+      const power = powerEl.value;
+
+      ball.vx = Math.cos(angle) * power * 0.5;
+      ball.vy = -Math.sin(angle) * power;
+
+      ball.flying = true;
+      shots++;
+      shotsEl.textContent = shots;
+
+      // CHEER SOUND (simple beep stack)
+      const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctxAudio.createOscillator();
+      const g = ctxAudio.createGain();
+      o.connect(g);
+      g.connect(ctxAudio.destination);
+      o.frequency.value = 600;
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.3);
+    }
+
+    shootBtn.addEventListener('click', shoot);
+
+    function updateBin() {
+      bin.x += 2 * bin.dir;
+      if (bin.x < 500 || bin.x > 750) bin.dir *= -1;
+    }
+
+    function loop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBackground();
       updateBin();
-      drawBin();
       updateBall();
+      drawBin();
       drawBall();
-      drawAimLine();
-      drawHUD();
-      if (flashTimer > 0) flashTimer--;
-      requestAnimationFrame(animate);
+      requestAnimationFrame(loop);
     }
 
-    // Mouse controls
-    canvas.addEventListener('pointerdown', (e) => {
-      initAudio();
-      if (ball.flying) return;
-      const p = getPointerPos(e);
-      const dx = p.x - ball.x;
-      const dy = p.y - ball.y;
-      const dist = Math.hypot(dx, dy);
-
-      if (dist <= ball.r + 12) {
-        aiming = true;
-        dragStart = { x: ball.x, y: ball.y };
-        dragCurrent = p;
-      }
-    });
-
-    canvas.addEventListener('pointermove', (e) => {
-      if (!aiming) return;
-      dragCurrent = getPointerPos(e);
-    });
-
-    canvas.addEventListener('pointerup', (e) => {
-      if (!aiming || ball.flying) return;
-      dragCurrent = getPointerPos(e);
-
-      const dx = dragStart.x - dragCurrent.x;
-      const dy = dragStart.y - dragCurrent.y;
-
-      const vx = Math.max(-2, Math.min(14, dx * 0.12));
-      const vy = Math.max(-16, Math.min(-4, dy * 0.12));
-
-      shootBall(vx, vy);
-
-      aiming = false;
-      dragStart = null;
-      dragCurrent = null;
-    });
-
-    canvas.addEventListener('pointerleave', () => {
-      if (aiming && !ball.flying) {
-        aiming = false;
-        dragStart = null;
-        dragCurrent = null;
-      }
-    });
-
-    shootBtn.addEventListener('click', () => {
-      if (ball.flying) return;
-      initAudio();
-      const angleDeg = Number(angleEl.value);
-      const power = Number(powerEl.value);
-      const angleRad = angleDeg * Math.PI / 180;
-
-      const vx = Math.cos(angleRad) * power * 0.55;
-      const vy = -Math.sin(angleRad) * power * 0.95;
-      shootBall(vx, vy);
-    });
-
-    updateStats();
-    animate();
+    loop();
   </script>
 </body>
 </html>
