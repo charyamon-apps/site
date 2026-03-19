@@ -19,6 +19,8 @@
       justify-content: center;
       padding: 20px;
       color: #2b2b2b;
+      overflow-x: hidden;
+      position: relative;
     }
 
     .app {
@@ -29,6 +31,8 @@
       padding: 24px;
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
       border: 3px solid #222;
+      position: relative;
+      z-index: 2;
     }
 
     h1 {
@@ -88,29 +92,6 @@
       transform: scale(0.98);
     }
 
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 14px;
-      padding: 12px 14px;
-      background: #f6f6f6;
-      border-radius: 14px;
-      border: 2px solid #222;
-    }
-
-    .toggle-row label {
-      margin: 0;
-      font-weight: bold;
-    }
-
-    .toggle-row input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: #111;
-    }
-
     .result {
       margin-top: 22px;
       padding: 18px;
@@ -118,6 +99,8 @@
       background: #fff8db;
       border: 2px dashed #222;
       display: none;
+      position: relative;
+      z-index: 2;
     }
 
     .section {
@@ -200,12 +183,23 @@
       margin-top: 8px;
     }
 
+    .footer-joke {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
     .shake {
       animation: shake 0.35s ease;
     }
 
     .flash {
       animation: flash 0.35s ease;
+    }
+
+    .result-pop {
+      animation: pop 0.3s ease;
     }
 
     @keyframes shake {
@@ -223,20 +217,60 @@
       100% { box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12); }
     }
 
-    .footer-joke {
-      margin-top: 14px;
+    @keyframes pop {
+      0% { transform: scale(0.98); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .rain-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .rain-item {
+      position: absolute;
+      top: -50px;
+      font-size: 2rem;
+      animation-name: fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      user-select: none;
+      opacity: 0.95;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-60px) rotate(0deg);
+        opacity: 0.95;
+      }
+      100% {
+        transform: translateY(115vh) rotate(360deg);
+        opacity: 0.98;
+      }
+    }
+
+    .headline-chaos {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #111;
+      color: #fff;
+      border-radius: 14px;
+      font-weight: bold;
       text-align: center;
-      font-size: 0.8rem;
-      color: #777;
+      line-height: 1.4;
     }
   </style>
 </head>
 <body>
+  <div class="rain-container" id="rainContainer"></div>
+
   <div class="app" id="appCard">
-    <h1>Unhinged BMI Judge Deluxe</h1>
+    <h1>Unhinged BMI Judge</h1>
     <div class="subtext">
-      Enter your height and weight and let this tiny digital goblin calculate your BMI,
-      roast you lightly, assign a fake cosmic body prophecy, and generally behave like it owns the place.
+      Enter your height and weight and let this tiny digital menace assess the situation with totally unnecessary confidence.
     </div>
 
     <label for="height">Height (cm)</label>
@@ -244,11 +278,6 @@
 
     <label for="weight">Weight (kg)</label>
     <input type="number" id="weight" placeholder="e.g. 69" />
-
-    <div class="toggle-row">
-      <label for="soundToggle">Dramatic sound effects</label>
-      <input type="checkbox" id="soundToggle" checked />
-    </div>
 
     <button id="calculateBtn">Calculate My Drama Index</button>
 
@@ -259,12 +288,13 @@
         <div class="bmi-number" id="bmiNumber">0.0</div>
         <div class="category" id="categoryText">Category</div>
         <div class="verdict" id="verdictText"></div>
+        <div class="headline-chaos" id="headlineChaos"></div>
       </div>
 
       <div class="section">
         <div class="section-title">Fake insult meter</div>
         <div class="meter-label-row">
-          <span>Goblin Rudeness Level</span>
+          <span>Audacity Level</span>
           <span id="meterScore">0%</span>
         </div>
         <div class="meter-track">
@@ -279,8 +309,7 @@
       </div>
 
       <div class="tiny-note">
-        Standard BMI category shown for reference only. This app is funny, not your doctor.
-        Human bodies are not Excel tabs, although some of us have clearly tried.
+        Standard BMI category shown for reference only. This app is for laughs, not clinical truth. Human bodies are complicated, and this calculator is clearly too excited about having opinions.
       </div>
     </div>
 
@@ -301,61 +330,85 @@
     const meterScore = document.getElementById("meterScore");
     const meterCaption = document.getElementById("meterCaption");
     const horoscopeText = document.getElementById("horoscopeText");
-    const soundToggle = document.getElementById("soundToggle");
+    const headlineChaos = document.getElementById("headlineChaos");
     const appCard = document.getElementById("appCard");
+    const rainContainer = document.getElementById("rainContainer");
 
     const messages = {
       underweight: [
-        "You are giving Victorian orphan with Wi-Fi. Please eat a sandwich and perhaps a second emotion.",
-        "This BMI says: fragile little breadstick energy. The vibe is concerning but elegant.",
-        "Your body said minimalist. Perhaps too minimalist."
+        "You are giving elegant coat hanger energy. Please consider a sandwich and perhaps a nap.",
+        "This BMI says: suspiciously aerodynamic. The vibe is fragile but curated.",
+        "Your body said minimalist. The minimalist said, maybe too far."
       ],
       normal: [
-        "Congratulations. You are medically ordinary. A true icon of administrative stability.",
-        "Your BMI is in the normal range. Disgusting. Where is the drama? Where is the scandal?",
-        "Balanced. Reasonable. Disturbingly well-organised. You are the beige cardigan of health metrics."
+        "Congratulations. You are medically ordinary. A true icon of stable admin energy.",
+        "Your BMI is in the normal range. Disturbingly reasonable. Where is the scandal?",
+        "Balanced. Sensible. Mildly infuriating in its competence."
       ],
       overweight: [
-        "This number suggests you are thriving, flourishing, and carrying both weight and the emotional burden of three households.",
-        "BMI says overweight. Rude. Frankly this calculator needs to mind its own business.",
-        "You are not a crisis. This is just a number doing far too much, like a middle manager with a spreadsheet."
+        "This number suggests you are flourishing and carrying the emotional baggage of several households.",
+        "BMI says overweight. Rude. Frankly this calculator needs to lower its voice.",
+        "You are not a crisis. This is just a number doing way too much."
       ],
       obese: [
-        "BMI has entered the chat with unnecessary confidence. Let us all remember it is a blunt tool, not the Pope.",
-        "This result is less doom and more maybe let’s romanticise a walk and a vegetable.",
-        "The calculator has concerns. Also, the calculator is dramatic and should be supervised."
+        "BMI has entered the chat with appalling confidence. Let us all calm down.",
+        "This result is less doom and more maybe romanticise a walk and a vegetable.",
+        "The calculator has concerns. The calculator is also deeply annoying."
       ]
     };
 
     const insultCaptions = [
-      "Barely rude. More passive-aggressive than insulting.",
-      "Mildly disrespectful. Like a friend who says 'interesting choice.'",
-      "Moderately uncalled for. The app is getting brave.",
-      "Quite rude now. The calculator has had two iced coffees and no restraint.",
-      "Maximum nonsense. This app needs HR intervention immediately."
+      "Barely rude. More mildly shady than offensive.",
+      "A little cheeky. The app has started smirking.",
+      "Moderately disrespectful. It has found its confidence now.",
+      "Quite rude now. This calculator thinks it hosts a talk show.",
+      "Maximum audacity. Frankly it needs to apologise to everyone."
     ];
 
     const horoscopes = {
       underweight: [
-        "Your body type horoscope says you are a Moon Twig: sensitive, elusive, and one skipped lunch away from writing poetry in a stairwell.",
-        "You are a Wind Biscuit rising. This week favours soup, soft blankets, and not letting your stress become a meal replacement plan.",
-        "The stars declare you a Celestial Breadstick. Your aura is delicate but weirdly expensive-looking."
+        "Your body type horoscope says you are a Moon Noodle: elusive, delicate, and one breeze away from becoming interpretive dance.",
+        "You are a Silk Twig rising. This week favours soup, rest, and not turning stress into an accidental fasting plan.",
+        "The stars declare you Celestial Chopstick: elegant, narrow, and weirdly powerful in photos."
       ],
       normal: [
         "You are a Spreadsheet Swan. Calm on the surface, emotionally pivot-tabling beneath.",
-        "Your cosmic body type is Beige Empress. Stable, sensible, and faintly annoyed by everyone else’s chaos.",
-        "The universe has assigned you Administrative Mermaid: balanced, hydrated, and quietly judging bad decisions."
+        "Your cosmic body type is Beige Empress. Stable, sensible, and faintly unimpressed by nonsense.",
+        "The universe has assigned you Administrative Mermaid: balanced, hydrated, and quietly judging chaos."
       ],
       overweight: [
-        "You are a Velvet Meteor. Warm, dramatic, and carrying enough presence to make a room nervous.",
-        "Your body horoscope says Houseplant Matriarch. You are lush, resilient, and one minor inconvenience away from a monologue.",
-        "The stars call you Cinnamon Thunder. Comforting, powerful, and not here for unsolicited advice from apps."
+        "You are a Velvet Meteor. Warm, dramatic, and impossible to ignore in the best way.",
+        "Your body horoscope says Houseplant Matriarch. Lush, resilient, and one inconvenience away from a speech.",
+        "The stars call you Cinnamon Thunder. Comforting, powerful, and not available for unsolicited advice."
       ],
       obese: [
-        "You are a Royal Comet. Magnificent, visible from space, and deeply uninterested in anyone’s nonsense.",
-        "Your sign is Sofa Oracle. Wise, observant, and spiritually aligned with snacks and boundaries.",
-        "The heavens name you Empress of Gravitas. Heavy is the crown, and also apparently the calculator’s opinion."
+        "You are a Royal Comet. Magnificent, visible from space, and not here for anyone’s rubbish.",
+        "Your sign is Sofa Oracle. Wise, observant, and spiritually aligned with boundaries and snacks.",
+        "The heavens name you Empress of Gravitas. Heavy is the crown, and apparently the app’s opinion."
       ]
+    };
+
+    const chaosEvents = {
+      underweight: {
+        emoji: "🥓",
+        headline: "BACON RAIN ACTIVATED. THE UNIVERSE WANTS YOU TO HAVE BREAKFAST.",
+        count: 24
+      },
+      normal: {
+        emoji: "✨",
+        headline: "CONFETTI OF MEDICAL ORDINARYNESS. HOW VERY STABLE OF YOU.",
+        count: 24
+      },
+      overweight: {
+        emoji: "🥦",
+        headline: "VEGETABLE STORM. SOMEONE HAS SUMMONED THE BROCCOLI OF CONSEQUENCE.",
+        count: 24
+      },
+      obese: {
+        emoji: "🏃",
+        headline: "TINY RUNNING PEOPLE HAVE ENTERED THE CHAT. THIS IS DEEPLY UNHELPFUL.",
+        count: 24
+      }
     };
 
     function getCategory(bmi) {
@@ -412,9 +465,40 @@
       };
     }
 
-    function playToneSequence(category) {
-      if (!soundToggle.checked) return;
+    function animateCard() {
+      appCard.classList.remove("shake", "flash");
+      resultBox.classList.remove("result-pop");
+      void appCard.offsetWidth;
+      appCard.classList.add("shake", "flash");
+      resultBox.classList.add("result-pop");
+    }
 
+    function clearRain() {
+      rainContainer.innerHTML = "";
+    }
+
+    function startRain(category) {
+      clearRain();
+
+      const event = chaosEvents[category];
+
+      for (let i = 0; i < event.count; i++) {
+        const item = document.createElement("div");
+        item.className = "rain-item";
+        item.textContent = event.emoji;
+        item.style.left = Math.random() * 100 + "vw";
+        item.style.animationDuration = (2.2 + Math.random() * 2.2) + "s";
+        item.style.animationDelay = (Math.random() * 0.8) + "s";
+        item.style.fontSize = (1.7 + Math.random() * 1.3) + "rem";
+        rainContainer.appendChild(item);
+
+        setTimeout(() => {
+          item.remove();
+        }, 5500);
+      }
+    }
+
+    function playToneSequence(category) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
 
@@ -440,32 +524,26 @@
       }
 
       if (category === "normal") {
-        beep(523.25, now, 0.18, "sine", 0.03);
-        beep(659.25, now + 0.18, 0.18, "sine", 0.03);
-        beep(783.99, now + 0.36, 0.22, "sine", 0.03);
+        beep(523.25, now, 0.16, "sine", 0.03);
+        beep(659.25, now + 0.18, 0.16, "sine", 0.03);
+        beep(783.99, now + 0.36, 0.22, "triangle", 0.03);
       } else if (category === "underweight") {
-        beep(440, now, 0.12, "triangle", 0.025);
-        beep(554.37, now + 0.14, 0.12, "triangle", 0.025);
-        beep(659.25, now + 0.28, 0.18, "triangle", 0.025);
+        beep(660, now, 0.1, "triangle", 0.028);
+        beep(880, now + 0.12, 0.12, "triangle", 0.028);
+        beep(990, now + 0.28, 0.2, "sine", 0.025);
       } else if (category === "overweight") {
-        beep(329.63, now, 0.15, "square", 0.03);
-        beep(293.66, now + 0.17, 0.15, "square", 0.03);
-        beep(261.63, now + 0.34, 0.24, "square", 0.03);
+        beep(294, now, 0.16, "square", 0.03);
+        beep(262, now + 0.18, 0.16, "square", 0.03);
+        beep(220, now + 0.38, 0.25, "sawtooth", 0.03);
       } else {
-        beep(220, now, 0.18, "sawtooth", 0.03);
-        beep(196, now + 0.2, 0.18, "sawtooth", 0.03);
-        beep(164.81, now + 0.4, 0.3, "sawtooth", 0.03);
+        beep(196, now, 0.16, "sawtooth", 0.03);
+        beep(174.61, now + 0.18, 0.16, "sawtooth", 0.03);
+        beep(146.83, now + 0.38, 0.28, "square", 0.03);
       }
 
       setTimeout(() => {
         audioCtx.close().catch(() => {});
       }, 1200);
-    }
-
-    function animateCard() {
-      appCard.classList.remove("shake", "flash");
-      void appCard.offsetWidth;
-      appCard.classList.add("shake", "flash");
     }
 
     function showValidationError() {
@@ -475,9 +553,11 @@
       verdictText.textContent = "Enter valid height and weight first. I may be unhinged, but I still require numbers.";
       meterFill.style.width = "12%";
       meterScore.textContent = "12%";
-      meterCaption.textContent = "The insult meter is disappointed, but not yet committed.";
+      meterCaption.textContent = "The audacity meter is disappointed, but not yet fully activated.";
       horoscopeText.textContent = "Your horoscope cannot be generated because you have provided chaos without measurements.";
+      headlineChaos.textContent = "NO FOOD RAIN. ONLY ADMINISTRATIVE DISAPPOINTMENT.";
       animateCard();
+      clearRain();
     }
 
     function calculateBMI() {
@@ -506,10 +586,13 @@
       meterCaption.textContent = insult.caption;
 
       horoscopeText.textContent = horoscope;
+      headlineChaos.textContent = chaosEvents[category].headline;
+
       resultBox.style.display = "block";
 
       animateCard();
       playToneSequence(category);
+      startRain(category);
     }
 
     calculateBtn.addEventListener("click", calculateBMI);
