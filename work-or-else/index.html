@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work or Else: Shame Mode</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 24px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding-top: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      opacity: 0.85;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: #1b1b1b;
+      border: 1px solid #2e2e2e;
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .label {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    #message {
+      font-size: 1.35rem;
+      line-height: 1.4;
+      min-height: 90px;
+      margin: 22px 0;
+      padding: 18px;
+      background: #1a1a1a;
+      border-radius: 14px;
+      border: 1px solid #2d2d2d;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #ff4757;
+      color: white;
+      font-weight: bold;
+      min-width: 180px;
+    }
+
+    button:hover {
+      opacity: 0.95;
+    }
+
+    .secondary {
+      background: #333;
+    }
+
+    .angry {
+      background: #320909;
+    }
+
+    .danger {
+      animation: shake 0.2s linear 3;
+    }
+
+    .tiny-note {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      opacity: 0.6;
+    }
+
+    /* Boss popup */
+    #bossPopup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .boss-box {
+      width: min(92vw, 420px);
+      background: #fff;
+      color: #111;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      text-align: center;
+      position: relative;
+      animation: popIn 0.22s ease-out;
+    }
+
+    .boss-face {
+      font-size: 4rem;
+      margin-bottom: 10px;
+    }
+
+    .boss-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .boss-text {
+      font-size: 1rem;
+      line-height: 1.45;
+      margin-bottom: 16px;
+    }
+
+    .boss-btn {
+      background: #111;
+      color: white;
+      min-width: 0;
+      width: 100%;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.85);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+
+    @media (min-width: 640px) {
+      .stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      h1 {
+        font-size: 2.4rem;
+      }
+
+      #message {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Work. Or Else.</h1>
+    <div class="subtitle">A deeply supportive productivity tool, if your definition of support is emotional harassment.</div>
+
+    <div class="stats">
+      <div class="card">
+        <div class="label">Fake Productivity Score</div>
+        <div class="value" id="score">0</div>
+      </div>
+      <div class="card">
+        <div class="label">Idle Shame Timer</div>
+        <div class="value" id="shameTimer">00:00</div>
+      </div>
+      <div class="card">
+        <div class="label">Times Boss Appeared</div>
+        <div class="value" id="bossCount">0</div>
+      </div>
+    </div>
+
+    <div id="message">Are you working? Be honest. This app already assumes no.</div>
+
+    <div class="button-row">
+      <button id="workBtn">I AM WORKING 😤</button>
+      <button id="resetBtn" class="secondary">Reset My Lies</button>
+    </div>
+
+    <div class="tiny-note">Reminder: opening twelve tabs and staring into the void is not a workflow.</div>
+  </div>
+
+  <!-- Boss popup -->
+  <div id="bossPopup">
+    <div class="boss-box">
+      <div class="boss-face">🧑‍💼</div>
+      <div class="boss-title">Your Boss Has Entered The Chat</div>
+      <div class="boss-text" id="bossText">
+        Just checking in. By “checking in,” I mean silently judging your output.
+      </div>
+      <button class="boss-btn" id="dismissBossBtn">SORRY, BACK TO WORK</button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    let idleSeconds = 0;
+    let bossCount = 0;
+    let messageLevel = 0;
+    let bossVisible = false;
+
+    const messageEl = document.getElementById("message");
+    const scoreEl = document.getElementById("score");
+    const shameTimerEl = document.getElementById("shameTimer");
+    const bossCountEl = document.getElementById("bossCount");
+    const bossPopup = document.getElementById("bossPopup");
+    const bossText = document.getElementById("bossText");
+
+    const unhingedMessages = [
+      "Are you working? Or just rearranging tabs like a suburban raccoon?",
+      "You said 'just five minutes.' That was a beautiful little fiction.",
+      "Your ancestors crossed oceans for this? For you to scroll and blink?",
+      "When I was your age, no one had burnout because we had no time for feelings. Only tasks.",
+      "You are not resting. You are marinating in avoidance.",
+      "This is why cousin Melissa owns two properties and a label maker.",
+      "Look at you. Full Wi-Fi, zero output. What a luxury.",
+      "Even your Notes app is embarrassed by the drafts in there.",
+      "You keep saying you're 'about to start' like it’s a religion.",
+      "At this point, procrastination is your side hustle.",
+      "If laziness burned calories, you’d be a Victorian ghost.",
+      "Your to-do list has now become historical fiction.",
+      "You have the posture of someone disappointing generations.",
+      "This is not deep work. This is decorative suffering.",
+      "You don’t need inspiration. You need a chair and consequences.",
+      "Honestly? Even your coffee has given up on you.",
+      "You have turned avoidance into an art form. Very moving. No notes. Except all the notes.",
+      "This app would clap for you, but you’ve done nothing.",
+      "Do something before your future self sends legal threats.",
+      "Hello? Productivity? Are you in the room with us right now?",
+      "Your screen time report should be submitted to the authorities.",
+      "This is why boomer parents think hobbies are a scam.",
+      "You’re acting like work is an optional side quest.",
+      "The deadline is approaching with a knife between its teeth.",
+      "You need less manifestation and more spreadsheet.",
+      "You are one more snack away from becoming folklore.",
+      "I am slapping you spiritually with a spreadsheet.",
+      "Get up. Fix your face. Open the file. Begin.",
+      "No more 'research.' You are just sightseeing in your own chaos.",
+      "If your boss could see this, they'd develop a twitch.",
+      "WORK. PLEASE. I am begging in Times New Roman.",
+      "You’ve been idle so long the app is forming opinions.",
+      "This is no longer a break. This is a lifestyle.",
+      "Your fake productivity score is the only thing here showing initiative.",
+      "Absolutely elite levels of avoidance. Olympian, even.",
+      "Fine. Stay idle. I’ll just prepare the disappointment."
+    ];
+
+    const bossLines = [
+      "Quick question: what exactly would you say you’ve been doing here?",
+      "Just circling back on the thing you were definitely supposed to start by now.",
+      "No pressure. I only noticed the complete absence of progress.",
+      "Love the energy. Slight concern about the output.",
+      "I’m hearing a lot of silence from your deliverables.",
+      "This looked urgent from my side. And also from reality’s side.",
+      "Can you provide an update that isn’t just emotional?",
+      "Checking in because the document still has the vibe of a blank hostage note.",
+      "Would now be a bad time to mention deadlines exist?",
+      "Amazing. The task is still untouched. Bold strategy."
+    ];
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+    }
+
+    function updateUI() {
+      scoreEl.textContent = score;
+      shameTimerEl.textContent = formatTime(idleSeconds);
+      bossCountEl.textContent = bossCount;
+    }
+
+    function setMessageByLevel() {
+      const index = Math.min(messageLevel, unhingedMessages.length - 1);
+      messageEl.textContent = unhingedMessages[index];
+    }
+
+    function showBossPopup() {
+      if (bossVisible) return;
+      bossVisible = true;
+      bossCount++;
+      bossText.textContent = bossLines[Math.floor(Math.random() * bossLines.length)];
+      bossPopup.style.display = "flex";
+      document.body.classList.add("danger");
+      updateUI();
+    }
+
+    function hideBossPopup() {
+      bossVisible = false;
+      bossPopup.style.display = "none";
+      document.body.classList.remove("danger");
+    }
+
+    function workingClick() {
+      score += 10;
+      idleSeconds = 0;
+      messageLevel = 0;
+      document.body.classList.remove("angry");
+      hideBossPopup();
+      messageEl.textContent = "Fine. I believe you. For now. Keep moving before I change my mind.";
+      updateUI();
+    }
+
+    function resetAll() {
+      score = 0;
+      idleSeconds = 0;
+      bossCount = 0;
+      messageLevel = 0;
+      hideBossPopup();
+      document.body.classList.remove("angry");
+      messageEl.textContent = "Reset complete. A fresh start for the same nonsense.";
+      updateUI();
+    }
+
+    // Main shame loop
+    setInterval(() => {
+      idleSeconds++;
+
+      // Increase fake shame intensity every 6 seconds
+      if (idleSeconds % 6 === 0) {
+        messageLevel++;
+        setMessageByLevel();
+      }
+
+      // Start getting visually angry
+      if (idleSeconds >= 18) {
+        document.body.classList.add("angry");
+      }
+
+      // Slowly punish score after 20 seconds idle
+      if (idleSeconds >= 20 && idleSeconds % 5 === 0) {
+        score = Math.max(0, score - 3);
+      }
+
+      // Boss appears every 25 seconds of idleness
+      if (idleSeconds > 0 && idleSeconds % 25 === 0) {
+        showBossPopup();
+      }
+
+      updateUI();
+    }, 1000);
+
+    document.getElementById("workBtn").addEventListener("click", workingClick);
+    document.getElementById("resetBtn").addEventListener("click", resetAll);
+    document.getElementById("dismissBossBtn").addEventListener("click", workingClick);
+
+    updateUI();
+  </script>
+</body>
+</html>
