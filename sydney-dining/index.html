@@ -24,16 +24,17 @@
     }
 
     .hero {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.88);
       border-radius: 24px;
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
       margin-bottom: 20px;
     }
 
     h1 {
       margin-top: 0;
       font-size: 2rem;
+      margin-bottom: 10px;
     }
 
     .subtext {
@@ -47,6 +48,7 @@
       grid-template-columns: 1.2fr 1fr auto;
       gap: 12px;
       margin-top: 20px;
+      align-items: center;
     }
 
     input, select, button {
@@ -64,11 +66,12 @@
       cursor: pointer;
       font-weight: bold;
       transition: transform 0.15s ease, opacity 0.15s ease;
+      min-width: 140px;
     }
 
     button:hover {
       transform: translateY(-1px);
-      opacity: 0.95;
+      opacity: 0.96;
     }
 
     .small-note {
@@ -81,6 +84,7 @@
       margin: 18px 0;
       font-weight: bold;
       color: #444;
+      min-height: 24px;
     }
 
     .results {
@@ -93,17 +97,18 @@
       background: white;
       border-radius: 20px;
       padding: 18px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
       display: flex;
       flex-direction: column;
       gap: 10px;
+      min-height: 280px;
     }
 
     .title-row {
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      align-items: start;
+      align-items: flex-start;
     }
 
     .place-name {
@@ -162,24 +167,23 @@
       flex-wrap: wrap;
     }
 
-    .link-btn {
+    .link-btn,
+    .ghost-btn {
       text-decoration: none;
-      background: #222;
-      color: white;
       padding: 10px 12px;
       border-radius: 12px;
       font-size: 0.92rem;
       display: inline-block;
     }
 
+    .link-btn {
+      background: #222;
+      color: white;
+    }
+
     .ghost-btn {
-      text-decoration: none;
       background: #f1f1f1;
       color: #222;
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-size: 0.92rem;
-      display: inline-block;
     }
 
     .footer-note {
@@ -197,6 +201,10 @@
       h1 {
         font-size: 1.7rem;
       }
+
+      button {
+        min-width: unset;
+      }
     }
   </style>
 </head>
@@ -209,8 +217,8 @@
       </p>
 
       <div class="search-box">
-        <input id="locationInput" type="text" placeholder="e.g. Newtown, Parramatta, CBD, Chatswood" />
-        
+        <input id="locationInput" type="text" placeholder="e.g. CBD, Newtown, Chatswood, Parramatta" />
+
         <select id="cuisineSelect">
           <option value="any">Any cuisine</option>
           <option value="italian">Italian</option>
@@ -234,19 +242,23 @@
       </div>
 
       <div class="small-note">
-        This app searches for restaurants in Sydney and shows Google ratings, review snippets, and a suggested thing to eat based on the cuisine. Because apparently choosing lunch now requires software.
+        This app searches for restaurants in Sydney and shows Google ratings, address, phone number,
+        and a suggested thing to eat based on the cuisine. Because making lunch decisions manually is apparently beneath us now.
       </div>
     </div>
 
-    <div id="status" class="status">Ready when your hunger and indecision are.</div>
+    <div id="status" class="status">Loading Google Maps magic...</div>
     <div id="results" class="results"></div>
 
+    <div class="footer-note">
+      Replace <strong>YOUR_GOOGLE_MAPS_API_KEY</strong> with your real API key.
+      Your key also needs permission for the Maps JavaScript API and Places API in Google Cloud. 
+    </div>
   </div>
 
   <script>
-    // --- Small mapping of cuisine to suggested dishes ---
-    // This gives the "what to try there" section.
-    // It's not restaurant-specific magic; it's a useful nudge.
+    // Suggested dishes by cuisine.
+    // Not deeply scientific. Just useful enough to feel clever.
     const cuisineSuggestions = {
       italian: ["carbonara", "cacio e pepe", "margherita pizza", "tiramisu"],
       japanese: ["ramen", "sashimi", "karaage", "matcha dessert"],
@@ -271,27 +283,7 @@
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
 
-    let map;
-    let service;
-
-    function initApp() {
-      // Hidden map element because PlacesService expects one.
-      const hiddenMapDiv = document.createElement("div");
-      hiddenMapDiv.style.display = "none";
-      document.body.appendChild(hiddenMapDiv);
-
-      map = new google.maps.Map(hiddenMapDiv, {
-        center: { lat: -33.8688, lng: 151.2093 }, // Sydney
-        zoom: 12
-      });
-
-      service = new google.maps.places.PlacesService(map);
-
-      searchBtn.addEventListener("click", runSearch);
-      locationInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") runSearch();
-      });
-    }
+    let placesLibraryLoaded = false;
 
     function setStatus(message) {
       statusEl.textContent = message;
@@ -303,7 +295,7 @@
 
     function escapeHtml(text) {
       if (!text) return "";
-      return text
+      return String(text)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -324,14 +316,32 @@
       return items.join(", ");
     }
 
-    function buildQuery(location, cuisine) {
-      const cuisineText = cuisine === "any" ? "restaurant" : `${cuisine} restaurant`;
-      return `${cuisineText} in ${location}, Sydney NSW`;
+    async function initApp() {
+      try {
+        await google.maps.importLibrary("places");
+        placesLibraryLoaded = true;
+        setStatus("Ready when your hunger and indecision are.");
+      } catch (error) {
+        console.error("Google Maps library failed to load:", error);
+        setStatus("Google Maps failed to load. Check your API key and restrictions.");
+      }
+
+      searchBtn.addEventListener("click", runSearch);
+      locationInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          runSearch();
+        }
+      });
     }
 
-    function runSearch() {
+    async function runSearch() {
       const location = locationInput.value.trim();
       const cuisine = cuisineSelect.value;
+
+      if (!placesLibraryLoaded) {
+        setStatus("Google Maps is not ready yet. Very on-brand for the internet.");
+        return;
+      }
 
       if (!location) {
         setStatus("Please enter a Sydney location first. The app is hungry, not psychic.");
@@ -341,93 +351,98 @@
       clearResults();
       setStatus("Searching for places worth leaving the house for...");
 
-      const query = buildQuery(location, cuisine);
+      try {
+        const { Place } = await google.maps.importLibrary("places");
 
-      const request = {
-        query,
-        fields: ["name", "place_id", "formatted_address", "rating", "user_ratings_total", "geometry"]
-      };
+        const textQuery =
+          cuisine === "any"
+            ? `restaurants in ${location}, Sydney NSW`
+            : `${cuisine} restaurant in ${location}, Sydney NSW`;
 
-      service.textSearch(request, (results, status) => {
-        if (status !== google.maps.places.PlacesServiceStatus.OK || !results || results.length === 0) {
+        const request = {
+          textQuery,
+          fields: [
+            "displayName",
+            "formattedAddress",
+            "rating",
+            "userRatingCount",
+            "websiteURI",
+            "googleMapsURI",
+            "nationalPhoneNumber",
+            "regularOpeningHours",
+            "primaryTypeDisplayName"
+          ],
+          maxResultCount: 6,
+          language: "en-AU",
+          region: "au"
+        };
+
+        const response = await Place.searchByText(request);
+        const places = response.places || [];
+
+        if (!places.length) {
           setStatus("No results found. Either the suburb is quiet or the universe wants you to cook.");
           return;
         }
 
-        const trimmed = results
-          .filter(place => place.place_id)
-          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-          .slice(0, 6);
+        setStatus(`Found ${places.length} place(s). Now narrowing your chaos.`);
 
-        setStatus(`Found ${trimmed.length} place(s). Now narrowing your chaos.`);
-
-        trimmed.forEach(place => fetchPlaceDetails(place, cuisine));
-      });
-    }
-
-    function fetchPlaceDetails(place, cuisine) {
-      const detailsRequest = {
-        placeId: place.place_id,
-        fields: [
-          "name",
-          "formatted_address",
-          "rating",
-          "user_ratings_total",
-          "reviews",
-          "website",
-          "url",
-          "formatted_phone_number",
-          "opening_hours",
-          "types"
-        ]
-      };
-
-      service.getDetails(detailsRequest, (details, status) => {
-        if (status !== google.maps.places.PlacesServiceStatus.OK || !details) return;
-        renderCard(details, cuisine);
-      });
+        places.forEach((place) => {
+          renderCard(place, cuisine);
+        });
+      } catch (error) {
+        console.error("Search error:", error);
+        setStatus("It broke in a very Google way. Open browser console and inspect the error.");
+      }
     }
 
     function renderCard(place, cuisine) {
       const card = document.createElement("div");
       card.className = "card";
 
-      const rating = place.rating ? `⭐ ${place.rating} (${place.user_ratings_total || 0})` : "No rating yet";
-      const address = place.formatted_address || "No address listed";
-      const phone = place.formatted_phone_number || "Phone not listed";
-      const isOpen = place.opening_hours && typeof place.opening_hours.isOpen === "function"
-        ? (place.opening_hours.isOpen() ? "Open now" : "Closed now")
-        : "Hours not available";
+      const name = place.displayName || "Unnamed place";
+      const rating = place.rating
+        ? `⭐ ${place.rating} (${place.userRatingCount || 0})`
+        : "No rating yet";
 
-      const reviewText = place.reviews && place.reviews.length
-        ? place.reviews.slice(0, 2).map(r => `“${escapeHtml(r.text)}” — ${escapeHtml(r.author_name)}`).join("<br><br>")
-        : "No review snippet available. A little mysterious. Very dramatic.";
-
+      const address = place.formattedAddress || "No address listed";
+      const phone = place.nationalPhoneNumber || "Phone not listed";
+      const mapsLink = place.googleMapsURI || "#";
+      const websiteLink = place.websiteURI || "";
       const suggestion = getCuisineSuggestion(cuisine);
+      const typeTag =
+        place.primaryTypeDisplayName ||
+        (cuisine === "any" ? "Restaurant" : cuisine.charAt(0).toUpperCase() + cuisine.slice(1));
 
-      const googleMapsLink = place.url || "#";
-      const websiteLink = place.website || "#";
+      let hoursText = "Hours not available";
+      if (
+        place.regularOpeningHours &&
+        Array.isArray(place.regularOpeningHours.weekdayDescriptions) &&
+        place.regularOpeningHours.weekdayDescriptions.length > 0
+      ) {
+        hoursText = "See Google Maps for opening hours";
+      }
 
       card.innerHTML = `
         <div class="title-row">
-          <div class="place-name">${escapeHtml(place.name)}</div>
+          <div class="place-name">${escapeHtml(name)}</div>
           <div class="rating">${rating}</div>
         </div>
 
         <div class="meta">
           <div><strong>Address:</strong> ${escapeHtml(address)}</div>
           <div><strong>Phone:</strong> ${escapeHtml(phone)}</div>
-          <div><strong>Status:</strong> ${escapeHtml(isOpen)}</div>
+          <div><strong>Status:</strong> ${escapeHtml(hoursText)}</div>
         </div>
 
         <div>
-          <span class="tag">${escapeHtml(cuisine === "any" ? "restaurant" : cuisine)}</span>
+          <span class="tag">${escapeHtml(typeTag)}</span>
           <span class="tag">Sydney</span>
         </div>
 
         <div class="review-box">
           <strong>Google review vibe:</strong><br>
-          ${reviewText}
+          Ratings are shown above. Open it in Google Maps if you want the full public-opinion spiral.
         </div>
 
         <div class="try-box">
@@ -436,9 +451,9 @@
         </div>
 
         <div class="actions">
-          <a class="link-btn" href="${googleMapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+          <a class="link-btn" href="${mapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
           ${
-            place.website
+            websiteLink
               ? `<a class="ghost-btn" href="${websiteLink}" target="_blank" rel="noopener noreferrer">Website</a>`
               : ""
           }
@@ -451,13 +466,8 @@
     window.initApp = initApp;
   </script>
 
-  <!--
-    IMPORTANT:
-    Replace YOUR_GOOGLE_MAPS_API_KEY with your own key.
-    You need Google Maps JavaScript API + Places enabled.
-  -->
   <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPp3yhm0_D9WNb61NImlSyjEDUFyzs3tk&libraries=places&callback=initApp"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPp3yhm0_D9WNb61NImlSyjEDUFyzs3tk&loading=async&callback=initApp"
     async
     defer
   ></script>
