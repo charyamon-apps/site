@@ -28,7 +28,8 @@
       display: block;
       border-radius: 16px;
       box-shadow: 0 12px 35px rgba(0,0,0,0.35);
-      background: #1a1a1a;
+      /* Use your Miami Heat wallpaper */
+      background: url('miami-heat.jpg') center/cover no-repeat;
     }
 
     .info {
@@ -129,75 +130,15 @@
     }
 
     function drawBackground() {
-      // Wall gradient
-      const wallGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      wallGrad.addColorStop(0, '#3f0b0b');
-      wallGrad.addColorStop(0.5, '#8b1014');
-      wallGrad.addColorStop(1, '#210507');
-      ctx.fillStyle = wallGrad;
+      // No drawing needed now — the canvas uses your wallpaper image as background
+      // We just add a subtle dark overlay so the game elements are visible
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Mural circle backdrop inspired by Miami Heat vibes
-      ctx.save();
-      ctx.globalAlpha = 0.18;
-      ctx.beginPath();
-      ctx.arc(710, 165, 115, 0, Math.PI * 2);
-      ctx.fillStyle = '#000';
-      ctx.fill();
-      ctx.restore();
-
-      ctx.save();
-      ctx.translate(710, 165);
-
-      // Basketball ring
-      ctx.beginPath();
-      ctx.arc(0, 0, 100, 0, Math.PI * 2);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 7;
-      ctx.stroke();
-
-      // Basketball body
-      ctx.beginPath();
-      ctx.arc(0, 25, 34, 0, Math.PI * 2);
-      ctx.fillStyle = '#f08a24';
-      ctx.fill();
-      ctx.strokeStyle = '#3b1f09';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // Basketball lines
-      ctx.beginPath();
-      ctx.moveTo(-34, 25);
-      ctx.lineTo(34, 25);
-      ctx.moveTo(0, -9);
-      ctx.lineTo(0, 59);
-      ctx.stroke();
-
-      // Flame shape
-      ctx.beginPath();
-      ctx.moveTo(0, -70);
-      ctx.bezierCurveTo(30, -50, 35, -15, 10, 10);
-      ctx.bezierCurveTo(25, -12, 15, -40, 0, -56);
-      ctx.bezierCurveTo(-8, -42, -16, -24, -10, 8);
-      ctx.bezierCurveTo(-30, -12, -32, -50, 0, -70);
-      ctx.fillStyle = '#ffd54d';
-      ctx.fill();
-
-      ctx.restore();
-
-      // Graffiti-ish mural text
-      ctx.save();
-      ctx.globalAlpha = 0.14;
-      ctx.font = 'bold 72px Arial';
-      ctx.fillStyle = '#fff';
-      ctx.rotate(-0.08);
-      ctx.fillText('HEAT', 500, 280);
-      ctx.restore();
-
-      // Floor
+      // Floor overlay for depth
       const floorGrad = ctx.createLinearGradient(0, 420, 0, canvas.height);
-      floorGrad.addColorStop(0, '#5f5f5f');
-      floorGrad.addColorStop(1, '#242424');
+      floorGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
+      floorGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
       ctx.fillStyle = floorGrad;
       ctx.fillRect(0, 420, canvas.width, 130);
 
