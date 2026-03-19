@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unhinged Body Composition Judge</title>
+  <title>Unhinged BMI Judge</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,494 +12,515 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, #f7f7f7, #fdf3f6, #f6f8ff);
-      color: #222;
+      background: linear-gradient(135deg, #fff0f6, #ffe3e3, #fff4e6);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
+      color: #2b2b2b;
     }
 
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-
-    .app-title {
-      text-align: center;
-      margin-bottom: 8px;
-      font-size: 2rem;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 22px;
-      line-height: 1.5;
-    }
-
-    .panel {
-      background: white;
+    .app {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
       border: 3px solid #222;
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
     }
 
-    .input-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
+    h1 {
+      margin-top: 0;
+      font-size: 1.9rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .subtext {
+      text-align: center;
+      margin-bottom: 22px;
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.5;
     }
 
     label {
       display: block;
+      margin: 14px 0 6px;
       font-weight: bold;
-      margin-bottom: 6px;
     }
 
-    input, select {
+    input {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border: 2px solid #222;
       border-radius: 14px;
       font-size: 1rem;
-      background: #fff;
+      outline: none;
     }
 
-    .button-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      flex-wrap: wrap;
+    input:focus {
+      border-color: #ff4d6d;
+      box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.15);
     }
 
     button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
       border: none;
       border-radius: 14px;
-      padding: 14px 18px;
+      background: #111;
+      color: white;
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease;
     }
 
-    .primary {
-      background: #111;
-      color: white;
+    button:hover {
+      opacity: 0.92;
     }
 
-    .secondary {
-      background: #ececec;
-      color: #222;
+    button:active {
+      transform: scale(0.98);
     }
 
-    .status-row {
+    .toggle-row {
       display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #f6f6f6;
+      border-radius: 14px;
+      border: 2px solid #222;
     }
 
-    .pill {
-      background: #efefef;
-      padding: 10px 16px;
-      border-radius: 999px;
+    .toggle-row label {
+      margin: 0;
       font-weight: bold;
-      color: #666;
     }
 
-    .pill.active {
-      background: #1f7fd8;
-      color: white;
+    .toggle-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #111;
     }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: #fafafa;
-      border-radius: 22px;
+    .result {
+      margin-top: 22px;
       padding: 18px;
-      min-height: 150px;
-      border: 1px solid #efefef;
-    }
-
-    .metric-title {
-      color: #666;
-      font-size: 0.95rem;
-      margin-bottom: 12px;
-    }
-
-    .metric-value {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 12px;
-      line-height: 1;
-    }
-
-    .metric-value small {
-      font-size: 1rem;
-      font-weight: normal;
-      margin-left: 3px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 8px 13px;
-      border-radius: 999px;
-      font-size: 0.95rem;
-      background: #e8f5eb;
-      color: #356b43;
-    }
-
-    .avg { background: #e7f3eb; color: #4a6651; }
-    .low { background: #e7f0f8; color: #4a6781; }
-    .high { background: #fff2d9; color: #7f682b; }
-    .obese { background: #fde5e7; color: #9a4c56; }
-
-    .green { color: #1bc239; }
-    .blue { color: #21a8e7; }
-    .pink { color: #f25d7f; }
-    .yellow { color: #e5a400; }
-    .mint { color: #89e5a7; }
-
-    .summary-box {
-      margin-top: 18px;
-      padding: 16px;
       border-radius: 18px;
       background: #fff8db;
       border: 2px dashed #222;
-      line-height: 1.5;
+      display: none;
     }
 
-    .footnote {
-      margin-top: 14px;
+    .section {
+      margin-bottom: 18px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 0.82rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #777;
+      margin-bottom: 8px;
+    }
+
+    .bmi-number {
+      font-size: 2.1rem;
+      font-weight: bold;
+      margin: 6px 0 10px;
+    }
+
+    .category {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #222;
+      color: white;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+
+    .verdict,
+    .horoscope-text {
+      font-size: 1rem;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .meter-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .meter-track {
+      height: 18px;
+      width: 100%;
+      background: linear-gradient(90deg, #9be15d, #ffd166, #ff7b54, #ef476f);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 2px solid #222;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: rgba(0, 0, 0, 0.18);
+      transition: width 0.5s ease;
+    }
+
+    .meter-caption {
+      margin-top: 8px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .tiny-note {
+      font-size: 0.82rem;
       color: #666;
-      font-size: 0.88rem;
-      line-height: 1.5;
+      line-height: 1.45;
+      margin-top: 8px;
     }
 
-    @media (max-width: 640px) {
-      .app-title {
-        font-size: 1.6rem;
-      }
+    .shake {
+      animation: shake 0.35s ease;
+    }
 
-      .metric-value {
-        font-size: 1.8rem;
-      }
+    .flash {
+      animation: flash 0.35s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes flash {
+      0% { box-shadow: 0 0 0 rgba(255, 77, 109, 0); }
+      50% { box-shadow: 0 0 0 8px rgba(255, 77, 109, 0.18); }
+      100% { box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12); }
+    }
+
+    .footer-joke {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="app-title">Unhinged Body Composition Judge</h1>
-    <p class="subtitle">
-      A deeply dramatic body composition dashboard.<br>
-      Like a smart scale, but with more audacity.
-    </p>
+  <div class="app" id="appCard">
+    <h1>Unhinged BMI Judge Deluxe</h1>
+    <div class="subtext">
+      Enter your height and weight and let this tiny digital goblin calculate your BMI,
+      roast you lightly, assign a fake cosmic body prophecy, and generally behave like it owns the place.
+    </div>
 
-    <div class="panel">
-      <div class="input-grid">
-        <div>
-          <label for="sex">Sex</label>
-          <select id="sex">
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-          </select>
-        </div>
+    <label for="height">Height (cm)</label>
+    <input type="number" id="height" placeholder="e.g. 157" />
 
-        <div>
-          <label for="age">Age</label>
-          <input type="number" id="age" placeholder="e.g. 42" />
-        </div>
+    <label for="weight">Weight (kg)</label>
+    <input type="number" id="weight" placeholder="e.g. 69" />
 
-        <div>
-          <label for="height">Height (cm)</label>
-          <input type="number" id="height" placeholder="e.g. 157" />
-        </div>
+    <div class="toggle-row">
+      <label for="soundToggle">Dramatic sound effects</label>
+      <input type="checkbox" id="soundToggle" checked />
+    </div>
 
-        <div>
-          <label for="weight">Weight (kg)</label>
-          <input type="number" id="weight" placeholder="e.g. 59" />
-        </div>
+    <button id="calculateBtn">Calculate My Drama Index</button>
+
+    <div class="result" id="resultBox">
+      <div class="section">
+        <div class="section-title">BMI verdict</div>
+        <div>Your BMI is</div>
+        <div class="bmi-number" id="bmiNumber">0.0</div>
+        <div class="category" id="categoryText">Category</div>
+        <div class="verdict" id="verdictText"></div>
       </div>
 
-      <div class="button-row">
-        <button class="primary" id="calcBtn">Reveal My Body Drama</button>
-        <button class="secondary" id="sampleBtn">Load Sample Data</button>
+      <div class="section">
+        <div class="section-title">Fake insult meter</div>
+        <div class="meter-label-row">
+          <span>Goblin Rudeness Level</span>
+          <span id="meterScore">0%</span>
+        </div>
+        <div class="meter-track">
+          <div class="meter-fill" id="meterFill"></div>
+        </div>
+        <div class="meter-caption" id="meterCaption"></div>
       </div>
 
-      <div class="footnote">
-        Important grown-up note: a real smart scale uses bioimpedance and device-specific formulas. This app gives rough estimates only. In other words, it is opinionated, not medically certified.
+      <div class="section">
+        <div class="section-title">Body type horoscope</div>
+        <div class="horoscope-text" id="horoscopeText"></div>
+      </div>
+
+      <div class="tiny-note">
+        Standard BMI category shown for reference only. This app is funny, not your doctor.
+        Human bodies are not Excel tabs, although some of us have clearly tried.
       </div>
     </div>
 
-    <div class="panel">
-      <div class="status-row">
-        <div class="pill">Comparison</div>
-        <div class="pill active">Health Status</div>
-        <div class="pill">Data Only</div>
-      </div>
-
-      <div class="cards" id="cards">
-        <!-- Cards inserted by JavaScript -->
-      </div>
-
-      <div class="summary-box" id="summaryBox">
-        Enter your details and let the app perform its little theatre production.
-      </div>
+    <div class="footer-joke">
+      Built for chaos, not medical supervision.
     </div>
   </div>
 
   <script>
-    const cards = document.getElementById("cards");
-    const summaryBox = document.getElementById("summaryBox");
-    const calcBtn = document.getElementById("calcBtn");
-    const sampleBtn = document.getElementById("sampleBtn");
+    const calculateBtn = document.getElementById("calculateBtn");
+    const heightInput = document.getElementById("height");
+    const weightInput = document.getElementById("weight");
+    const resultBox = document.getElementById("resultBox");
+    const bmiNumber = document.getElementById("bmiNumber");
+    const categoryText = document.getElementById("categoryText");
+    const verdictText = document.getElementById("verdictText");
+    const meterFill = document.getElementById("meterFill");
+    const meterScore = document.getElementById("meterScore");
+    const meterCaption = document.getElementById("meterCaption");
+    const horoscopeText = document.getElementById("horoscopeText");
+    const soundToggle = document.getElementById("soundToggle");
+    const appCard = document.getElementById("appCard");
 
-    function clamp(num, min, max) {
-      return Math.min(Math.max(num, min), max);
+    const messages = {
+      underweight: [
+        "You are giving Victorian orphan with Wi-Fi. Please eat a sandwich and perhaps a second emotion.",
+        "This BMI says: fragile little breadstick energy. The vibe is concerning but elegant.",
+        "Your body said minimalist. Perhaps too minimalist."
+      ],
+      normal: [
+        "Congratulations. You are medically ordinary. A true icon of administrative stability.",
+        "Your BMI is in the normal range. Disgusting. Where is the drama? Where is the scandal?",
+        "Balanced. Reasonable. Disturbingly well-organised. You are the beige cardigan of health metrics."
+      ],
+      overweight: [
+        "This number suggests you are thriving, flourishing, and carrying both weight and the emotional burden of three households.",
+        "BMI says overweight. Rude. Frankly this calculator needs to mind its own business.",
+        "You are not a crisis. This is just a number doing far too much, like a middle manager with a spreadsheet."
+      ],
+      obese: [
+        "BMI has entered the chat with unnecessary confidence. Let us all remember it is a blunt tool, not the Pope.",
+        "This result is less doom and more maybe let’s romanticise a walk and a vegetable.",
+        "The calculator has concerns. Also, the calculator is dramatic and should be supervised."
+      ]
+    };
+
+    const insultCaptions = [
+      "Barely rude. More passive-aggressive than insulting.",
+      "Mildly disrespectful. Like a friend who says 'interesting choice.'",
+      "Moderately uncalled for. The app is getting brave.",
+      "Quite rude now. The calculator has had two iced coffees and no restraint.",
+      "Maximum nonsense. This app needs HR intervention immediately."
+    ];
+
+    const horoscopes = {
+      underweight: [
+        "Your body type horoscope says you are a Moon Twig: sensitive, elusive, and one skipped lunch away from writing poetry in a stairwell.",
+        "You are a Wind Biscuit rising. This week favours soup, soft blankets, and not letting your stress become a meal replacement plan.",
+        "The stars declare you a Celestial Breadstick. Your aura is delicate but weirdly expensive-looking."
+      ],
+      normal: [
+        "You are a Spreadsheet Swan. Calm on the surface, emotionally pivot-tabling beneath.",
+        "Your cosmic body type is Beige Empress. Stable, sensible, and faintly annoyed by everyone else’s chaos.",
+        "The universe has assigned you Administrative Mermaid: balanced, hydrated, and quietly judging bad decisions."
+      ],
+      overweight: [
+        "You are a Velvet Meteor. Warm, dramatic, and carrying enough presence to make a room nervous.",
+        "Your body horoscope says Houseplant Matriarch. You are lush, resilient, and one minor inconvenience away from a monologue.",
+        "The stars call you Cinnamon Thunder. Comforting, powerful, and not here for unsolicited advice from apps."
+      ],
+      obese: [
+        "You are a Royal Comet. Magnificent, visible from space, and deeply uninterested in anyone’s nonsense.",
+        "Your sign is Sofa Oracle. Wise, observant, and spiritually aligned with snacks and boundaries.",
+        "The heavens name you Empress of Gravitas. Heavy is the crown, and also apparently the calculator’s opinion."
+      ]
+    };
+
+    function getCategory(bmi) {
+      if (bmi < 18.5) return "underweight";
+      if (bmi < 25) return "normal";
+      if (bmi < 30) return "overweight";
+      return "obese";
     }
 
-    function round(value, digits = 1) {
-      return Number(value.toFixed(digits));
-    }
-
-    function getStatus(metric, value, sex) {
-      const ranges = {
-        bmi: value < 18.5 ? "Low" : value < 25 ? "Average" : value < 30 ? "High" : "Obese",
-        bodyFat: sex === "female"
-          ? value < 21 ? "Low" : value <= 33 ? "Average" : value <= 39 ? "High" : "Obese"
-          : value < 8 ? "Low" : value <= 20 ? "Average" : value <= 25 ? "High" : "Obese",
-        skeletalMuscle: sex === "female"
-          ? value < 39 ? "Low" : value <= 45 ? "Average" : "High"
-          : value < 42 ? "Low" : value <= 54 ? "Average" : "High",
-        subcutaneousFat: value < 18 ? "Low" : value <= 28 ? "Average" : "High",
-        visceralFat: value < 10 ? "Average" : value <= 14 ? "High" : "Obese",
-        bodyWater: sex === "female"
-          ? value < 45 ? "Low" : value <= 60 ? "Average" : "High"
-          : value < 50 ? "Low" : value <= 65 ? "Average" : "High",
-        protein: value < 14 ? "Low" : value <= 20 ? "Average" : "High",
-        metabolicAge: "High"
+    function getCategoryLabel(category) {
+      const labels = {
+        underweight: "Underweight",
+        normal: "Normal",
+        overweight: "Overweight",
+        obese: "Obese"
       };
-
-      return ranges[metric] || "Average";
+      return labels[category];
     }
 
-    function getBadgeClass(status) {
-      if (status === "Low") return "low";
-      if (status === "High") return "high";
-      if (status === "Obese") return "obese";
-      return "avg";
+    function getRandomMessage(category) {
+      const group = messages[category];
+      return group[Math.floor(Math.random() * group.length)];
     }
 
-    function makeCard(title, value, unit, colourClass, status) {
-      return `
-        <div class="card">
-          <div class="metric-title">${title}</div>
-          <div class="metric-value ${colourClass}">
-            ${value}<small>${unit}</small>
-          </div>
-          <div class="badge ${getBadgeClass(status)}">${status}</div>
-        </div>
-      `;
+    function getRandomHoroscope(category) {
+      const group = horoscopes[category];
+      return group[Math.floor(Math.random() * group.length)];
     }
 
-    function calculateBodyComposition() {
-      const sex = document.getElementById("sex").value;
-      const age = parseFloat(document.getElementById("age").value);
-      const height = parseFloat(document.getElementById("height").value);
-      const weight = parseFloat(document.getElementById("weight").value);
+    function getInsultMeter(category, bmi) {
+      let score;
 
-      if (!age || !height || !weight || age <= 0 || height <= 0 || weight <= 0) {
-        summaryBox.innerHTML = "Please enter valid age, height, and weight. I cannot build a full health dashboard out of vibes alone.";
-        cards.innerHTML = "";
+      if (category === "underweight") {
+        score = 38 + Math.floor((18.5 - bmi) * 4);
+      } else if (category === "normal") {
+        score = 18 + Math.floor((25 - bmi) * 2);
+      } else if (category === "overweight") {
+        score = 58 + Math.floor((bmi - 25) * 4);
+      } else {
+        score = 78 + Math.floor((bmi - 30) * 3);
+      }
+
+      score = Math.max(8, Math.min(score, 99));
+
+      let captionIndex = 0;
+      if (score >= 25) captionIndex = 1;
+      if (score >= 45) captionIndex = 2;
+      if (score >= 70) captionIndex = 3;
+      if (score >= 90) captionIndex = 4;
+
+      return {
+        score,
+        caption: insultCaptions[captionIndex]
+      };
+    }
+
+    function playToneSequence(category) {
+      if (!soundToggle.checked) return;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      const audioCtx = new AudioContextClass();
+      const now = audioCtx.currentTime;
+
+      function beep(freq, start, duration, type = "sine", volume = 0.03) {
+        const oscillator = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(volume, start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+        oscillator.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscillator.start(start);
+        oscillator.stop(start + duration);
+      }
+
+      if (category === "normal") {
+        beep(523.25, now, 0.18, "sine", 0.03);
+        beep(659.25, now + 0.18, 0.18, "sine", 0.03);
+        beep(783.99, now + 0.36, 0.22, "sine", 0.03);
+      } else if (category === "underweight") {
+        beep(440, now, 0.12, "triangle", 0.025);
+        beep(554.37, now + 0.14, 0.12, "triangle", 0.025);
+        beep(659.25, now + 0.28, 0.18, "triangle", 0.025);
+      } else if (category === "overweight") {
+        beep(329.63, now, 0.15, "square", 0.03);
+        beep(293.66, now + 0.17, 0.15, "square", 0.03);
+        beep(261.63, now + 0.34, 0.24, "square", 0.03);
+      } else {
+        beep(220, now, 0.18, "sawtooth", 0.03);
+        beep(196, now + 0.2, 0.18, "sawtooth", 0.03);
+        beep(164.81, now + 0.4, 0.3, "sawtooth", 0.03);
+      }
+
+      setTimeout(() => {
+        audioCtx.close().catch(() => {});
+      }, 1200);
+    }
+
+    function animateCard() {
+      appCard.classList.remove("shake", "flash");
+      void appCard.offsetWidth;
+      appCard.classList.add("shake", "flash");
+    }
+
+    function showValidationError() {
+      resultBox.style.display = "block";
+      bmiNumber.textContent = "??";
+      categoryText.textContent = "Please Behave";
+      verdictText.textContent = "Enter valid height and weight first. I may be unhinged, but I still require numbers.";
+      meterFill.style.width = "12%";
+      meterScore.textContent = "12%";
+      meterCaption.textContent = "The insult meter is disappointed, but not yet committed.";
+      horoscopeText.textContent = "Your horoscope cannot be generated because you have provided chaos without measurements.";
+      animateCard();
+    }
+
+    function calculateBMI() {
+      const height = parseFloat(heightInput.value);
+      const weight = parseFloat(weightInput.value);
+
+      if (!height || !weight || height <= 0 || weight <= 0) {
+        showValidationError();
         return;
       }
 
-      const hMeters = height / 100;
-      const bmi = weight / (hMeters * hMeters);
+      const heightInMetres = height / 100;
+      const bmi = weight / (heightInMetres * heightInMetres);
+      const roundedBMI = bmi.toFixed(1);
+      const category = getCategory(bmi);
+      const message = getRandomMessage(category);
+      const horoscope = getRandomHoroscope(category);
+      const insult = getInsultMeter(category, bmi);
 
-      // Estimated body fat %
-      // Deurenberg-style rough estimate
-      let bodyFat = (1.20 * bmi) + (0.23 * age) - (sex === "male" ? 16.2 : 5.4);
-      bodyFat = clamp(bodyFat, sex === "male" ? 5 : 12, sex === "male" ? 40 : 50);
+      bmiNumber.textContent = roundedBMI;
+      categoryText.textContent = getCategoryLabel(category);
+      verdictText.textContent = message;
 
-      const fatMass = weight * (bodyFat / 100);
-      const fatFreeMass = weight - fatMass;
+      meterFill.style.width = insult.score + "%";
+      meterScore.textContent = insult.score + "%";
+      meterCaption.textContent = insult.caption;
 
-      // Skeletal muscle % rough estimate
-      let skeletalMusclePct = sex === "female"
-        ? 46 - (bodyFat * 0.22)
-        : 52 - (bodyFat * 0.20);
-      skeletalMusclePct = clamp(skeletalMusclePct, 28, 55);
+      horoscopeText.textContent = horoscope;
+      resultBox.style.display = "block";
 
-      // Subcutaneous fat rough portion of body fat
-      let subcutaneousFat = bodyFat * 0.91;
-      subcutaneousFat = clamp(subcutaneousFat, 8, 38);
+      animateCard();
+      playToneSequence(category);
+    }
 
-      // Visceral fat rating rough estimate
-      let visceralFat = (bmi * 0.32) + (age * 0.07) - (sex === "female" ? 4.5 : 3.2);
-      visceralFat = clamp(visceralFat, 1, 20);
+    calculateBtn.addEventListener("click", calculateBMI);
 
-      // Body water % rough estimate
-      let bodyWater = 100 - bodyFat - 18;
-      if (sex === "male") bodyWater += 5;
-      bodyWater = clamp(bodyWater, 35, 70);
-
-      const muscleMass = fatFreeMass - (weight * 0.04);
-
-      // Bone mass rough estimate
-      let boneMass = sex === "female" ? weight * 0.04 : weight * 0.045;
-      boneMass = clamp(boneMass, 1.8, 4.5);
-
-      // Protein % rough estimate
-      let protein = bodyWater * 0.335;
-      protein = clamp(protein, 10, 22);
-
-      // BMR Mifflin-St Jeor
-      let bmr = sex === "male"
-        ? (10 * weight) + (6.25 * height) - (5 * age) + 5
-        : (10 * weight) + (6.25 * height) - (5 * age) - 161;
-
-      // Metabolic age: silly but fun estimate
-      let metabolicAge = age + ((bodyFat - (sex === "female" ? 28 : 18)) * 0.35) - ((skeletalMusclePct - 40) * 0.2);
-      metabolicAge = clamp(metabolicAge, 12, 80);
-
-      const data = [
-        {
-          title: "Weight",
-          value: round(weight, 2),
-          unit: "kg",
-          colour: "green",
-          status: "Average"
-        },
-        {
-          title: "BMI",
-          value: round(bmi, 1),
-          unit: "",
-          colour: "green",
-          status: getStatus("bmi", bmi, sex)
-        },
-        {
-          title: "Body Fat",
-          value: round(bodyFat, 1),
-          unit: "%",
-          colour: "pink",
-          status: getStatus("bodyFat", bodyFat, sex)
-        },
-        {
-          title: "Skeletal Muscle",
-          value: round(skeletalMusclePct, 1),
-          unit: "%",
-          colour: "blue",
-          status: getStatus("skeletalMuscle", skeletalMusclePct, sex)
-        },
-        {
-          title: "Fat-Free Mass",
-          value: round(fatFreeMass, 2),
-          unit: "kg",
-          colour: "green",
-          status: "Average"
-        },
-        {
-          title: "Subcutaneous Fat",
-          value: round(subcutaneousFat, 1),
-          unit: "%",
-          colour: "yellow",
-          status: getStatus("subcutaneousFat", subcutaneousFat, sex)
-        },
-        {
-          title: "Visceral Fat",
-          value: round(visceralFat, 0),
-          unit: "",
-          colour: "mint",
-          status: getStatus("visceralFat", visceralFat, sex)
-        },
-        {
-          title: "Body Water",
-          value: round(bodyWater, 1),
-          unit: "%",
-          colour: "green",
-          status: getStatus("bodyWater", bodyWater, sex)
-        },
-        {
-          title: "Muscle Mass",
-          value: round(muscleMass, 2),
-          unit: "kg",
-          colour: "green",
-          status: "Average"
-        },
-        {
-          title: "Bone Mass",
-          value: round(boneMass, 2),
-          unit: "kg",
-          colour: "green",
-          status: "Average"
-        },
-        {
-          title: "Protein",
-          value: round(protein, 1),
-          unit: "%",
-          colour: "green",
-          status: getStatus("protein", protein, sex)
-        },
-        {
-          title: "BMR",
-          value: round(bmr, 0),
-          unit: "kcal",
-          colour: "green",
-          status: "Average"
-        },
-        {
-          title: "Metabolic Age",
-          value: round(metabolicAge, 0),
-          unit: "",
-          colour: "yellow",
-          status: getStatus("metabolicAge", metabolicAge, sex)
+    [heightInput, weightInput].forEach(input => {
+      input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          calculateBMI();
         }
-      ];
-
-      cards.innerHTML = data.map(item =>
-        makeCard(item.title, item.value, item.unit, item.colour, item.status)
-      ).join("");
-
-      const bmiStatus = getStatus("bmi", bmi, sex);
-      const bfStatus = getStatus("bodyFat", bodyFat, sex);
-      const muscleStatus = getStatus("skeletalMuscle", skeletalMusclePct, sex);
-
-      let unhingedLine = "";
-
-      if (bmiStatus === "Average" && bfStatus === "Average") {
-        unhingedLine = "Honestly? Fairly stable. Annoyingly reasonable. Your stats are giving responsible adult with a snack drawer.";
-      } else if (bfStatus === "High" || bfStatus === "Obese") {
-        unhingedLine = "The body fat estimate is being a little loud today. Not a crisis. Just a gentle invitation to move your body and perhaps stop letting snacks become a personality.";
-      } else if (muscleStatus === "Low") {
-        unhingedLine = "Muscle looks a bit underpowered. Nothing dramatic, but your glutes may be filing a formal complaint.";
-      } else {
-        unhingedLine = "Your body stats contain a touch of mystery, a dash of audacity, and the usual betrayal from numbers on a screen.";
-      }
-
-      summaryBox.innerHTML = `
-        <strong>Your estimated health status:</strong><br>
-        BMI: <strong>${round(bmi, 1)}</strong> (${bmiStatus}) &nbsp;|&nbsp;
-        Body Fat: <strong>${round(bodyFat, 1)}%</strong> (${bfStatus}) &nbsp;|&nbsp;
-        Skeletal Muscle: <strong>${round(skeletalMusclePct, 1)}%</strong> (${muscleStatus})<br><br>
-        ${unhingedLine}
-      `;
-    }
-
-    function loadSampleData() {
-      document.getElementById("sex").value = "female";
-      document.getElementById("age").value = 42;
-      document.getElementById("height").value = 157;
-      document.getElementById("weight").value = 59;
-      calculateBodyComposition();
-    }
-
-    calcBtn.addEventListener("click", calculateBodyComposition);
-    sampleBtn.addEventListener("click", loadSampleData);
+      });
+    });
   </script>
 </body>
 </html>
