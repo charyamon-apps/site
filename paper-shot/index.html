@@ -29,7 +29,7 @@
       border-radius: 16px;
       box-shadow: 0 12px 35px rgba(0,0,0,0.35);
       /* Use your Miami Heat wallpaper */
-      background: url('miami-heat.jpg') center/cover no-repeat;
+      background: #1a1a1a;
     }
 
     .info {
@@ -48,6 +48,44 @@
       opacity: 0.75;
       line-height: 1.4;
     }
+
+    .mobile-controls {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 8px 12px;
+      align-items: center;
+      background: rgba(255,255,255,0.08);
+      padding: 12px;
+      border-radius: 14px;
+    }
+
+    .mobile-controls label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .mobile-controls input[type="range"] {
+      width: 100%;
+    }
+
+    .mobile-controls button {
+      grid-column: 1 / -1;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #ffffff;
+      color: #111;
+      cursor: pointer;
+    }
+
+    @media (min-width: 821px) {
+      .mobile-controls {
+        max-width: 420px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -59,7 +97,14 @@
       <div><strong>Hit Rate:</strong> <span id="rate">0%</span></div>
     </div>
     <div class="hint">
-      Drag from the paper ball to aim, then release to shoot. Because apparently office productivity needed a sports arc.
+      Drag from the paper ball to aim, then release to shoot. On mobile, use the big shoot button and power slider, because your thumb deserves rights.
+    </div>
+    <div class="mobile-controls">
+      <label for="angle">Angle</label>
+      <input id="angle" type="range" min="25" max="75" value="48" />
+      <label for="power">Power</label>
+      <input id="power" type="range" min="8" max="22" value="14" />
+      <button id="shootBtn">Shoot</button>
     </div>
   </div>
 
@@ -71,9 +116,13 @@
     const scoreEl = document.getElementById('score');
     const shotsEl = document.getElementById('shots');
     const rateEl = document.getElementById('rate');
+    const angleEl = document.getElementById('angle');
+    const powerEl = document.getElementById('power');
+    const shootBtn = document.getElementById('shootBtn');
 
     let score = 0;
     let shots = 0;
+    let flashTimer = 0;
 
     // Paper ball state
     const ball = {
@@ -102,6 +151,45 @@
     let dragStart = null;
     let dragCurrent = null;
 
+    // Tiny sound system using the Web Audio API
+    let audioReady = false;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (audioReady) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioCtx = new AudioContextClass();
+      audioReady = true;
+    }
+
+    function playTone(freq, duration, type = 'sine', volume = 0.04) {
+      if (!audioReady || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = volume;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playCheer() {
+      if (!audioReady || !audioCtx) return;
+      playTone(523, 0.12, 'triangle', 0.05);
+      setTimeout(() => playTone(659, 0.14, 'triangle', 0.05), 90);
+      setTimeout(() => playTone(784, 0.18, 'triangle', 0.06), 180);
+      setTimeout(() => playTone(988, 0.28, 'triangle', 0.06), 300);
+    }
+
+    function playThrow() {
+      if (!audioReady || !audioCtx) return;
+      playTone(220, 0.08, 'sawtooth', 0.025);
+    }
+
     function updateStats() {
       scoreEl.textContent = score;
       shotsEl.textContent = shots;
@@ -129,16 +217,38 @@
       ball.trail = [];
     }
 
+    function shootBall(vx, vy) {
+      if (ball.flying) return;
+      initAudio();
+      ball.vx = vx;
+      ball.vy = vy;
+      ball.flying = true;
+      shots++;
+      updateStats();
+      playThrow();
+    }
+
     function drawBackground() {
-      // No drawing needed now — the canvas uses your wallpaper image as background
-      // We just add a subtle dark overlay so the game elements are visible
-      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      // Draw wallpaper if available
+      if (bgImage.complete && bgImage.naturalWidth > 0) {
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        // Fallback so the game still works if the image can't be found
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#240507');
+        grad.addColorStop(1, '#111');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Dark overlay so game elements stay visible
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Floor overlay for depth
       const floorGrad = ctx.createLinearGradient(0, 420, 0, canvas.height);
-      floorGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
-      floorGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
+      floorGrad.addColorStop(0, 'rgba(0,0,0,0.15)');
+      floorGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
       ctx.fillStyle = floorGrad;
       ctx.fillRect(0, 420, canvas.width, 130);
 
@@ -149,6 +259,13 @@
       ctx.moveTo(0, 420);
       ctx.lineTo(canvas.width, 420);
       ctx.stroke();
+
+      // Tiny debug message if image is missing
+      if (!bgImage.complete || bgImage.naturalWidth === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = '14px Arial';
+        ctx.fillText('Background image not found: put miami-heat.jpg beside index.html', 20, canvas.height - 20);
+      }
     }
 
     function drawBin() {
@@ -281,7 +398,9 @@
         ball.vy > 0
       ) {
         score++;
+        flashTimer = 14;
         updateStats();
+        playCheer();
         resetBall();
         return;
       }
@@ -294,12 +413,22 @@
 
     function drawHUD() {
       ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      ctx.fillRect(18, 18, 245, 78);
+      ctx.fillRect(18, 18, 290, 86);
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 22px Arial';
       ctx.fillText('Paper Shot', 30, 48);
       ctx.font = '14px Arial';
-      ctx.fillText('Office basketball, but with lower pay-off.', 30, 74);
+      ctx.fillText('Moving bin. Fragile ego. Great combo.', 30, 74);
+
+      if (flashTimer > 0) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 44px Arial';
+        ctx.fillText('SWISH!', canvas.width / 2 - 85, 90);
+        ctx.restore();
+      }
     }
 
     function animate() {
@@ -311,11 +440,13 @@
       drawBall();
       drawAimLine();
       drawHUD();
+      if (flashTimer > 0) flashTimer--;
       requestAnimationFrame(animate);
     }
 
     // Mouse controls
     canvas.addEventListener('pointerdown', (e) => {
+      initAudio();
       if (ball.flying) return;
       const p = getPointerPos(e);
       const dx = p.x - ball.x;
@@ -341,13 +472,10 @@
       const dx = dragStart.x - dragCurrent.x;
       const dy = dragStart.y - dragCurrent.y;
 
-      // Clamp power so it doesn't become absolute nonsense
-      ball.vx = Math.max(-2, Math.min(14, dx * 0.12));
-      ball.vy = Math.max(-16, Math.min(-4, dy * 0.12));
+      const vx = Math.max(-2, Math.min(14, dx * 0.12));
+      const vy = Math.max(-16, Math.min(-4, dy * 0.12));
 
-      ball.flying = true;
-      shots++;
-      updateStats();
+      shootBall(vx, vy);
 
       aiming = false;
       dragStart = null;
@@ -360,6 +488,18 @@
         dragStart = null;
         dragCurrent = null;
       }
+    });
+
+    shootBtn.addEventListener('click', () => {
+      if (ball.flying) return;
+      initAudio();
+      const angleDeg = Number(angleEl.value);
+      const power = Number(powerEl.value);
+      const angleRad = angleDeg * Math.PI / 180;
+
+      const vx = Math.cos(angleRad) * power * 0.55;
+      const vy = -Math.sin(angleRad) * power * 0.95;
+      shootBall(vx, vy);
     });
 
     updateStats();
