@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unhinged BMI Judge</title>
+  <title>Unhinged Body Composition Judge</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,267 +12,494 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, #fff0f6, #ffe3e3, #fff4e6);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: linear-gradient(135deg, #f7f7f7, #fdf3f6, #f6f8ff);
+      color: #222;
       padding: 20px;
-      color: #2b2b2b;
     }
 
-    .app {
-      width: 100%;
-      max-width: 460px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 22px;
-      padding: 24px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-      border: 3px solid #222;
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
     }
 
-    h1 {
-      margin-top: 0;
-      font-size: 1.8rem;
-      line-height: 1.2;
+    .app-title {
       text-align: center;
+      margin-bottom: 8px;
+      font-size: 2rem;
     }
 
-    .subtext {
+    .subtitle {
       text-align: center;
+      color: #666;
       margin-bottom: 22px;
-      font-size: 0.95rem;
-      color: #555;
+      line-height: 1.5;
+    }
+
+    .panel {
+      background: white;
+      border: 3px solid #222;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
     }
 
     label {
       display: block;
-      margin: 14px 0 6px;
       font-weight: bold;
+      margin-bottom: 6px;
     }
 
-    input {
+    input, select {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       border: 2px solid #222;
       border-radius: 14px;
       font-size: 1rem;
-      outline: none;
+      background: #fff;
     }
 
-    input:focus {
-      border-color: #ff4d6d;
-      box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.15);
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
     }
 
     button {
-      width: 100%;
-      margin-top: 18px;
-      padding: 15px;
       border: none;
       border-radius: 14px;
-      background: #111;
-      color: white;
+      padding: 14px 18px;
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.08s ease, opacity 0.2s ease;
     }
 
-    button:hover {
-      opacity: 0.92;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    .result {
-      margin-top: 22px;
-      padding: 18px;
-      border-radius: 18px;
-      background: #fff8db;
-      border: 2px dashed #222;
-      display: none;
-    }
-
-    .bmi-number {
-      font-size: 2.1rem;
-      font-weight: bold;
-      margin: 6px 0 10px;
-    }
-
-    .category {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #222;
+    .primary {
+      background: #111;
       color: white;
-      font-size: 0.9rem;
-      margin-bottom: 14px;
     }
 
-    .verdict {
-      font-size: 1rem;
-      line-height: 1.5;
+    .secondary {
+      background: #ececec;
+      color: #222;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      background: #efefef;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: bold;
+      color: #666;
+    }
+
+    .pill.active {
+      background: #1f7fd8;
+      color: white;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #fafafa;
+      border-radius: 22px;
+      padding: 18px;
+      min-height: 150px;
+      border: 1px solid #efefef;
+    }
+
+    .metric-title {
+      color: #666;
+      font-size: 0.95rem;
       margin-bottom: 12px;
     }
 
-    .tiny-note {
-      font-size: 0.82rem;
-      color: #666;
-      line-height: 1.4;
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 12px;
+      line-height: 1;
     }
 
-    .shake {
-      animation: shake 0.35s ease;
+    .metric-value small {
+      font-size: 1rem;
+      font-weight: normal;
+      margin-left: 3px;
     }
 
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      20% { transform: translateX(-6px); }
-      40% { transform: translateX(6px); }
-      60% { transform: translateX(-4px); }
-      80% { transform: translateX(4px); }
-      100% { transform: translateX(0); }
+    .badge {
+      display: inline-block;
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      background: #e8f5eb;
+      color: #356b43;
     }
 
-    .footer-joke {
+    .avg { background: #e7f3eb; color: #4a6651; }
+    .low { background: #e7f0f8; color: #4a6781; }
+    .high { background: #fff2d9; color: #7f682b; }
+    .obese { background: #fde5e7; color: #9a4c56; }
+
+    .green { color: #1bc239; }
+    .blue { color: #21a8e7; }
+    .pink { color: #f25d7f; }
+    .yellow { color: #e5a400; }
+    .mint { color: #89e5a7; }
+
+    .summary-box {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #fff8db;
+      border: 2px dashed #222;
+      line-height: 1.5;
+    }
+
+    .footnote {
       margin-top: 14px;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #777;
+      color: #666;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 640px) {
+      .app-title {
+        font-size: 1.6rem;
+      }
+
+      .metric-value {
+        font-size: 1.8rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app" id="appCard">
-    <h1>Unhinged BMI Judge</h1>
-    <div class="subtext">
-      Enter your height and weight and let this tiny digital goblin assess the situation.
-    </div>
+  <div class="container">
+    <h1 class="app-title">Unhinged Body Composition Judge</h1>
+    <p class="subtitle">
+      A deeply dramatic body composition dashboard.<br>
+      Like a smart scale, but with more audacity.
+    </p>
 
-    <label for="height">Height (cm)</label>
-    <input type="number" id="height" placeholder="e.g. 157" />
+    <div class="panel">
+      <div class="input-grid">
+        <div>
+          <label for="sex">Sex</label>
+          <select id="sex">
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+        </div>
 
-    <label for="weight">Weight (kg)</label>
-    <input type="number" id="weight" placeholder="e.g. 69" />
+        <div>
+          <label for="age">Age</label>
+          <input type="number" id="age" placeholder="e.g. 42" />
+        </div>
 
-    <button id="calculateBtn">Calculate My Drama Index</button>
+        <div>
+          <label for="height">Height (cm)</label>
+          <input type="number" id="height" placeholder="e.g. 157" />
+        </div>
 
-    <div class="result" id="resultBox">
-      <div>Your BMI is</div>
-      <div class="bmi-number" id="bmiNumber">0.0</div>
-      <div class="category" id="categoryText">Category</div>
-      <div class="verdict" id="verdictText"></div>
-      <div class="tiny-note">
-        Standard BMI category shown for reference only. This app is funny, not your doctor. Human bodies are not Excel tabs. Sadly.
+        <div>
+          <label for="weight">Weight (kg)</label>
+          <input type="number" id="weight" placeholder="e.g. 59" />
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="primary" id="calcBtn">Reveal My Body Drama</button>
+        <button class="secondary" id="sampleBtn">Load Sample Data</button>
+      </div>
+
+      <div class="footnote">
+        Important grown-up note: a real smart scale uses bioimpedance and device-specific formulas. This app gives rough estimates only. In other words, it is opinionated, not medically certified.
       </div>
     </div>
 
-    <div class="footer-joke">
-      Built for chaos, not medical supervision.
+    <div class="panel">
+      <div class="status-row">
+        <div class="pill">Comparison</div>
+        <div class="pill active">Health Status</div>
+        <div class="pill">Data Only</div>
+      </div>
+
+      <div class="cards" id="cards">
+        <!-- Cards inserted by JavaScript -->
+      </div>
+
+      <div class="summary-box" id="summaryBox">
+        Enter your details and let the app perform its little theatre production.
+      </div>
     </div>
   </div>
 
   <script>
-    const calculateBtn = document.getElementById("calculateBtn");
-    const heightInput = document.getElementById("height");
-    const weightInput = document.getElementById("weight");
-    const resultBox = document.getElementById("resultBox");
-    const bmiNumber = document.getElementById("bmiNumber");
-    const categoryText = document.getElementById("categoryText");
-    const verdictText = document.getElementById("verdictText");
-    const appCard = document.getElementById("appCard");
+    const cards = document.getElementById("cards");
+    const summaryBox = document.getElementById("summaryBox");
+    const calcBtn = document.getElementById("calcBtn");
+    const sampleBtn = document.getElementById("sampleBtn");
 
-    // Unhinged message bank by BMI category
-    const messages = {
-      underweight: [
-        "You are giving Victorian orphan with Wi-Fi. Please eat a sandwich and perhaps a second emotion.",
-        "This BMI says: 'fragile little breadstick energy.' The vibe is concerning but elegant.",
-        "Your body said minimalist. Perhaps too minimalist."
-      ],
-      normal: [
-        "Congratulations. You are medically ordinary. A true icon of administrative stability.",
-        "Your BMI is in the normal range. Disgusting. Where is the drama? Where is the scandal?",
-        "Balanced. Reasonable. Disturbingly well-organised. You are the beige cardigan of health metrics."
-      ],
-      overweight: [
-        "This number suggests you are thriving, flourishing, and carrying both weight and the emotional burden of three households.",
-        "BMI says overweight. Rude. Frankly this calculator needs to mind its own business.",
-        "You are not a crisis. This is just a number doing far too much, like a middle manager with a spreadsheet."
-      ],
-      obese: [
-        "BMI has entered the chat with unnecessary confidence. Let us all remember it is a blunt tool, not the Pope.",
-        "This result is less 'doom' and more 'maybe let’s romanticise a walk and a vegetable.'",
-        "The calculator has concerns. Also, the calculator is dramatic and should be supervised."
-      ]
-    };
-
-    function getCategory(bmi) {
-      if (bmi < 18.5) return "underweight";
-      if (bmi < 25) return "normal";
-      if (bmi < 30) return "overweight";
-      return "obese";
+    function clamp(num, min, max) {
+      return Math.min(Math.max(num, min), max);
     }
 
-    function getCategoryLabel(category) {
-      const labels = {
-        underweight: "Underweight",
-        normal: "Normal",
-        overweight: "Overweight",
-        obese: "Obese"
+    function round(value, digits = 1) {
+      return Number(value.toFixed(digits));
+    }
+
+    function getStatus(metric, value, sex) {
+      const ranges = {
+        bmi: value < 18.5 ? "Low" : value < 25 ? "Average" : value < 30 ? "High" : "Obese",
+        bodyFat: sex === "female"
+          ? value < 21 ? "Low" : value <= 33 ? "Average" : value <= 39 ? "High" : "Obese"
+          : value < 8 ? "Low" : value <= 20 ? "Average" : value <= 25 ? "High" : "Obese",
+        skeletalMuscle: sex === "female"
+          ? value < 39 ? "Low" : value <= 45 ? "Average" : "High"
+          : value < 42 ? "Low" : value <= 54 ? "Average" : "High",
+        subcutaneousFat: value < 18 ? "Low" : value <= 28 ? "Average" : "High",
+        visceralFat: value < 10 ? "Average" : value <= 14 ? "High" : "Obese",
+        bodyWater: sex === "female"
+          ? value < 45 ? "Low" : value <= 60 ? "Average" : "High"
+          : value < 50 ? "Low" : value <= 65 ? "Average" : "High",
+        protein: value < 14 ? "Low" : value <= 20 ? "Average" : "High",
+        metabolicAge: "High"
       };
-      return labels[category];
+
+      return ranges[metric] || "Average";
     }
 
-    function getRandomMessage(category) {
-      const group = messages[category];
-      return group[Math.floor(Math.random() * group.length)];
+    function getBadgeClass(status) {
+      if (status === "Low") return "low";
+      if (status === "High") return "high";
+      if (status === "Obese") return "obese";
+      return "avg";
     }
 
-    function calculateBMI() {
-      const height = parseFloat(heightInput.value);
-      const weight = parseFloat(weightInput.value);
+    function makeCard(title, value, unit, colourClass, status) {
+      return `
+        <div class="card">
+          <div class="metric-title">${title}</div>
+          <div class="metric-value ${colourClass}">
+            ${value}<small>${unit}</small>
+          </div>
+          <div class="badge ${getBadgeClass(status)}">${status}</div>
+        </div>
+      `;
+    }
 
-      // Basic validation because chaos still needs guardrails
-      if (!height || !weight || height <= 0 || weight <= 0) {
-        resultBox.style.display = "block";
-        bmiNumber.textContent = "??";
-        categoryText.textContent = "Please Behave";
-        verdictText.textContent = "Enter valid height and weight first. I may be unhinged, but I still require numbers.";
-        appCard.classList.remove("shake");
-        void appCard.offsetWidth; // restart animation
-        appCard.classList.add("shake");
+    function calculateBodyComposition() {
+      const sex = document.getElementById("sex").value;
+      const age = parseFloat(document.getElementById("age").value);
+      const height = parseFloat(document.getElementById("height").value);
+      const weight = parseFloat(document.getElementById("weight").value);
+
+      if (!age || !height || !weight || age <= 0 || height <= 0 || weight <= 0) {
+        summaryBox.innerHTML = "Please enter valid age, height, and weight. I cannot build a full health dashboard out of vibes alone.";
+        cards.innerHTML = "";
         return;
       }
 
-      const heightInMetres = height / 100;
-      const bmi = weight / (heightInMetres * heightInMetres);
-      const roundedBMI = bmi.toFixed(1);
-      const category = getCategory(bmi);
-      const message = getRandomMessage(category);
+      const hMeters = height / 100;
+      const bmi = weight / (hMeters * hMeters);
 
-      bmiNumber.textContent = roundedBMI;
-      categoryText.textContent = getCategoryLabel(category);
-      verdictText.textContent = message;
-      resultBox.style.display = "block";
+      // Estimated body fat %
+      // Deurenberg-style rough estimate
+      let bodyFat = (1.20 * bmi) + (0.23 * age) - (sex === "male" ? 16.2 : 5.4);
+      bodyFat = clamp(bodyFat, sex === "male" ? 5 : 12, sex === "male" ? 40 : 50);
 
-      appCard.classList.remove("shake");
-      void appCard.offsetWidth;
-      appCard.classList.add("shake");
+      const fatMass = weight * (bodyFat / 100);
+      const fatFreeMass = weight - fatMass;
+
+      // Skeletal muscle % rough estimate
+      let skeletalMusclePct = sex === "female"
+        ? 46 - (bodyFat * 0.22)
+        : 52 - (bodyFat * 0.20);
+      skeletalMusclePct = clamp(skeletalMusclePct, 28, 55);
+
+      // Subcutaneous fat rough portion of body fat
+      let subcutaneousFat = bodyFat * 0.91;
+      subcutaneousFat = clamp(subcutaneousFat, 8, 38);
+
+      // Visceral fat rating rough estimate
+      let visceralFat = (bmi * 0.32) + (age * 0.07) - (sex === "female" ? 4.5 : 3.2);
+      visceralFat = clamp(visceralFat, 1, 20);
+
+      // Body water % rough estimate
+      let bodyWater = 100 - bodyFat - 18;
+      if (sex === "male") bodyWater += 5;
+      bodyWater = clamp(bodyWater, 35, 70);
+
+      const muscleMass = fatFreeMass - (weight * 0.04);
+
+      // Bone mass rough estimate
+      let boneMass = sex === "female" ? weight * 0.04 : weight * 0.045;
+      boneMass = clamp(boneMass, 1.8, 4.5);
+
+      // Protein % rough estimate
+      let protein = bodyWater * 0.335;
+      protein = clamp(protein, 10, 22);
+
+      // BMR Mifflin-St Jeor
+      let bmr = sex === "male"
+        ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+        : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+
+      // Metabolic age: silly but fun estimate
+      let metabolicAge = age + ((bodyFat - (sex === "female" ? 28 : 18)) * 0.35) - ((skeletalMusclePct - 40) * 0.2);
+      metabolicAge = clamp(metabolicAge, 12, 80);
+
+      const data = [
+        {
+          title: "Weight",
+          value: round(weight, 2),
+          unit: "kg",
+          colour: "green",
+          status: "Average"
+        },
+        {
+          title: "BMI",
+          value: round(bmi, 1),
+          unit: "",
+          colour: "green",
+          status: getStatus("bmi", bmi, sex)
+        },
+        {
+          title: "Body Fat",
+          value: round(bodyFat, 1),
+          unit: "%",
+          colour: "pink",
+          status: getStatus("bodyFat", bodyFat, sex)
+        },
+        {
+          title: "Skeletal Muscle",
+          value: round(skeletalMusclePct, 1),
+          unit: "%",
+          colour: "blue",
+          status: getStatus("skeletalMuscle", skeletalMusclePct, sex)
+        },
+        {
+          title: "Fat-Free Mass",
+          value: round(fatFreeMass, 2),
+          unit: "kg",
+          colour: "green",
+          status: "Average"
+        },
+        {
+          title: "Subcutaneous Fat",
+          value: round(subcutaneousFat, 1),
+          unit: "%",
+          colour: "yellow",
+          status: getStatus("subcutaneousFat", subcutaneousFat, sex)
+        },
+        {
+          title: "Visceral Fat",
+          value: round(visceralFat, 0),
+          unit: "",
+          colour: "mint",
+          status: getStatus("visceralFat", visceralFat, sex)
+        },
+        {
+          title: "Body Water",
+          value: round(bodyWater, 1),
+          unit: "%",
+          colour: "green",
+          status: getStatus("bodyWater", bodyWater, sex)
+        },
+        {
+          title: "Muscle Mass",
+          value: round(muscleMass, 2),
+          unit: "kg",
+          colour: "green",
+          status: "Average"
+        },
+        {
+          title: "Bone Mass",
+          value: round(boneMass, 2),
+          unit: "kg",
+          colour: "green",
+          status: "Average"
+        },
+        {
+          title: "Protein",
+          value: round(protein, 1),
+          unit: "%",
+          colour: "green",
+          status: getStatus("protein", protein, sex)
+        },
+        {
+          title: "BMR",
+          value: round(bmr, 0),
+          unit: "kcal",
+          colour: "green",
+          status: "Average"
+        },
+        {
+          title: "Metabolic Age",
+          value: round(metabolicAge, 0),
+          unit: "",
+          colour: "yellow",
+          status: getStatus("metabolicAge", metabolicAge, sex)
+        }
+      ];
+
+      cards.innerHTML = data.map(item =>
+        makeCard(item.title, item.value, item.unit, item.colour, item.status)
+      ).join("");
+
+      const bmiStatus = getStatus("bmi", bmi, sex);
+      const bfStatus = getStatus("bodyFat", bodyFat, sex);
+      const muscleStatus = getStatus("skeletalMuscle", skeletalMusclePct, sex);
+
+      let unhingedLine = "";
+
+      if (bmiStatus === "Average" && bfStatus === "Average") {
+        unhingedLine = "Honestly? Fairly stable. Annoyingly reasonable. Your stats are giving responsible adult with a snack drawer.";
+      } else if (bfStatus === "High" || bfStatus === "Obese") {
+        unhingedLine = "The body fat estimate is being a little loud today. Not a crisis. Just a gentle invitation to move your body and perhaps stop letting snacks become a personality.";
+      } else if (muscleStatus === "Low") {
+        unhingedLine = "Muscle looks a bit underpowered. Nothing dramatic, but your glutes may be filing a formal complaint.";
+      } else {
+        unhingedLine = "Your body stats contain a touch of mystery, a dash of audacity, and the usual betrayal from numbers on a screen.";
+      }
+
+      summaryBox.innerHTML = `
+        <strong>Your estimated health status:</strong><br>
+        BMI: <strong>${round(bmi, 1)}</strong> (${bmiStatus}) &nbsp;|&nbsp;
+        Body Fat: <strong>${round(bodyFat, 1)}%</strong> (${bfStatus}) &nbsp;|&nbsp;
+        Skeletal Muscle: <strong>${round(skeletalMusclePct, 1)}%</strong> (${muscleStatus})<br><br>
+        ${unhingedLine}
+      `;
     }
 
-    calculateBtn.addEventListener("click", calculateBMI);
+    function loadSampleData() {
+      document.getElementById("sex").value = "female";
+      document.getElementById("age").value = 42;
+      document.getElementById("height").value = 157;
+      document.getElementById("weight").value = 59;
+      calculateBodyComposition();
+    }
 
-    // Also allow Enter key inside the inputs
-    [heightInput, weightInput].forEach(input => {
-      input.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-          calculateBMI();
-        }
-      });
-    });
+    calcBtn.addEventListener("click", calculateBodyComposition);
+    sampleBtn.addEventListener("click", loadSampleData);
   </script>
 </body>
 </html>
