@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unhinged BMI Judge</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #fff0f6, #ffe3e3, #fff4e6);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #2b2b2b;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+      border: 3px solid #222;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .subtext {
+      text-align: center;
+      margin-bottom: 22px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #222;
+      border-radius: 14px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #ff4d6d;
+      box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.15);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      background: #111;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .result {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #fff8db;
+      border: 2px dashed #222;
+      display: none;
+    }
+
+    .bmi-number {
+      font-size: 2.1rem;
+      font-weight: bold;
+      margin: 6px 0 10px;
+    }
+
+    .category {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #222;
+      color: white;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+
+    .verdict {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .tiny-note {
+      font-size: 0.82rem;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .shake {
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    .footer-joke {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="appCard">
+    <h1>Unhinged BMI Judge</h1>
+    <div class="subtext">
+      Enter your height and weight and let this tiny digital goblin assess the situation.
+    </div>
+
+    <label for="height">Height (cm)</label>
+    <input type="number" id="height" placeholder="e.g. 157" />
+
+    <label for="weight">Weight (kg)</label>
+    <input type="number" id="weight" placeholder="e.g. 69" />
+
+    <button id="calculateBtn">Calculate My Drama Index</button>
+
+    <div class="result" id="resultBox">
+      <div>Your BMI is</div>
+      <div class="bmi-number" id="bmiNumber">0.0</div>
+      <div class="category" id="categoryText">Category</div>
+      <div class="verdict" id="verdictText"></div>
+      <div class="tiny-note">
+        Standard BMI category shown for reference only. This app is funny, not your doctor. Human bodies are not Excel tabs. Sadly.
+      </div>
+    </div>
+
+    <div class="footer-joke">
+      Built for chaos, not medical supervision.
+    </div>
+  </div>
+
+  <script>
+    const calculateBtn = document.getElementById("calculateBtn");
+    const heightInput = document.getElementById("height");
+    const weightInput = document.getElementById("weight");
+    const resultBox = document.getElementById("resultBox");
+    const bmiNumber = document.getElementById("bmiNumber");
+    const categoryText = document.getElementById("categoryText");
+    const verdictText = document.getElementById("verdictText");
+    const appCard = document.getElementById("appCard");
+
+    // Unhinged message bank by BMI category
+    const messages = {
+      underweight: [
+        "You are giving Victorian orphan with Wi-Fi. Please eat a sandwich and perhaps a second emotion.",
+        "This BMI says: 'fragile little breadstick energy.' The vibe is concerning but elegant.",
+        "Your body said minimalist. Perhaps too minimalist."
+      ],
+      normal: [
+        "Congratulations. You are medically ordinary. A true icon of administrative stability.",
+        "Your BMI is in the normal range. Disgusting. Where is the drama? Where is the scandal?",
+        "Balanced. Reasonable. Disturbingly well-organised. You are the beige cardigan of health metrics."
+      ],
+      overweight: [
+        "This number suggests you are thriving, flourishing, and carrying both weight and the emotional burden of three households.",
+        "BMI says overweight. Rude. Frankly this calculator needs to mind its own business.",
+        "You are not a crisis. This is just a number doing far too much, like a middle manager with a spreadsheet."
+      ],
+      obese: [
+        "BMI has entered the chat with unnecessary confidence. Let us all remember it is a blunt tool, not the Pope.",
+        "This result is less 'doom' and more 'maybe let’s romanticise a walk and a vegetable.'",
+        "The calculator has concerns. Also, the calculator is dramatic and should be supervised."
+      ]
+    };
+
+    function getCategory(bmi) {
+      if (bmi < 18.5) return "underweight";
+      if (bmi < 25) return "normal";
+      if (bmi < 30) return "overweight";
+      return "obese";
+    }
+
+    function getCategoryLabel(category) {
+      const labels = {
+        underweight: "Underweight",
+        normal: "Normal",
+        overweight: "Overweight",
+        obese: "Obese"
+      };
+      return labels[category];
+    }
+
+    function getRandomMessage(category) {
+      const group = messages[category];
+      return group[Math.floor(Math.random() * group.length)];
+    }
+
+    function calculateBMI() {
+      const height = parseFloat(heightInput.value);
+      const weight = parseFloat(weightInput.value);
+
+      // Basic validation because chaos still needs guardrails
+      if (!height || !weight || height <= 0 || weight <= 0) {
+        resultBox.style.display = "block";
+        bmiNumber.textContent = "??";
+        categoryText.textContent = "Please Behave";
+        verdictText.textContent = "Enter valid height and weight first. I may be unhinged, but I still require numbers.";
+        appCard.classList.remove("shake");
+        void appCard.offsetWidth; // restart animation
+        appCard.classList.add("shake");
+        return;
+      }
+
+      const heightInMetres = height / 100;
+      const bmi = weight / (heightInMetres * heightInMetres);
+      const roundedBMI = bmi.toFixed(1);
+      const category = getCategory(bmi);
+      const message = getRandomMessage(category);
+
+      bmiNumber.textContent = roundedBMI;
+      categoryText.textContent = getCategoryLabel(category);
+      verdictText.textContent = message;
+      resultBox.style.display = "block";
+
+      appCard.classList.remove("shake");
+      void appCard.offsetWidth;
+      appCard.classList.add("shake");
+    }
+
+    calculateBtn.addEventListener("click", calculateBMI);
+
+    // Also allow Enter key inside the inputs
+    [heightInput, weightInput].forEach(input => {
+      input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          calculateBMI();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
