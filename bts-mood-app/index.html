@@ -12,72 +12,77 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #0d0b14, #1c1329, #2b1840);
-      color: #fff;
+      background:
+        radial-gradient(circle at top, #4c2177 0%, #1b112d 40%, #0c0914 100%);
+      color: #ffffff;
       min-height: 100vh;
       padding: 20px;
     }
 
     .app {
-      max-width: 900px;
+      max-width: 980px;
       margin: 0 auto;
     }
 
-    .title {
+    .header {
       text-align: center;
-      margin-bottom: 10px;
-      font-size: 2rem;
-      font-weight: 800;
+      margin-bottom: 22px;
+    }
+
+    .header h1 {
+      margin: 0 0 10px;
+      font-size: 2.3rem;
       letter-spacing: 1px;
     }
 
-    .subtitle {
-      text-align: center;
-      margin: 0 auto 24px;
-      max-width: 700px;
-      color: #d8cfea;
-      line-height: 1.5;
-      font-size: 0.98rem;
+    .header p {
+      margin: 0 auto;
+      max-width: 760px;
+      color: #ded1ef;
+      line-height: 1.6;
+      font-size: 1rem;
     }
 
-    .panel {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 22px;
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
       padding: 18px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
       backdrop-filter: blur(8px);
     }
 
-    .moods {
+    .mood-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
-    .mood-btn, .secondary-btn {
+    .mood-btn,
+    .action-btn {
       border: none;
       border-radius: 16px;
       padding: 14px 12px;
       font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
     }
 
-    .mood-btn:hover, .secondary-btn:hover {
+    .mood-btn:hover,
+    .action-btn:hover {
       transform: translateY(-2px);
     }
 
     .mood-btn {
       background: #ffffff;
-      color: #241733;
+      color: #241532;
     }
 
     .mood-btn.active {
-      background: #ffb3ec;
-      color: #220d1b;
+      background: #ff97d4;
+      color: #2a1021;
     }
 
     .result {
@@ -87,25 +92,22 @@
       align-items: stretch;
     }
 
-    .image-card {
-      background: rgba(255,255,255,0.06);
+    .photo-panel {
+      background: rgba(255, 255, 255, 0.06);
       border-radius: 20px;
       overflow: hidden;
-      min-height: 400px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      min-height: 420px;
     }
 
-    .image-card img {
+    .photo-panel img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    .info-card {
-      background: rgba(255,255,255,0.06);
+    .info-panel {
+      background: rgba(255, 255, 255, 0.06);
       border-radius: 20px;
       padding: 20px;
       display: flex;
@@ -114,79 +116,92 @@
       justify-content: center;
     }
 
-    .tag {
+    .pill {
       display: inline-block;
       width: fit-content;
-      background: rgba(255,255,255,0.12);
-      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.13);
+      color: #f8ddff;
       border-radius: 999px;
-      font-size: 0.8rem;
-      color: #f7ddff;
+      padding: 8px 12px;
+      font-size: 0.82rem;
       font-weight: 700;
     }
 
     .member-name {
+      margin: 0;
       font-size: 2rem;
       font-weight: 800;
-      margin: 0;
     }
 
     .quote {
-      font-size: 1.08rem;
-      line-height: 1.6;
-      color: #f8f2ff;
       margin: 0;
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: #f6efff;
     }
 
-    .song-box {
-      background: rgba(255,255,255,0.08);
+    .song-box,
+    .status-box {
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 14px;
     }
 
-    .song-label {
-      font-size: 0.82rem;
+    .label {
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #d5b8ef;
+      color: #d7b5f0;
       margin-bottom: 6px;
       font-weight: 700;
     }
 
-    .song-name {
+    .song-title {
       font-size: 1.1rem;
       font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .status-text {
+      color: #eadcf9;
+      line-height: 1.5;
+      font-size: 0.95rem;
     }
 
     .actions {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
-      margin-top: 4px;
+      gap: 10px;
     }
 
-    .secondary-btn {
+    .action-btn {
       background: #8c52ff;
-      color: white;
+      color: #fff;
       padding: 12px 16px;
     }
 
-    .secondary-btn.alt {
+    .action-btn.alt {
       background: #ff4fb3;
     }
 
-    .small-note {
-      margin-top: 12px;
-      color: #d8cfea;
-      font-size: 0.85rem;
+    .start-box {
+      text-align: center;
+      padding: 46px 20px;
+      color: #d9ccec;
+      line-height: 1.7;
+    }
+
+    .tiny-note {
+      font-size: 0.86rem;
+      color: #d9ccec;
       line-height: 1.5;
     }
 
-    .start-state {
+    .footer-note {
+      margin-top: 14px;
       text-align: center;
-      color: #d8cfea;
-      padding: 40px 20px;
-      font-size: 1rem;
+      color: #bfaed7;
+      font-size: 0.84rem;
     }
 
     audio {
@@ -199,39 +214,52 @@
         grid-template-columns: 1fr;
       }
 
-      .image-card {
+      .photo-panel {
         min-height: 340px;
       }
 
       .member-name {
         font-size: 1.7rem;
       }
+
+      .header h1 {
+        font-size: 1.9rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <h1 class="title">BTS Mood Button</h1>
-    <p class="subtitle">
-      Choose your current emotional state and let Bangtan decide whether you need comfort, healing, or a dramatic soundtrack while staring into the void like it owes you rent.
-    </p>
+    <div class="header">
+      <h1>BTS Mood Button</h1>
+      <p>
+        Choose your mood. Receive a BTS member, a ridiculous quote, and a song that starts automatically,
+        because apparently that is the level of emotional infrastructure we deserve now.
+      </p>
+    </div>
 
-    <div class="panel">
-      <div class="moods" id="moodButtons"></div>
+    <div class="card">
+      <div class="mood-grid" id="moodGrid"></div>
 
       <div id="resultArea">
-        <div class="start-state">
-          Pick a mood above. Let BTS assess the situation, which frankly is more support than most workplaces provide.
+        <div class="start-box">
+          Click a mood above and let BTS diagnose your emotional nonsense.
+          <br><br>
+          Yes, the music should auto-play after you click. For once, technology might actually do something useful.
         </div>
+      </div>
+
+      <div class="footer-note">
+        Keep your files inside <strong>images</strong> and <strong>audio</strong> folders. Computers are deeply fussy and love exact file names.
       </div>
     </div>
   </div>
 
-  <!-- Hidden audio player -->
-  <audio id="audioPlayer" controls style="display:none;"></audio>
+  <!-- Main hidden audio player -->
+  <audio id="mainAudio" preload="auto"></audio>
 
   <script>
-    // Mood buttons shown on screen
+    // ===== MOODS =====
     const moods = [
       { id: "tired", label: "😩 Tired of life" },
       { id: "heartbroken", label: "💔 Heartbroken" },
@@ -240,91 +268,230 @@
       { id: "unhinged", label: "🤡 Unhinged" }
     ];
 
-    // Member data
-    // Make sure these image files are inside your /images folder
+    // ===== MEMBERS =====
+    // These image names must match the files in your /images folder exactly.
     const members = [
       {
         name: "RM",
         image: "images/rm.jpg",
         quotes: {
-          tired: "It’s okay to not have a dream. Just breathe. You are not a broken spreadsheet.",
-          heartbroken: "Your value does not drop because someone failed to recognise it.",
-          angry: "Use your rage wisely. Arson is frowned upon.",
-          calm: "Sometimes the most productive thing is to be still.",
-          unhinged: "Honestly? A little chaos is fine. Just moisturise through it."
+          tired: [
+            "Life is a soup and I am a fork. Still, we carry on.",
+            "You are not lazy. You are spiritually buffering.",
+            "It is okay to pause. Even Wi-Fi does it and nobody calls it a failure."
+          ],
+          heartbroken: [
+            "You lost them. Do not also lose your dignity in paragraph-long texts.",
+            "Some people leave. Your playlists remain.",
+            "A broken heart is still a heart. Unfortunately, it is just louder about it."
+          ],
+          angry: [
+            "Before you burn the village down, maybe drink water first.",
+            "Rage is valid. Emailing while enraged is less so.",
+            "Use your anger wisely. Arson continues to test poorly in focus groups."
+          ],
+          calm: [
+            "Peace is something you defend from nonsense.",
+            "Rest is not weakness. It is strategy with better lighting.",
+            "Maybe your next big move is simply not reacting."
+          ],
+          unhinged: [
+            "This may be your villain origin story. Please make it chic.",
+            "You are not too much. The room is just underqualified.",
+            "Chaos is fine in moderation. Like hot sauce or bad decisions."
+          ]
         }
       },
       {
         name: "Jin",
         image: "images/jin.jpg",
         quotes: {
-          tired: "Please rest. You cannot be iconic on three hours of sleep and spite alone.",
-          heartbroken: "You deserve someone who sees you as worldwide handsome-adjacent.",
-          angry: "Take a breath. Then eat something. Half of civilisation is just people being hungry.",
-          calm: "Peace looks good on you. Very expensive. Very unattainable. Love that.",
-          unhinged: "Be chaotic, but make it elegant."
+          tired: [
+            "You cannot be iconic on three hours of sleep and blind optimism.",
+            "Rest. Even legends need a nap and a snack.",
+            "You are tired because life keeps assigning group work."
+          ],
+          heartbroken: [
+            "You deserve better, though your taste remains under review.",
+            "Romance is temporary. Good hair is forever.",
+            "You are still fabulous. The situation is simply rude."
+          ],
+          angry: [
+            "You are not angry. You are surrounded by people.",
+            "Step away from the phone. No dramatic typing today.",
+            "Eat first. Half of human conflict is just low blood sugar in a blazer."
+          ],
+          calm: [
+            "Lie down dramatically. Healing loves theatre.",
+            "Peace looks expensive on you.",
+            "Sometimes the best response is a beautiful face and no reply."
+          ],
+          unhinged: [
+            "Be chaotic, but moisturised.",
+            "If you are going to spiral, spiral attractively.",
+            "Remain elegant while causing light emotional confusion."
+          ]
         }
       },
       {
         name: "Suga",
         image: "images/suga.jpg",
         quotes: {
-          tired: "You do not need to run all the time. Existing is also a valid activity.",
-          heartbroken: "Pain passes. Unfortunately it does not send a polite calendar invite first.",
-          angry: "Sit with the anger. Then decide whether it deserves your energy.",
-          calm: "Silence can heal more than noise ever will.",
-          unhinged: "You’re not too much. The room is just poorly designed."
+          tired: [
+            "You do not need a purpose today. Surviving is enough.",
+            "Resting is not quitting. It is refusing to collapse in public.",
+            "Your only job today may be existing. Frankly, that is still plenty."
+          ],
+          heartbroken: [
+            "Pain is temporary. Screenshots are forever.",
+            "Some wounds heal slowly. That does not mean they are permanent.",
+            "You can miss someone and still know they were bad for your nervous system."
+          ],
+          angry: [
+            "Say less. Silence scares people more.",
+            "Anger is information. It is not always instruction.",
+            "Do not let one idiot turn you into a side quest."
+          ],
+          calm: [
+            "Stillness is underrated.",
+            "Quiet is not emptiness. It is room to breathe.",
+            "You do not have to prove anything today."
+          ],
+          unhinged: [
+            "You are not overreacting. You are simply very committed.",
+            "The line between passion and madness is mostly branding.",
+            "Be honest. A tiny bit of chaos keeps the blood moving."
+          ]
         }
       },
       {
         name: "j-hope",
         image: "images/jhope.jpg",
         quotes: {
-          tired: "One small step still counts. Even if your step today is just standing up dramatically.",
-          heartbroken: "Your heart will recover. Annoying, but true.",
-          angry: "Turn that energy into motion. Dance. Walk. Clean aggressively.",
-          calm: "Light can be soft and still powerful.",
-          unhinged: "You’re a sparkling menace, and I mean that with respect."
+          tired: [
+            "Even one small step counts. Even if the step is toward the fridge.",
+            "Today does not need to be impressive. It just needs to happen.",
+            "Tiny progress still annoys your problems, which is nice."
+          ],
+          heartbroken: [
+            "You will laugh again. Irritatingly soon.",
+            "Your heart will recover. It hates that too, but it will.",
+            "This hurts now, but not forever. Very rude, very temporary."
+          ],
+          angry: [
+            "Move your body before you move your mouth.",
+            "Dance, walk, stretch, stomp dramatically. Just do not text them.",
+            "Turn the anger into motion instead of a witness statement."
+          ],
+          calm: [
+            "Soft energy. Strong spine.",
+            "Joy can be quiet too.",
+            "You do not need to perform peace. You can simply have it."
+          ],
+          unhinged: [
+            "You are the plot twist. Act accordingly.",
+            "Be a sparkling menace.",
+            "You contain multitudes, several of them deeply unserious."
+          ]
         }
       },
       {
         name: "Jimin",
         image: "images/jimin.jpg",
         quotes: {
-          tired: "Be gentle with yourself. You are a person, not a machine with Wi-Fi issues.",
-          heartbroken: "Some endings hurt because they mattered. That does not make them mistakes.",
-          angry: "You are allowed to feel deeply without setting your life on fire.",
-          calm: "Softness is not weakness. It is control with better hair.",
-          unhinged: "Stay sweet, stay dangerous, stay hydrated."
+          tired: [
+            "Be gentle with yourself. You are a person, not a vending machine.",
+            "You are trying very hard in a world built by clowns.",
+            "Life is a soup and you are a fork. Still adorable though."
+          ],
+          heartbroken: [
+            "Some people are lessons. Expensive ones.",
+            "You can be soft and still survive this.",
+            "Your sadness does not make you weak. It makes you annoyingly human."
+          ],
+          angry: [
+            "Feel the anger. Just do not redecorate your life with it.",
+            "You are allowed to be furious without becoming cruel.",
+            "Take a breath before your mouth applies for a criminal record."
+          ],
+          calm: [
+            "Softness is not weakness. It is control wearing silk gloves.",
+            "Gentle does not mean small.",
+            "Peace is a decision you keep making."
+          ],
+          unhinged: [
+            "Stay soft. Stay dangerous.",
+            "You look calm, which makes the chaos funnier.",
+            "There is elegance in being one bad idea away from a story."
+          ]
         }
       },
       {
         name: "V",
         image: "images/v.jpg",
         quotes: {
-          tired: "Maybe today is for looking out the window and being mysterious about it.",
-          heartbroken: "You can grieve and still remain beautiful. Irritatingly beautiful, even.",
-          angry: "Not every battle deserves your artful suffering.",
-          calm: "Slow down. Let life catch up to you for once.",
-          unhinged: "Romanticise the madness just enough to survive it."
+          tired: [
+            "Maybe today is for staring into space and calling it reflection.",
+            "You need less guilt and more lying on the floor.",
+            "Rest dramatically. Make it seem intentional."
+          ],
+          heartbroken: [
+            "You can be sad and still look incredible. Multitasking.",
+            "Not every goodbye deserves your collapse.",
+            "Romantic suffering is fine, but please hydrate."
+          ],
+          angry: [
+            "Not everything deserves your reaction.",
+            "Silence can be a luxury item.",
+            "Some people should only get your absence."
+          ],
+          calm: [
+            "Slow down. You are not being chased. Probably.",
+            "Let the moment be enough for once.",
+            "Peace often looks like saying no and going home."
+          ],
+          unhinged: [
+            "Romanticise everything, even your poor judgment.",
+            "Be mysterious. It hides a lot.",
+            "You are one velvet blazer away from becoming folklore."
+          ]
         }
       },
       {
         name: "Jungkook",
         image: "images/jk.jpg",
         quotes: {
-          tired: "You’ve done enough for today. The empire can collapse quietly without you for one evening.",
-          heartbroken: "Feel it fully, then keep going. You are not done yet.",
-          angry: "Hit the gym, scream into a pillow, do not text that person.",
-          calm: "Balance is hot. Inner peace is hotter.",
-          unhinged: "Channel the chaos into confidence. Terrify people politely."
+          tired: [
+            "You have done enough today, even if enough was just surviving meetings.",
+            "The empire can function without you for one evening.",
+            "Being alive all day is already a shift."
+          ],
+          heartbroken: [
+            "Feel it fully. Then keep moving.",
+            "You are not ruined. Just temporarily dramatic.",
+            "Some endings hurt because they mattered. That is all."
+          ],
+          angry: [
+            "Gym. Music. Silence. In that order.",
+            "Do not text that person. Respect yourself at least a little.",
+            "Anger needs an outlet, not a group chat."
+          ],
+          calm: [
+            "Balance looks good on you.",
+            "Inner peace is hot, actually.",
+            "You do not always need more. Sometimes you need less noise."
+          ],
+          unhinged: [
+            "Be scary, but politely.",
+            "Confidence and menace are cousins.",
+            "Channel the chaos into something with a great soundtrack."
+          ]
         }
       }
     ];
 
-    // Songs by mood
-    // Put these files in your /audio folder
-    // If you use different file names, just change them here
+    // ===== SONGS =====
+    // These file names must match the files in your /audio folder exactly.
     const songsByMood = {
       tired: [
         { title: "Spring Day", file: "audio/spring-day.mp3" },
@@ -352,92 +519,125 @@
     let currentMember = null;
     let currentSong = null;
 
-    const moodButtonsEl = document.getElementById("moodButtons");
+    const moodGrid = document.getElementById("moodGrid");
     const resultArea = document.getElementById("resultArea");
-    const audioPlayer = document.getElementById("audioPlayer");
+    const mainAudio = document.getElementById("mainAudio");
 
-    function randomItem(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
+    function randomItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function getMoodLabel(moodId) {
+      const mood = moods.find(item => item.id === moodId);
+      return mood ? mood.label : moodId;
     }
 
     function renderMoodButtons() {
-      moodButtonsEl.innerHTML = "";
+      moodGrid.innerHTML = "";
 
       moods.forEach(mood => {
-        const btn = document.createElement("button");
-        btn.className = "mood-btn";
-        btn.textContent = mood.label;
-        btn.dataset.mood = mood.id;
+        const button = document.createElement("button");
+        button.className = "mood-btn";
+        button.textContent = mood.label;
+        button.dataset.mood = mood.id;
 
-        btn.addEventListener("click", () => {
+        button.addEventListener("click", () => {
           currentMood = mood.id;
-          generateResult();
-          updateActiveButton();
+          updateActiveMood();
+          generateMoodResult(true); // true = autoplay
         });
 
-        moodButtonsEl.appendChild(btn);
+        moodGrid.appendChild(button);
       });
     }
 
-    function updateActiveButton() {
+    function updateActiveMood() {
       const buttons = document.querySelectorAll(".mood-btn");
-      buttons.forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.mood === currentMood);
+      buttons.forEach(button => {
+        button.classList.toggle("active", button.dataset.mood === currentMood);
       });
     }
 
-    function generateResult() {
+    function playSong(file) {
+      mainAudio.pause();
+      mainAudio.currentTime = 0;
+      mainAudio.src = file;
+      mainAudio.load();
+
+      // Because the user clicked a button, browsers usually allow autoplay here.
+      mainAudio.play().catch(() => {
+        const status = document.getElementById("audioStatus");
+        if (status) {
+          status.textContent = "Autoplay was blocked by the browser. Click 'Play song again' below because browsers enjoy making things weird.";
+        }
+      });
+    }
+
+    function generateMoodResult(autoplay = false) {
       currentMember = randomItem(members);
       currentSong = randomItem(songsByMood[currentMood]);
-
-      const quote = currentMember.quotes[currentMood];
+      const quote = randomItem(currentMember.quotes[currentMood]);
 
       resultArea.innerHTML = `
         <div class="result">
-          <div class="image-card">
+          <div class="photo-panel">
             <img src="${currentMember.image}" alt="${currentMember.name}">
           </div>
 
-          <div class="info-card">
-            <span class="tag">Mood detected: ${getMoodLabel(currentMood)}</span>
+          <div class="info-panel">
+            <div class="pill">Mood detected: ${getMoodLabel(currentMood)}</div>
             <h2 class="member-name">${currentMember.name}</h2>
             <p class="quote">“${quote}”</p>
 
             <div class="song-box">
-              <div class="song-label">Today’s BTS prescription</div>
-              <div class="song-name">${currentSong.title}</div>
-              <audio controls>
+              <div class="label">Current emotional support song</div>
+              <div class="song-title">${currentSong.title}</div>
+              <audio controls autoplay>
                 <source src="${currentSong.file}" type="audio/mpeg">
                 Your browser does not support audio.
               </audio>
             </div>
 
-            <div class="actions">
-              <button class="secondary-btn" id="anotherBtn">Give me another member</button>
-              <button class="secondary-btn alt" id="playBtn">Play song up top</button>
+            <div class="status-box">
+              <div class="label">Audio status</div>
+              <div class="status-text" id="audioStatus">
+                Song should auto-play after your click, assuming your file name is correct and your browser is not feeling theatrical.
+              </div>
             </div>
 
-            <div class="small-note">
-              If the audio does not play, your file name probably doesn’t match. Because computers are needy and dramatic.
+            <div class="actions">
+              <button class="action-btn" id="anotherMemberBtn">Another member</button>
+              <button class="action-btn alt" id="playAgainBtn">Play song again</button>
+            </div>
+
+            <div class="tiny-note">
+              Required audio files:
+              spring-day.mp3, life-goes-on.mp3, the-truth-untold.mp3, blue-and-grey.mp3,
+              mic-drop.mp3, ugh.mp3, magic-shop.mp3, butterfly.mp3, dynamite.mp3, boy-with-luv.mp3
             </div>
           </div>
         </div>
       `;
 
-      document.getElementById("anotherBtn").addEventListener("click", generateResult);
-
-      document.getElementById("playBtn").addEventListener("click", () => {
-        audioPlayer.style.display = "block";
-        audioPlayer.src = currentSong.file;
-        audioPlayer.play().catch(() => {
-          alert("Could not play audio. Check your file names inside the audio folder.");
-        });
+      document.getElementById("anotherMemberBtn").addEventListener("click", () => {
+        generateMoodResult(true);
       });
-    }
 
-    function getMoodLabel(id) {
-      const found = moods.find(m => m.id === id);
-      return found ? found.label : id;
+      document.getElementById("playAgainBtn").addEventListener("click", () => {
+        const embeddedAudio = resultArea.querySelector("audio");
+        if (embeddedAudio) {
+          embeddedAudio.play().catch(() => {});
+        }
+        playSong(currentSong.file);
+        const status = document.getElementById("audioStatus");
+        if (status) {
+          status.textContent = "Trying again. Because apparently one emotional support soundtrack was not enough.";
+        }
+      });
+
+      if (autoplay) {
+        playSong(currentSong.file);
+      }
     }
 
     renderMoodButtons();
