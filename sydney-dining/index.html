@@ -229,6 +229,13 @@
       color: #554941;
     }
 
+    .review-disclosure {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #78695f;
+      line-height: 1.4;
+    }
+
     .try-box {
       background: #edf8ef;
       border-left: 4px solid #77c58a;
@@ -327,24 +334,6 @@
   </div>
 
   <script>
-    const cuisineSuggestions = {
-      italian: ["carbonara", "cacio e pepe", "margherita pizza", "tiramisu"],
-      japanese: ["ramen", "sashimi", "karaage", "matcha dessert"],
-      korean: ["Korean fried chicken", "bibimbap", "tteokbokki", "bulgogi"],
-      thai: ["pad thai", "massaman curry", "satay skewers", "mango sticky rice"],
-      chinese: ["dumplings", "Peking duck", "fried rice", "xiao long bao"],
-      vietnamese: ["pho", "banh mi", "bun cha", "iced coffee"],
-      indian: ["butter chicken", "biryani", "naan", "samosa"],
-      filipino: ["sisig", "lechon kawali", "halo-halo", "adobo"],
-      mexican: ["tacos", "birria", "nachos", "churros"],
-      greek: ["souvlaki", "lamb gyro", "spanakopita", "baklava"],
-      burger: ["classic cheeseburger", "loaded fries", "fried chicken burger", "milkshake"],
-      pizza: ["pepperoni pizza", "margherita", "garlic bread", "burrata pizza"],
-      cafe: ["eggs benedict", "ricotta hotcakes", "corn fritters", "good coffee"],
-      seafood: ["grilled fish", "oysters", "prawn pasta", "calamari"],
-      dessert: ["gelato", "cheesecake", "waffles", "brownie"]
-    };
-
     const locationInput = document.getElementById("locationInput");
     const cuisineSelect = document.getElementById("cuisineSelect");
     const searchBtn = document.getElementById("searchBtn");
@@ -352,6 +341,18 @@
     const resultsEl = document.getElementById("results");
 
     let placesLibraryLoaded = false;
+
+    const genericDishWords = [
+      "ramen", "sushi", "dumpling", "dumplings", "xiao long bao", "fried rice",
+      "peking duck", "duck", "pho", "banh mi", "biryani", "butter chicken",
+      "naan", "samosa", "bibimbap", "bulgogi", "kimchi", "tteokbokki",
+      "fried chicken", "pad thai", "massaman curry", "green curry", "satay",
+      "laksa", "pizza", "pasta", "carbonara", "risotto", "gnocchi",
+      "burger", "cheeseburger", "fries", "nachos", "tacos", "burrito",
+      "gelato", "cheesecake", "tiramisu", "waffle", "pancakes", "hotcakes",
+      "croissant", "coffee", "brunch", "oysters", "calamari", "prawn pasta",
+      "steak", "schnitzel", "bao", "yakitori", "karaage", "sashimi"
+    ];
 
     function setStatus(message) {
       statusEl.textContent = message;
@@ -371,29 +372,37 @@
         .replaceAll("'", "&#039;");
     }
 
-    function getCuisineSuggestion(cuisine) {
-      if (!cuisine || cuisine === "any") {
-        return "Try the house special, something fried, or whatever looks expensive enough to feel like self-care.";
+    function moneyToText(money) {
+      if (!money) return "";
+      if (typeof money.toString === "function") {
+        return money.toString();
       }
 
-      const items = cuisineSuggestions[cuisine];
-      if (!items) {
-        return "Try whatever looks suspiciously popular and slightly out of budget.";
-      }
+      const currency = money.currencyCode || "$";
+      const units = Number(money.units || 0);
+      const nanos = Number(money.nanos || 0);
+      const amount = units + (nanos / 1000000000);
 
-      return items.join(", ");
+      return `${currency}${Math.round(amount)}`;
     }
 
-    function formatPriceLevel(priceLevel) {
-      const map = {
-        PRICE_LEVEL_FREE: "Free. Which feels suspicious.",
-        PRICE_LEVEL_INEXPENSIVE: "$ · Around $10–25 pp",
-        PRICE_LEVEL_MODERATE: "$$ · Around $25–50 pp",
-        PRICE_LEVEL_EXPENSIVE: "$$$ · Around $50–100 pp",
-        PRICE_LEVEL_VERY_EXPENSIVE: "$$$$ · $100+ pp"
-      };
+    function formatPriceRange(priceRange) {
+      if (!priceRange) {
+        return "Price not listed. Financial mystery.";
+      }
 
-      return map[priceLevel] || "Price not listed. A leap of faith.";
+      const startText = moneyToText(priceRange.startPrice);
+      const endText = moneyToText(priceRange.endPrice);
+
+      if (startText && endText) {
+        return `${startText}–${endText} per person`;
+      }
+
+      if (startText) {
+        return `${startText}+ per person`;
+      }
+
+      return "Price not listed. Financial mystery.";
     }
 
     function getPlacePhotoUrl(place) {
@@ -402,11 +411,147 @@
       }
 
       try {
-        return place.photos[0].getURI({ maxWidth: 800, maxHeight: 500 });
+        return place.photos[0].getURI({ maxWidth: 900, maxHeight: 550 });
       } catch (error) {
         console.warn("Photo URL failed:", error);
         return "";
       }
+    }
+
+    function getReviewSummaryText(place) {
+      const summary = place.reviewSummary;
+      if (!summary) return "";
+
+      if (typeof summary.text === "string" && summary.text.trim()) {
+        return summary.text.trim();
+      }
+
+      if (typeof summary.overview === "string" && summary.overview.trim()) {
+        return summary.overview.trim();
+      }
+
+      if (summary.description && typeof summary.description.text === "string" && summary.description.text.trim()) {
+        return summary.description.text.trim();
+      }
+
+      return "";
+    }
+
+    function getReviewDisclosureText(place) {
+      const summary = place.reviewSummary;
+      if (!summary) return "";
+
+      if (typeof summary.disclosureText === "string" && summary.disclosureText.trim()) {
+        return summary.disclosureText.trim();
+      }
+
+      return "";
+    }
+
+    function extractReviewText(review) {
+      if (!review) return "";
+
+      if (typeof review.text === "string") {
+        return review.text;
+      }
+
+      if (review.text && typeof review.text.text === "string") {
+        return review.text.text;
+      }
+
+      if (typeof review.originalText === "string") {
+        return review.originalText;
+      }
+
+      if (review.originalText && typeof review.originalText.text === "string") {
+        return review.originalText.text;
+      }
+
+      return "";
+    }
+
+    function getCuisineDishMap(cuisine) {
+      const cuisineMap = {
+        italian: ["carbonara", "cacio e pepe", "margherita", "pizza", "pasta", "risotto", "gnocchi", "tiramisu"],
+        japanese: ["ramen", "sushi", "sashimi", "karaage", "yakitori", "bao", "udon", "donburi"],
+        korean: ["korean fried chicken", "fried chicken", "bibimbap", "bulgogi", "kimchi", "tteokbokki"],
+        thai: ["pad thai", "massaman curry", "green curry", "satay", "tom yum", "mango sticky rice"],
+        chinese: ["dumplings", "dumpling", "xiao long bao", "fried rice", "peking duck", "duck", "bao"],
+        vietnamese: ["pho", "banh mi", "bun cha", "spring rolls", "vermicelli"],
+        indian: ["butter chicken", "biryani", "naan", "samosa", "tikka", "curry"],
+        filipino: ["sisig", "adobo", "halo-halo", "lechon", "kare-kare"],
+        mexican: ["tacos", "birria", "nachos", "burrito", "quesadilla", "churros"],
+        greek: ["souvlaki", "gyro", "spanakopita", "baklava", "lamb"],
+        burger: ["burger", "cheeseburger", "fries", "fried chicken burger", "milkshake"],
+        pizza: ["pizza", "margherita", "pepperoni", "garlic bread", "burrata"],
+        cafe: ["eggs benedict", "hotcakes", "pancakes", "corn fritters", "croissant", "coffee"],
+        seafood: ["oysters", "calamari", "fish", "prawn pasta", "lobster", "scallops"],
+        dessert: ["gelato", "cheesecake", "waffles", "brownie", "tiramisu", "ice cream"]
+      };
+
+      return cuisineMap[cuisine] || genericDishWords;
+    }
+
+    function normaliseDishLabel(label) {
+      const map = {
+        dumpling: "dumplings",
+        bao: "bao",
+        duck: "peking duck",
+        pizza: "pizza",
+        burger: "burger",
+        tacos: "tacos",
+        hotcakes: "hotcakes",
+        pancakes: "pancakes",
+        fish: "fish",
+        curry: "curry"
+      };
+
+      return map[label] || label;
+    }
+
+    function pickWhatToTryFromReviews(place, cuisine) {
+      const reviews = Array.isArray(place.reviews) ? place.reviews : [];
+      if (!reviews.length) {
+        return "No review-based dish gossip yet. Open Google Maps and let strangers guide your appetite.";
+      }
+
+      const candidateDishes = getCuisineDishMap(cuisine);
+      const counts = {};
+
+      for (const rawDish of candidateDishes) {
+        counts[rawDish] = 0;
+      }
+
+      for (const review of reviews) {
+        const text = extractReviewText(review).toLowerCase();
+        if (!text) continue;
+
+        for (const rawDish of candidateDishes) {
+          const pattern = new RegExp(`\\b${rawDish.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi");
+          const matches = text.match(pattern);
+          if (matches) {
+            counts[rawDish] += matches.length;
+          }
+        }
+      }
+
+      const winners = Object.entries(counts)
+        .filter(([, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([dish]) => normaliseDishLabel(dish));
+
+      const uniqueWinners = [...new Set(winners)];
+
+      if (!uniqueWinners.length) {
+        return "Reviews are full of feelings, not menu specifics. Try the house special and trust the chaos.";
+      }
+
+      if (uniqueWinners.length === 1) {
+        return `${uniqueWinners[0]} keeps coming up in reviews. The people have spoken.`;
+      }
+
+      return `${uniqueWinners.join(", ")} keep getting mentioned in reviews. Frankly, that is enough peer pressure.`;
     }
 
     async function initApp() {
@@ -461,11 +606,14 @@
             "userRatingCount",
             "websiteURI",
             "googleMapsURI",
+            "googleMapsLinks",
             "nationalPhoneNumber",
             "regularOpeningHours",
             "primaryTypeDisplayName",
             "photos",
-            "priceLevel"
+            "priceRange",
+            "reviewSummary",
+            "reviews"
           ],
           maxResultCount: 6,
           language: "en-AU",
@@ -503,10 +651,13 @@
 
       const address = place.formattedAddress || "No address listed";
       const phone = place.nationalPhoneNumber || "Phone not listed";
-      const mapsLink = place.googleMapsURI || "#";
+      const mapsLink = place.googleMapsLinks?.placeURI || place.googleMapsURI || "#";
       const websiteLink = place.websiteURI || "";
-      const suggestion = getCuisineSuggestion(cuisine);
-      const priceText = formatPriceLevel(place.priceLevel);
+      const reviewsLink = place.googleMapsLinks?.reviewsURI || place.googleMapsURI || "#";
+      const priceText = formatPriceRange(place.priceRange);
+      const reviewSummaryText = getReviewSummaryText(place);
+      const reviewDisclosureText = getReviewDisclosureText(place);
+      const whatToTryText = pickWhatToTryFromReviews(place, cuisine);
 
       const typeTag =
         place.primaryTypeDisplayName ||
@@ -522,6 +673,25 @@
       ) {
         hoursText = "See Google Maps for opening hours";
       }
+
+      const reviewBoxHtml = reviewSummaryText
+        ? `
+          <div class="review-box">
+            <strong>Google review vibe:</strong><br>
+            ${escapeHtml(reviewSummaryText)}
+            ${
+              reviewDisclosureText
+                ? `<div class="review-disclosure">${escapeHtml(reviewDisclosureText)}</div>`
+                : ""
+            }
+          </div>
+        `
+        : `
+          <div class="review-box">
+            <strong>Google review vibe:</strong><br>
+            No summary yet. The people have spoken, but apparently not in one tidy paragraph.
+          </div>
+        `;
 
       card.innerHTML = `
         <div class="photo-wrap">
@@ -551,18 +721,16 @@
             <span class="tag">Sydney</span>
           </div>
 
-          <div class="review-box">
-            <strong>Google review vibe:</strong><br>
-            Ratings are shown above. Open it in Google Maps if you want the full public-opinion spiral.
-          </div>
+          ${reviewBoxHtml}
 
           <div class="try-box">
             <strong>What to try:</strong><br>
-            ${escapeHtml(suggestion)}
+            ${escapeHtml(whatToTryText)}
           </div>
 
           <div class="actions">
             <a class="link-btn" href="${mapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+            <a class="ghost-btn" href="${reviewsLink}" target="_blank" rel="noopener noreferrer">Read Reviews</a>
             ${
               websiteLink
                 ? `<a class="ghost-btn" href="${websiteLink}" target="_blank" rel="noopener noreferrer">Website</a>`
