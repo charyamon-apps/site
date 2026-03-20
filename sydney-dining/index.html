@@ -50,7 +50,7 @@
 
     .search-box {
       display: grid;
-      grid-template-columns: 1.2fr 1fr auto;
+      grid-template-columns: 1.2fr 1fr auto auto;
       gap: 12px;
       align-items: center;
       margin-top: 14px;
@@ -86,6 +86,12 @@
       opacity: 0.96;
     }
 
+    .secondary-btn {
+      background: #efe7e0;
+      color: #2d2d2d;
+      min-width: 190px;
+    }
+
     .small-note {
       margin-top: 12px;
       font-size: 0.93rem;
@@ -107,6 +113,13 @@
       min-height: 24px;
     }
 
+    .picker-result {
+      margin-top: 10px;
+      color: #5b2d2d;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
     .results {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -120,6 +133,28 @@
       box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
       display: flex;
       flex-direction: column;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card.picked {
+      transform: scale(1.02);
+      box-shadow: 0 18px 36px rgba(255, 214, 10, 0.4);
+      outline: 4px solid rgba(255, 214, 10, 0.65);
+    }
+
+    .picked-ribbon {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 3;
+      background: rgba(255, 214, 10, 0.95);
+      color: #332600;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
     }
 
     .photo-wrap {
@@ -215,21 +250,25 @@
       color: #4f443d;
     }
 
-    .why-box {
-      background: #faf4ee;
-      border-left: 4px solid #ffb366;
-      color: #554941;
+    .pressure-box {
+      background: #fff0f3;
+      border-left: 4px solid #ff4d6d;
+      color: #5a2a2a;
       border-radius: 14px;
       padding: 12px;
       font-size: 0.94rem;
       line-height: 1.5;
+      font-weight: 500;
     }
 
-    .review-disclosure {
-      margin-top: 8px;
-      font-size: 0.78rem;
-      color: #78695f;
-      line-height: 1.4;
+    .score-box {
+      background: #eef7ff;
+      border-left: 4px solid #4d96ff;
+      color: #29435c;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 0.94rem;
+      line-height: 1.5;
     }
 
     .actions {
@@ -259,6 +298,30 @@
       color: #2d2d2d;
     }
 
+    .confetti-piece {
+      position: fixed;
+      top: -20px;
+      width: 10px;
+      height: 14px;
+      opacity: 0.95;
+      pointer-events: none;
+      z-index: 9999;
+      animation: fall 1800ms linear forwards;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0.1;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .search-box {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     @media (max-width: 760px) {
       .search-box {
         grid-template-columns: 1fr;
@@ -272,7 +335,8 @@
         height: 200px;
       }
 
-      button {
+      button,
+      .secondary-btn {
         min-width: unset;
       }
     }
@@ -309,11 +373,14 @@
         </select>
 
         <button id="searchBtn">End My Food Crisis</button>
+        <button id="pickBtn" class="secondary-btn">Just Pick One For Me</button>
       </div>
 
       <div class="small-note">
         Budget: unclear. Appetite: aggressive. Decision-making skills: absent.
       </div>
+
+      <div id="pickerResult" class="picker-result"></div>
     </div>
 
     <div class="status-wrap">
@@ -327,10 +394,14 @@
     const locationInput = document.getElementById("locationInput");
     const cuisineSelect = document.getElementById("cuisineSelect");
     const searchBtn = document.getElementById("searchBtn");
+    const pickBtn = document.getElementById("pickBtn");
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
+    const pickerResultEl = document.getElementById("pickerResult");
 
     let placesLibraryLoaded = false;
+    let latestPlaces = [];
+    let currentPickedPlaceId = "";
 
     function setStatus(message) {
       statusEl.textContent = message;
@@ -338,6 +409,11 @@
 
     function clearResults() {
       resultsEl.innerHTML = "";
+    }
+
+    function clearPickedState() {
+      currentPickedPlaceId = "";
+      pickerResultEl.textContent = "";
     }
 
     function escapeHtml(text) {
@@ -396,34 +472,114 @@
       }
     }
 
-    function getReviewSummaryText(place) {
-      const summary = place.reviewSummary;
-      if (!summary) return "";
+    function getDecisionPressure(place) {
+      const rating = place.rating || 0;
+      const reviews = place.userRatingCount || 0;
 
-      if (typeof summary.text === "string" && summary.text.trim()) {
-        return summary.text.trim();
+      const savage = [
+        "You’ve looked at enough places. Pick this one and move on.",
+        "This is the one. Stop scrolling like you have infinite time.",
+        "You are not getting less hungry by delaying this decision.",
+        "Pick this or go home and eat instant noodles.",
+        "Your hunger is now a personality. Fix it here.",
+        "This is above your usual standards. Don’t overthink it.",
+        "You will regret not eating here. Deeply and theatrically.",
+        "People queued for this. You won’t even click?",
+        "You opened this app for a reason. This is the reason.",
+        "Decision fatigue ends here. Congratulations."
+      ];
+
+      const hype = [
+        "High rating. Statistically, this will not embarrass you.",
+        "This many people liked it. You are not special. Follow them.",
+        "Safe choice energy. Boring? Maybe. Reliable? Yes.",
+        "Crowd favourite behaviour. Trust the masses for once.",
+        "This is data-backed dining, which is as romantic as you get."
+      ];
+
+      if (rating >= 4.5 && reviews > 200) {
+        return hype[Math.floor(Math.random() * hype.length)];
       }
 
-      if (typeof summary.overview === "string" && summary.overview.trim()) {
-        return summary.overview.trim();
-      }
-
-      if (summary.description && typeof summary.description.text === "string" && summary.description.text.trim()) {
-        return summary.description.text.trim();
-      }
-
-      return "";
+      return savage[Math.floor(Math.random() * savage.length)];
     }
 
-    function getReviewDisclosureText(place) {
-      const summary = place.reviewSummary;
-      if (!summary) return "";
+    function getRegretScore(place) {
+      const rating = Number(place.rating || 0);
+      const reviews = Number(place.userRatingCount || 0);
+      const maxReviewBoost = Math.min(reviews, 500) / 500;
+      const score = Math.round((rating / 5) * 70 + maxReviewBoost * 30);
 
-      if (typeof summary.disclosureText === "string" && summary.disclosureText.trim()) {
-        return summary.disclosureText.trim();
+      if (score >= 90) {
+        return `${score}% regret if you ignore this and end up eating something sad later.`;
       }
 
-      return "";
+      if (score >= 75) {
+        return `${score}% regret potential. Strong chance you’ll compare everything else to this.`;
+      }
+
+      if (score >= 60) {
+        return `${score}% regret potential. Respectable, edible, probably worth your time.`;
+      }
+
+      return `${score}% regret potential. Not terrible. Just not life-changing either.`;
+    }
+
+    function getStablePlaceId(place) {
+      return place.id || place.googleMapsURI || place.displayName || Math.random().toString();
+    }
+
+    function markPickedCard() {
+      const allCards = document.querySelectorAll(".card");
+      allCards.forEach((card) => {
+        if (card.dataset.placeId === currentPickedPlaceId) {
+          card.classList.add("picked");
+        } else {
+          card.classList.remove("picked");
+        }
+      });
+    }
+
+    function burstConfetti() {
+      const colors = ["#ff4d6d", "#ffd60a", "#4d96ff", "#77c58a", "#ff9f1c", "#9b5de5"];
+      const pieces = 28;
+
+      for (let i = 0; i < pieces; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.transform = `translateY(0) rotate(${Math.random() * 360}deg)`;
+        piece.style.animationDuration = `${1400 + Math.random() * 1200}ms`;
+        document.body.appendChild(piece);
+
+        setTimeout(() => {
+          piece.remove();
+        }, 2600);
+      }
+    }
+
+    function pickOneForMe() {
+      if (!latestPlaces.length) {
+        pickerResultEl.textContent = "You need actual restaurant results first. I can’t randomly choose from your imagination.";
+        return;
+      }
+
+      const chosen = latestPlaces[Math.floor(Math.random() * latestPlaces.length)];
+      currentPickedPlaceId = getStablePlaceId(chosen);
+      markPickedCard();
+      burstConfetti();
+
+      const placeName = chosen.displayName || "This place";
+      const rating = chosen.rating ? `${chosen.rating} stars` : "unknown stars";
+      const price = formatPriceRange(chosen.priceRange);
+
+      pickerResultEl.textContent = `Fine. We picked ${placeName}. It has ${rating}, costs ${price}, and you are no longer allowed to pretend this is a difficult decision.`;
+
+      const chosenCard = document.querySelector(`.card[data-place-id="${CSS.escape(currentPickedPlaceId)}"]`);
+      if (chosenCard) {
+        chosenCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
 
     async function initApp() {
@@ -437,6 +593,7 @@
       }
 
       searchBtn.addEventListener("click", runSearch);
+      pickBtn.addEventListener("click", pickOneForMe);
       locationInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           runSearch();
@@ -459,6 +616,8 @@
       }
 
       clearResults();
+      clearPickedState();
+      latestPlaces = [];
       setStatus("Consulting Google because apparently you cannot choose your own dinner...");
 
       try {
@@ -472,6 +631,7 @@
         const request = {
           textQuery,
           fields: [
+            "id",
             "displayName",
             "formattedAddress",
             "rating",
@@ -483,8 +643,7 @@
             "regularOpeningHours",
             "primaryTypeDisplayName",
             "photos",
-            "priceRange",
-            "reviewSummary"
+            "priceRange"
           ],
           maxResultCount: 6,
           language: "en-AU",
@@ -500,6 +659,7 @@
           return;
         }
 
+        latestPlaces = places;
         setStatus(`Found ${places.length} options. You will still overthink every single one.`);
 
         places.forEach((place) => {
@@ -513,7 +673,13 @@
 
     function renderCard(place, cuisine) {
       const card = document.createElement("div");
+      const stableId = getStablePlaceId(place);
       card.className = "card";
+      card.dataset.placeId = stableId;
+
+      if (stableId === currentPickedPlaceId) {
+        card.classList.add("picked");
+      }
 
       const photoUrl = getPlacePhotoUrl(place);
       const name = place.displayName || "Unnamed place";
@@ -528,8 +694,8 @@
       const photosLink = place.googleMapsLinks?.photosURI || place.googleMapsURI || "#";
       const websiteLink = place.websiteURI || "";
       const priceText = formatPriceRange(place.priceRange);
-      const reviewSummaryText = getReviewSummaryText(place);
-      const reviewDisclosureText = getReviewDisclosureText(place);
+      const pressureText = getDecisionPressure(place);
+      const regretScoreText = getRegretScore(place);
 
       const typeTag =
         place.primaryTypeDisplayName ||
@@ -546,26 +712,9 @@
         hoursText = "See Google Maps for opening hours";
       }
 
-      const whyPeopleGoHtml = reviewSummaryText
-        ? `
-          <div class="why-box">
-            <strong>Why people go:</strong><br>
-            ${escapeHtml(reviewSummaryText)}
-            ${
-              reviewDisclosureText
-                ? `<div class="review-disclosure">${escapeHtml(reviewDisclosureText)}</div>`
-                : ""
-            }
-          </div>
-        `
-        : `
-          <div class="why-box">
-            <strong>Why people go:</strong><br>
-            No tidy summary yet. This restaurant remains wrapped in mystery, carbs, and online opinion.
-          </div>
-        `;
-
       card.innerHTML = `
+        ${stableId === currentPickedPlaceId ? `<div class="picked-ribbon">Chosen for you</div>` : ""}
+
         <div class="photo-wrap">
           ${
             photoUrl
@@ -593,7 +742,15 @@
             <span class="tag">Sydney</span>
           </div>
 
-          ${whyPeopleGoHtml}
+          <div class="pressure-box">
+            <strong>Decision pressure:</strong><br>
+            ${escapeHtml(pressureText)}
+          </div>
+
+          <div class="score-box">
+            <strong>Regret score:</strong><br>
+            ${escapeHtml(regretScoreText)}
+          </div>
 
           <div class="actions">
             <a class="link-btn" href="${mapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
