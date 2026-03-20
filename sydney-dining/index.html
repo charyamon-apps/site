@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Should We Dine in Sydney?</title>
+  <title>What Are We Eating or Are We Starving Again?</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,61 +12,73 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, #fff8f0, #ffe9d6, #fff3ea);
       color: #2d2d2d;
       min-height: 100vh;
+      background:
+        linear-gradient(rgba(20, 14, 8, 0.55), rgba(20, 14, 8, 0.55)),
+        url("food.jpg") center center / cover no-repeat fixed;
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 28px 20px 40px;
     }
 
     .hero {
-      background: rgba(255, 255, 255, 0.88);
-      border-radius: 24px;
+      background: rgba(255, 248, 241, 0.93);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
       margin-bottom: 20px;
     }
 
     h1 {
-      margin-top: 0;
-      font-size: 2rem;
-      margin-bottom: 10px;
+      margin: 0 0 10px;
+      font-size: 2.2rem;
+      color: #241d18;
+      line-height: 1.2;
     }
 
     .subtext {
-      margin-top: 8px;
-      color: #555;
+      margin: 0 0 16px;
+      color: #5b4e45;
       line-height: 1.5;
+      font-size: 1.04rem;
     }
 
     .search-box {
       display: grid;
       grid-template-columns: 1.2fr 1fr auto;
       gap: 12px;
-      margin-top: 20px;
       align-items: center;
+      margin-top: 14px;
     }
 
-    input, select, button {
+    input,
+    select,
+    button {
       width: 100%;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #ddd;
+      padding: 15px 16px;
+      border-radius: 16px;
+      border: 1px solid #d7c8bc;
       font-size: 1rem;
     }
 
+    input,
+    select {
+      background: rgba(255, 255, 255, 0.92);
+    }
+
     button {
-      background: #222;
+      background: #1f1f1f;
       color: white;
       border: none;
       cursor: pointer;
       font-weight: bold;
+      min-width: 170px;
       transition: transform 0.15s ease, opacity 0.15s ease;
-      min-width: 140px;
     }
 
     button:hover {
@@ -76,32 +88,86 @@
 
     .small-note {
       margin-top: 12px;
-      font-size: 0.92rem;
-      color: #666;
+      font-size: 0.93rem;
+      color: #6a5b50;
+      line-height: 1.45;
+    }
+
+    .status-wrap {
+      background: rgba(255, 248, 241, 0.9);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      margin-bottom: 18px;
     }
 
     .status {
-      margin: 18px 0;
       font-weight: bold;
-      color: #444;
+      color: #3f3229;
       min-height: 24px;
     }
 
     .results {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
     }
 
     .card {
-      background: white;
-      border-radius: 20px;
+      background: rgba(255, 251, 247, 0.97);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .photo-wrap {
+      position: relative;
+      height: 220px;
+      background: #eadfd7;
+      overflow: hidden;
+    }
+
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+      color: #6f6258;
+      background: linear-gradient(135deg, rgba(255, 220, 180, 0.8), rgba(255, 245, 230, 0.95));
+      font-weight: bold;
+      line-height: 1.4;
+    }
+
+    .photo-badge {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      background: rgba(31, 31, 31, 0.82);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      backdrop-filter: blur(3px);
+    }
+
+    .card-body {
       padding: 18px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
       display: flex;
       flex-direction: column;
       gap: 10px;
-      min-height: 280px;
+      flex: 1;
     }
 
     .title-row {
@@ -112,52 +178,61 @@
     }
 
     .place-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      line-height: 1.3;
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #241d18;
     }
 
     .rating {
-      background: #fff5cc;
+      background: #fff1bf;
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 0.9rem;
       white-space: nowrap;
+      color: #594400;
+      font-weight: 600;
     }
 
     .meta {
-      color: #666;
+      color: #5a4d43;
       font-size: 0.95rem;
-      line-height: 1.5;
+      line-height: 1.55;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .tag {
       display: inline-block;
-      background: #f4f4f4;
+      background: #f3ece7;
       border-radius: 999px;
-      padding: 6px 10px;
-      margin-right: 6px;
-      margin-top: 4px;
-      font-size: 0.85rem;
+      padding: 7px 11px;
+      font-size: 0.84rem;
+      color: #4f443d;
+    }
+
+    .review-box,
+    .try-box {
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 0.94rem;
+      line-height: 1.5;
     }
 
     .review-box {
-      background: #faf7f3;
+      background: #faf4ee;
       border-left: 4px solid #ffb366;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: #444;
+      color: #554941;
     }
 
     .try-box {
-      background: #eef8f0;
+      background: #edf8ef;
       border-left: 4px solid #77c58a;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      color: #3f4b42;
     }
 
     .actions {
@@ -165,6 +240,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      padding-top: 2px;
     }
 
     .link-btn,
@@ -177,20 +253,13 @@
     }
 
     .link-btn {
-      background: #222;
+      background: #1f1f1f;
       color: white;
     }
 
     .ghost-btn {
-      background: #f1f1f1;
-      color: #222;
-    }
-
-    .footer-note {
-      margin-top: 24px;
-      color: #666;
-      font-size: 0.92rem;
-      line-height: 1.5;
+      background: #efe7e0;
+      color: #2d2d2d;
     }
 
     @media (max-width: 760px) {
@@ -199,7 +268,11 @@
       }
 
       h1 {
-        font-size: 1.7rem;
+        font-size: 1.8rem;
+      }
+
+      .photo-wrap {
+        height: 200px;
       }
 
       button {
@@ -211,9 +284,9 @@
 <body>
   <div class="container">
     <div class="hero">
-      <h1>Should We Dine in Sydney?</h1>
+      <h1>What Are We Eating or Are We Starving Again?</h1>
       <p class="subtext">
-        Type a Sydney location, pick a cuisine, and let the internet pretend to be decisive for once.
+        You live in Sydney. There are far too many restaurants. And yet here we are — hungry, dramatic, and somehow unable to choose.
       </p>
 
       <div class="search-box">
@@ -238,22 +311,22 @@
           <option value="dessert">Dessert</option>
         </select>
 
-        <button id="searchBtn">Find Food</button>
+        <button id="searchBtn">End My Food Crisis</button>
       </div>
 
       <div class="small-note">
-        This app searches for restaurants in Sydney and shows Google ratings, address, phone number,
-        and a suggested thing to eat based on the cuisine. Because making lunch decisions manually is apparently beneath us now.
+        Budget: unclear. Appetite: aggressive. Decision-making skills: absent.
       </div>
     </div>
 
-    <div id="status" class="status">Loading Google Maps magic...</div>
+    <div class="status-wrap">
+      <div id="status" class="status">Loading Google Maps magic...</div>
+    </div>
+
     <div id="results" class="results"></div>
   </div>
 
   <script>
-    // Suggested dishes by cuisine.
-    // Not deeply scientific. Just useful enough to feel clever.
     const cuisineSuggestions = {
       italian: ["carbonara", "cacio e pepe", "margherita pizza", "tiramisu"],
       japanese: ["ramen", "sashimi", "karaage", "matcha dessert"],
@@ -300,25 +373,50 @@
 
     function getCuisineSuggestion(cuisine) {
       if (!cuisine || cuisine === "any") {
-        return "Try the house special, something fried, or the dessert menu. Life is short and menus are long.";
+        return "Try the house special, something fried, or whatever looks expensive enough to feel like self-care.";
       }
 
       const items = cuisineSuggestions[cuisine];
       if (!items) {
-        return "Try whatever looks suspiciously popular and slightly expensive.";
+        return "Try whatever looks suspiciously popular and slightly out of budget.";
       }
 
       return items.join(", ");
+    }
+
+    function formatPriceLevel(priceLevel) {
+      const map = {
+        PRICE_LEVEL_FREE: "Free. Which feels suspicious.",
+        PRICE_LEVEL_INEXPENSIVE: "$ · Around $10–25 pp",
+        PRICE_LEVEL_MODERATE: "$$ · Around $25–50 pp",
+        PRICE_LEVEL_EXPENSIVE: "$$$ · Around $50–100 pp",
+        PRICE_LEVEL_VERY_EXPENSIVE: "$$$$ · $100+ pp"
+      };
+
+      return map[priceLevel] || "Price not listed. A leap of faith.";
+    }
+
+    function getPlacePhotoUrl(place) {
+      if (!place.photos || !place.photos.length) {
+        return "";
+      }
+
+      try {
+        return place.photos[0].getURI({ maxWidth: 800, maxHeight: 500 });
+      } catch (error) {
+        console.warn("Photo URL failed:", error);
+        return "";
+      }
     }
 
     async function initApp() {
       try {
         await google.maps.importLibrary("places");
         placesLibraryLoaded = true;
-        setStatus("Ready when your hunger and indecision are.");
+        setStatus("System ready. Emotional readiness still pending.");
       } catch (error) {
         console.error("Google Maps library failed to load:", error);
-        setStatus("Google Maps failed to load. Check your API key and restrictions.");
+        setStatus("Google Maps failed to load. Incredible. Love that for us.");
       }
 
       searchBtn.addEventListener("click", runSearch);
@@ -334,20 +432,20 @@
       const cuisine = cuisineSelect.value;
 
       if (!placesLibraryLoaded) {
-        setStatus("Google Maps is not ready yet. Very on-brand for the internet.");
+        setStatus("Google Maps is not ready yet. Much like you before coffee.");
         return;
       }
 
       if (!location) {
-        setStatus("Please enter a Sydney location first. The app is hungry, not psychic.");
+        setStatus("Please enter a location first. The app is helpful, not psychic.");
         return;
       }
 
       clearResults();
-      setStatus("Searching for places worth leaving the house for...");
+      setStatus("Consulting Google because apparently you cannot choose your own dinner...");
 
       try {
-        const { Place } = await google.maps.importLibrary("places");
+        const { Place, SearchByTextRankPreference } = await google.maps.importLibrary("places");
 
         const textQuery =
           cuisine === "any"
@@ -365,29 +463,31 @@
             "googleMapsURI",
             "nationalPhoneNumber",
             "regularOpeningHours",
-            "primaryTypeDisplayName"
+            "primaryTypeDisplayName",
+            "photos",
+            "priceLevel"
           ],
           maxResultCount: 6,
           language: "en-AU",
-          region: "au"
+          region: "au",
+          rankPreference: SearchByTextRankPreference.RELEVANCE
         };
 
         const response = await Place.searchByText(request);
         const places = response.places || [];
 
         if (!places.length) {
-          setStatus("No results found. Either the suburb is quiet or the universe wants you to cook.");
+          setStatus("No results. This is either a sign to cook or to lower your standards immediately.");
           return;
         }
 
-        setStatus(`Found ${places.length} place(s). Now narrowing your chaos.`);
-
+        setStatus(`Found ${places.length} options. You will still overthink every single one.`);
         places.forEach((place) => {
           renderCard(place, cuisine);
         });
       } catch (error) {
         console.error("Search error:", error);
-        setStatus("It broke in a very Google way. Open browser console and inspect the error.");
+        setStatus("Google has failed you. Much like your ability to pick a restaurant.");
       }
     }
 
@@ -395,6 +495,7 @@
       const card = document.createElement("div");
       card.className = "card";
 
+      const photoUrl = getPlacePhotoUrl(place);
       const name = place.displayName || "Unnamed place";
       const rating = place.rating
         ? `⭐ ${place.rating} (${place.userRatingCount || 0})`
@@ -405,9 +506,13 @@
       const mapsLink = place.googleMapsURI || "#";
       const websiteLink = place.websiteURI || "";
       const suggestion = getCuisineSuggestion(cuisine);
+      const priceText = formatPriceLevel(place.priceLevel);
+
       const typeTag =
         place.primaryTypeDisplayName ||
-        (cuisine === "any" ? "Restaurant" : cuisine.charAt(0).toUpperCase() + cuisine.slice(1));
+        (cuisine === "any"
+          ? "Restaurant"
+          : cuisine.charAt(0).toUpperCase() + cuisine.slice(1));
 
       let hoursText = "Hours not available";
       if (
@@ -419,39 +524,51 @@
       }
 
       card.innerHTML = `
-        <div class="title-row">
-          <div class="place-name">${escapeHtml(name)}</div>
-          <div class="rating">${rating}</div>
-        </div>
-
-        <div class="meta">
-          <div><strong>Address:</strong> ${escapeHtml(address)}</div>
-          <div><strong>Phone:</strong> ${escapeHtml(phone)}</div>
-          <div><strong>Status:</strong> ${escapeHtml(hoursText)}</div>
-        </div>
-
-        <div>
-          <span class="tag">${escapeHtml(typeTag)}</span>
-          <span class="tag">Sydney</span>
-        </div>
-
-        <div class="review-box">
-          <strong>Google review vibe:</strong><br>
-          Ratings are shown above. Open it in Google Maps if you want the full public-opinion spiral.
-        </div>
-
-        <div class="try-box">
-          <strong>What to try:</strong><br>
-          ${escapeHtml(suggestion)}
-        </div>
-
-        <div class="actions">
-          <a class="link-btn" href="${mapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+        <div class="photo-wrap">
           ${
-            websiteLink
-              ? `<a class="ghost-btn" href="${websiteLink}" target="_blank" rel="noopener noreferrer">Website</a>`
-              : ""
+            photoUrl
+              ? `<img src="${photoUrl}" alt="${escapeHtml(name)} photo" />`
+              : `<div class="photo-fallback">No photo available.<br>Very mysterious. Very probably overpriced.</div>`
           }
+          <div class="photo-badge">${escapeHtml(priceText)}</div>
+        </div>
+
+        <div class="card-body">
+          <div class="title-row">
+            <div class="place-name">${escapeHtml(name)}</div>
+            <div class="rating">${rating}</div>
+          </div>
+
+          <div class="meta">
+            <div><strong>Address:</strong> ${escapeHtml(address)}</div>
+            <div><strong>Phone:</strong> ${escapeHtml(phone)}</div>
+            <div><strong>Status:</strong> ${escapeHtml(hoursText)}</div>
+            <div><strong>Cost per person:</strong> ${escapeHtml(priceText)}</div>
+          </div>
+
+          <div class="tag-row">
+            <span class="tag">${escapeHtml(typeTag)}</span>
+            <span class="tag">Sydney</span>
+          </div>
+
+          <div class="review-box">
+            <strong>Google review vibe:</strong><br>
+            Ratings are shown above. Open it in Google Maps if you want the full public-opinion spiral.
+          </div>
+
+          <div class="try-box">
+            <strong>What to try:</strong><br>
+            ${escapeHtml(suggestion)}
+          </div>
+
+          <div class="actions">
+            <a class="link-btn" href="${mapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+            ${
+              websiteLink
+                ? `<a class="ghost-btn" href="${websiteLink}" target="_blank" rel="noopener noreferrer">Website</a>`
+                : ""
+            }
+          </div>
         </div>
       `;
 
