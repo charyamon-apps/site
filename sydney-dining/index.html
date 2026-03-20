@@ -215,18 +215,14 @@
       color: #4f443d;
     }
 
-    .review-box,
-    .try-box {
+    .why-box {
+      background: #faf4ee;
+      border-left: 4px solid #ffb366;
+      color: #554941;
       border-radius: 14px;
       padding: 12px;
       font-size: 0.94rem;
       line-height: 1.5;
-    }
-
-    .review-box {
-      background: #faf4ee;
-      border-left: 4px solid #ffb366;
-      color: #554941;
     }
 
     .review-disclosure {
@@ -234,12 +230,6 @@
       font-size: 0.78rem;
       color: #78695f;
       line-height: 1.4;
-    }
-
-    .try-box {
-      background: #edf8ef;
-      border-left: 4px solid #77c58a;
-      color: #3f4b42;
     }
 
     .actions {
@@ -342,18 +332,6 @@
 
     let placesLibraryLoaded = false;
 
-    const genericDishWords = [
-      "ramen", "sushi", "dumpling", "dumplings", "xiao long bao", "fried rice",
-      "peking duck", "duck", "pho", "banh mi", "biryani", "butter chicken",
-      "naan", "samosa", "bibimbap", "bulgogi", "kimchi", "tteokbokki",
-      "fried chicken", "pad thai", "massaman curry", "green curry", "satay",
-      "laksa", "pizza", "pasta", "carbonara", "risotto", "gnocchi",
-      "burger", "cheeseburger", "fries", "nachos", "tacos", "burrito",
-      "gelato", "cheesecake", "tiramisu", "waffle", "pancakes", "hotcakes",
-      "croissant", "coffee", "brunch", "oysters", "calamari", "prawn pasta",
-      "steak", "schnitzel", "bao", "yakitori", "karaage", "sashimi"
-    ];
-
     function setStatus(message) {
       statusEl.textContent = message;
     }
@@ -448,112 +426,6 @@
       return "";
     }
 
-    function extractReviewText(review) {
-      if (!review) return "";
-
-      if (typeof review.text === "string") {
-        return review.text;
-      }
-
-      if (review.text && typeof review.text.text === "string") {
-        return review.text.text;
-      }
-
-      if (typeof review.originalText === "string") {
-        return review.originalText;
-      }
-
-      if (review.originalText && typeof review.originalText.text === "string") {
-        return review.originalText.text;
-      }
-
-      return "";
-    }
-
-    function getCuisineDishMap(cuisine) {
-      const cuisineMap = {
-        italian: ["carbonara", "cacio e pepe", "margherita", "pizza", "pasta", "risotto", "gnocchi", "tiramisu"],
-        japanese: ["ramen", "sushi", "sashimi", "karaage", "yakitori", "bao", "udon", "donburi"],
-        korean: ["korean fried chicken", "fried chicken", "bibimbap", "bulgogi", "kimchi", "tteokbokki"],
-        thai: ["pad thai", "massaman curry", "green curry", "satay", "tom yum", "mango sticky rice"],
-        chinese: ["dumplings", "dumpling", "xiao long bao", "fried rice", "peking duck", "duck", "bao"],
-        vietnamese: ["pho", "banh mi", "bun cha", "spring rolls", "vermicelli"],
-        indian: ["butter chicken", "biryani", "naan", "samosa", "tikka", "curry"],
-        filipino: ["sisig", "adobo", "halo-halo", "lechon", "kare-kare"],
-        mexican: ["tacos", "birria", "nachos", "burrito", "quesadilla", "churros"],
-        greek: ["souvlaki", "gyro", "spanakopita", "baklava", "lamb"],
-        burger: ["burger", "cheeseburger", "fries", "fried chicken burger", "milkshake"],
-        pizza: ["pizza", "margherita", "pepperoni", "garlic bread", "burrata"],
-        cafe: ["eggs benedict", "hotcakes", "pancakes", "corn fritters", "croissant", "coffee"],
-        seafood: ["oysters", "calamari", "fish", "prawn pasta", "lobster", "scallops"],
-        dessert: ["gelato", "cheesecake", "waffles", "brownie", "tiramisu", "ice cream"]
-      };
-
-      return cuisineMap[cuisine] || genericDishWords;
-    }
-
-    function normaliseDishLabel(label) {
-      const map = {
-        dumpling: "dumplings",
-        bao: "bao",
-        duck: "peking duck",
-        pizza: "pizza",
-        burger: "burger",
-        tacos: "tacos",
-        hotcakes: "hotcakes",
-        pancakes: "pancakes",
-        fish: "fish",
-        curry: "curry"
-      };
-
-      return map[label] || label;
-    }
-
-    function pickWhatToTryFromReviews(place, cuisine) {
-      const reviews = Array.isArray(place.reviews) ? place.reviews : [];
-      if (!reviews.length) {
-        return "No review-based dish gossip yet. Open Google Maps and let strangers guide your appetite.";
-      }
-
-      const candidateDishes = getCuisineDishMap(cuisine);
-      const counts = {};
-
-      for (const rawDish of candidateDishes) {
-        counts[rawDish] = 0;
-      }
-
-      for (const review of reviews) {
-        const text = extractReviewText(review).toLowerCase();
-        if (!text) continue;
-
-        for (const rawDish of candidateDishes) {
-          const pattern = new RegExp(`\\b${rawDish.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi");
-          const matches = text.match(pattern);
-          if (matches) {
-            counts[rawDish] += matches.length;
-          }
-        }
-      }
-
-      const winners = Object.entries(counts)
-        .filter(([, count]) => count > 0)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([dish]) => normaliseDishLabel(dish));
-
-      const uniqueWinners = [...new Set(winners)];
-
-      if (!uniqueWinners.length) {
-        return "Reviews are full of feelings, not menu specifics. Try the house special and trust the chaos.";
-      }
-
-      if (uniqueWinners.length === 1) {
-        return `${uniqueWinners[0]} keeps coming up in reviews. The people have spoken.`;
-      }
-
-      return `${uniqueWinners.join(", ")} keep getting mentioned in reviews. Frankly, that is enough peer pressure.`;
-    }
-
     async function initApp() {
       try {
         await google.maps.importLibrary("places");
@@ -612,8 +484,7 @@
             "primaryTypeDisplayName",
             "photos",
             "priceRange",
-            "reviewSummary",
-            "reviews"
+            "reviewSummary"
           ],
           maxResultCount: 6,
           language: "en-AU",
@@ -630,6 +501,7 @@
         }
 
         setStatus(`Found ${places.length} options. You will still overthink every single one.`);
+
         places.forEach((place) => {
           renderCard(place, cuisine);
         });
@@ -652,12 +524,12 @@
       const address = place.formattedAddress || "No address listed";
       const phone = place.nationalPhoneNumber || "Phone not listed";
       const mapsLink = place.googleMapsLinks?.placeURI || place.googleMapsURI || "#";
-      const websiteLink = place.websiteURI || "";
       const reviewsLink = place.googleMapsLinks?.reviewsURI || place.googleMapsURI || "#";
+      const photosLink = place.googleMapsLinks?.photosURI || place.googleMapsURI || "#";
+      const websiteLink = place.websiteURI || "";
       const priceText = formatPriceRange(place.priceRange);
       const reviewSummaryText = getReviewSummaryText(place);
       const reviewDisclosureText = getReviewDisclosureText(place);
-      const whatToTryText = pickWhatToTryFromReviews(place, cuisine);
 
       const typeTag =
         place.primaryTypeDisplayName ||
@@ -674,10 +546,10 @@
         hoursText = "See Google Maps for opening hours";
       }
 
-      const reviewBoxHtml = reviewSummaryText
+      const whyPeopleGoHtml = reviewSummaryText
         ? `
-          <div class="review-box">
-            <strong>Google review vibe:</strong><br>
+          <div class="why-box">
+            <strong>Why people go:</strong><br>
             ${escapeHtml(reviewSummaryText)}
             ${
               reviewDisclosureText
@@ -687,9 +559,9 @@
           </div>
         `
         : `
-          <div class="review-box">
-            <strong>Google review vibe:</strong><br>
-            No summary yet. The people have spoken, but apparently not in one tidy paragraph.
+          <div class="why-box">
+            <strong>Why people go:</strong><br>
+            No tidy summary yet. This restaurant remains wrapped in mystery, carbs, and online opinion.
           </div>
         `;
 
@@ -721,16 +593,12 @@
             <span class="tag">Sydney</span>
           </div>
 
-          ${reviewBoxHtml}
-
-          <div class="try-box">
-            <strong>What to try:</strong><br>
-            ${escapeHtml(whatToTryText)}
-          </div>
+          ${whyPeopleGoHtml}
 
           <div class="actions">
             <a class="link-btn" href="${mapsLink}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
             <a class="ghost-btn" href="${reviewsLink}" target="_blank" rel="noopener noreferrer">Read Reviews</a>
+            <a class="ghost-btn" href="${photosLink}" target="_blank" rel="noopener noreferrer">See Photos</a>
             ${
               websiteLink
                 ? `<a class="ghost-btn" href="${websiteLink}" target="_blank" rel="noopener noreferrer">Website</a>`
