@@ -9,16 +9,39 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg: #f6f4ef;
+      --text: #1f1f1f;
+      --muted: #5f5a52;
+      --border: #ddd6c8;
+      --panel: #ffffff;
+      --soft: #faf8f4;
+
+      --a-main: #245c73;
+      --a-soft: #eef7fb;
+      --a-border: #b9d8e6;
+      --a-pill: #d9eef7;
+
+      --b-main: #8a4f17;
+      --b-soft: #fff5ea;
+      --b-border: #efcfab;
+      --b-pill: #f7e2ca;
+
+      --summary-main: #5d4a2d;
+      --summary-soft: #fff8e8;
+      --summary-border: #ecd9a2;
+    }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f6f4ef;
-      color: #1f1f1f;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.45;
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1450px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -30,20 +53,20 @@
 
     .subtitle {
       margin: 0 0 20px;
-      color: #5f5a52;
+      color: var(--muted);
     }
 
     .top-grid {
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 390px 1fr;
       gap: 20px;
       align-items: start;
     }
 
     .card {
-      background: #fff;
-      border: 1px solid #ddd6c8;
-      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
       padding: 16px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
@@ -112,11 +135,55 @@
       margin-top: 6px;
     }
 
+    .message {
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .summary-message {
+      background: var(--summary-soft);
+      border: 1px solid var(--summary-border);
+    }
+
     .compare-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 18px;
       margin-top: 18px;
+    }
+
+    .scenario-card {
+      border-width: 2px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .scenario-a {
+      border-color: var(--a-border);
+      background: linear-gradient(to bottom, var(--a-soft) 0, var(--a-soft) 72px, #fff 72px, #fff 100%);
+    }
+
+    .scenario-b {
+      border-color: var(--b-border);
+      background: linear-gradient(to bottom, var(--b-soft) 0, var(--b-soft) 72px, #fff 72px, #fff 100%);
+    }
+
+    .scenario-top {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .scenario-a .scenario-top {
+      background: var(--a-soft);
+    }
+
+    .scenario-b .scenario-top {
+      background: var(--b-soft);
+    }
+
+    .scenario-body {
+      padding: 16px;
     }
 
     .scenario-header {
@@ -125,29 +192,39 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 8px;
+      flex-wrap: wrap;
     }
 
     .scenario-name {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: bold;
       margin: 0;
     }
 
-    .scenario-tag {
-      font-size: 0.8rem;
-      background: #f3eee3;
-      color: #655d50;
-      padding: 5px 10px;
-      border-radius: 999px;
-      white-space: nowrap;
+    .scenario-a .scenario-name {
+      color: var(--a-main);
     }
 
-    .message {
-      background: #fff8e8;
-      border: 1px solid #ecd9a2;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 18px;
+    .scenario-b .scenario-name {
+      color: var(--b-main);
+    }
+
+    .scenario-tag {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+
+    .scenario-a .scenario-tag {
+      background: var(--a-pill);
+      color: var(--a-main);
+    }
+
+    .scenario-b .scenario-tag {
+      background: var(--b-pill);
+      color: var(--b-main);
     }
 
     .results-grid {
@@ -158,11 +235,20 @@
     }
 
     .stat {
-      background: #faf8f4;
-      border: 1px solid #e4dccf;
       border-radius: 14px;
       padding: 14px;
-      min-height: 94px;
+      min-height: 96px;
+      border: 1px solid;
+    }
+
+    .scenario-a .stat {
+      background: #f9fdff;
+      border-color: var(--a-border);
+    }
+
+    .scenario-b .stat {
+      background: #fffaf5;
+      border-color: var(--b-border);
     }
 
     .stat .label {
@@ -172,22 +258,63 @@
     }
 
     .stat .value {
-      font-size: 1.14rem;
+      font-size: 1.12rem;
       font-weight: bold;
     }
 
-    .mini-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-top: 18px;
+    .scenario-a .stat .value {
+      color: var(--a-main);
+    }
+
+    .scenario-b .stat .value {
+      color: var(--b-main);
+    }
+
+    .scenario-message-a {
+      background: var(--a-soft);
+      border: 1px solid var(--a-border);
+    }
+
+    .scenario-message-b {
+      background: var(--b-soft);
+      border: 1px solid var(--b-border);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      margin: 0 6px 6px 0;
+      font-weight: bold;
+    }
+
+    .pill-a {
+      background: var(--a-pill);
+      color: var(--a-main);
+    }
+
+    .pill-b {
+      background: var(--b-pill);
+      color: var(--b-main);
     }
 
     .table-wrap {
       overflow-x: auto;
-      border: 1px solid #e3dccf;
       border-radius: 12px;
       background: #fff;
+    }
+
+    .scenario-a .table-wrap {
+      border: 1px solid var(--a-border);
+    }
+
+    .scenario-b .table-wrap {
+      border: 1px solid var(--b-border);
+    }
+
+    .summary-table-wrap {
+      border: 1px solid #e3dccf;
     }
 
     table {
@@ -204,10 +331,23 @@
     }
 
     th {
-      background: #f5f1e8;
-      color: #4b4337;
       position: sticky;
       top: 0;
+    }
+
+    .summary-table th {
+      background: #f5f1e8;
+      color: #4b4337;
+    }
+
+    .scenario-a table th {
+      background: #e8f4fa;
+      color: var(--a-main);
+    }
+
+    .scenario-b table th {
+      background: #fcebd8;
+      color: var(--b-main);
     }
 
     th:first-child, td:first-child {
@@ -223,10 +363,11 @@
     }
 
     .chart-wrap {
-      border: 1px solid #e3dccf;
       border-radius: 12px;
       background: #fff;
       padding: 10px;
+      border: 1px solid #e3dccf;
+      margin-top: 18px;
     }
 
     canvas {
@@ -241,27 +382,39 @@
       color: #666;
     }
 
-    .pill {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: #f2ede2;
-      font-size: 0.84rem;
-      margin: 0 6px 6px 0;
+    .scenario-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 0.9rem;
     }
 
-    .stronger {
-      color: #1f1f1f;
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-weight: bold;
     }
 
-    @media (max-width: 1100px) {
-      .top-grid {
-        grid-template-columns: 1fr;
-      }
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      display: inline-block;
+    }
 
+    .legend-a {
+      background: var(--a-main);
+    }
+
+    .legend-b {
+      background: var(--b-main);
+    }
+
+    @media (max-width: 1100px) {
+      .top-grid,
       .compare-grid,
-      .mini-grid,
       .results-grid {
         grid-template-columns: 1fr;
       }
@@ -270,9 +423,9 @@
 </head>
 <body>
   <div class="container">
-    <h1>Mortgage Reality Check — Compare Mode</h1>
+    <h1>Mortgage Reality Check — Clear Compare Mode</h1>
     <p class="subtitle">
-      Compare two scenarios side by side and see exactly how much faster you can stop living in a long-term relationship with interest.
+      Compare two mortgage scenarios side by side, but now in a way your eyeballs can actually tolerate.
     </p>
 
     <div class="top-grid">
@@ -282,14 +435,11 @@
         <label for="balance">Current mortgage balance</label>
         <input id="balance" type="number" value="650000" min="0" step="1000" />
 
-        <label for="currentRate">Current interest rate (% p.a.)</label>
-        <input id="currentRate" type="number" value="6.19" min="0" step="0.01" />
-
         <label for="scenarioAName">Scenario A name</label>
         <input id="scenarioAName" type="text" value="Current Setup" />
 
         <label for="scenarioBName">Scenario B name</label>
-        <input id="scenarioBName" type="text" value="Slightly Less Chaotic Plan" />
+        <input id="scenarioBName" type="text" value="More Aggressive Plan" />
 
         <div class="section-title">Scenario A</div>
 
@@ -312,7 +462,7 @@
         <label for="lumpSumA">One-off payment</label>
         <input id="lumpSumA" type="number" value="0" min="0" step="1000" />
 
-        <label for="lumpWhenYearsA">One-off payment timing (years from now)</label>
+        <label for="lumpWhenYearsA">One-off timing (years from now)</label>
         <input id="lumpWhenYearsA" type="number" value="0" min="0" step="0.1" />
 
         <div class="section-title">Scenario B</div>
@@ -336,7 +486,7 @@
         <label for="lumpSumB">One-off payment</label>
         <input id="lumpSumB" type="number" value="10000" min="0" step="1000" />
 
-        <label for="lumpWhenYearsB">One-off payment timing (years from now)</label>
+        <label for="lumpWhenYearsB">One-off timing (years from now)</label>
         <input id="lumpWhenYearsB" type="number" value="0" min="0" step="0.1" />
 
         <div class="section-title">Extra planning tool</div>
@@ -354,17 +504,17 @@
         <button id="swapBtn" class="secondary-btn">Swap A and B</button>
 
         <div class="footer-note">
-          This uses standard amortisation maths. Your bank may calculate things slightly differently because apparently a normal life was too easy.
+          Standard amortisation logic. Real bank maths may vary slightly, because apparently one layer of complexity was not enough.
         </div>
       </div>
 
       <div>
         <div class="card">
           <h2>At a glance</h2>
-          <div class="message" id="headlineMessage"></div>
+          <div class="message summary-message" id="headlineMessage"></div>
 
-          <div class="table-wrap">
-            <table class="comparison-table">
+          <div class="table-wrap summary-table-wrap">
+            <table class="comparison-table summary-table">
               <thead>
                 <tr>
                   <th>Metric</th>
@@ -376,9 +526,14 @@
               <tbody id="comparisonBody"></tbody>
             </table>
           </div>
+
+          <div class="scenario-legend">
+            <div class="legend-item"><span class="legend-swatch legend-a"></span> Scenario A</div>
+            <div class="legend-item"><span class="legend-swatch legend-b"></span> Scenario B</div>
+          </div>
         </div>
 
-        <div class="chart-wrap" style="margin-top:18px;">
+        <div class="chart-wrap">
           <h3 style="margin:4px 0 10px;">Balance over time</h3>
           <canvas id="comparisonChart" width="960" height="340"></canvas>
         </div>
@@ -386,146 +541,145 @@
     </div>
 
     <div class="compare-grid">
-      <div class="card">
-        <div class="scenario-header">
-          <h2 class="scenario-name" id="scenarioATitle">Scenario A</h2>
-          <span class="scenario-tag">Baseline / current / emotionally familiar</span>
-        </div>
-
-        <div class="message" id="messageA"></div>
-
-        <div class="results-grid">
-          <div class="stat">
-            <div class="label">Time left to pay off</div>
-            <div class="value" id="timeLeftA">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Total interest</div>
-            <div class="value" id="totalInterestA">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Interest-charged loan after offset</div>
-            <div class="value" id="effectiveLoanA">-</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">First repayment: interest</div>
-            <div class="value" id="firstInterestA">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">First repayment: principal</div>
-            <div class="value" id="firstPrincipalA">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Repayment needed if rate changes</div>
-            <div class="value" id="rateChangeRepaymentA">-</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Repayment for target balance</div>
-            <div class="value" id="targetRepaymentA">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Balance at target date</div>
-            <div class="value" id="targetBalanceResultA">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Offset interest benefit</div>
-            <div class="value" id="offsetBenefitA">-</div>
+      <div class="card scenario-card scenario-a">
+        <div class="scenario-top">
+          <div class="scenario-header">
+            <h2 class="scenario-name" id="scenarioATitle">Scenario A</h2>
+            <span class="scenario-tag">BLUE SCENARIO</span>
           </div>
         </div>
 
-        <div id="notesA"></div>
+        <div class="scenario-body">
+          <div class="message scenario-message-a" id="messageA"></div>
 
-        <div class="mini-grid">
-          <div>
-            <h3>Yearly breakdown</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Year</th>
-                    <th>Opening</th>
-                    <th>Principal</th>
-                    <th>Interest</th>
-                    <th>Closing</th>
-                  </tr>
-                </thead>
-                <tbody id="yearlyTableBodyA"></tbody>
-              </table>
+          <div class="results-grid">
+            <div class="stat">
+              <div class="label">Time left to pay off</div>
+              <div class="value" id="timeLeftA">-</div>
             </div>
+            <div class="stat">
+              <div class="label">Total interest</div>
+              <div class="value" id="totalInterestA">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Interest-charged loan after offset</div>
+              <div class="value" id="effectiveLoanA">-</div>
+            </div>
+
+            <div class="stat">
+              <div class="label">First repayment: interest</div>
+              <div class="value" id="firstInterestA">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">First repayment: principal</div>
+              <div class="value" id="firstPrincipalA">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Repayment needed if rate changes</div>
+              <div class="value" id="rateChangeRepaymentA">-</div>
+            </div>
+
+            <div class="stat">
+              <div class="label">Repayment for target balance</div>
+              <div class="value" id="targetRepaymentA">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Balance at target date</div>
+              <div class="value" id="targetBalanceResultA">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Offset interest benefit</div>
+              <div class="value" id="offsetBenefitA">-</div>
+            </div>
+          </div>
+
+          <div id="notesA"></div>
+
+          <h3>Yearly breakdown</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Opening</th>
+                  <th>Principal</th>
+                  <th>Interest</th>
+                  <th>Closing</th>
+                </tr>
+              </thead>
+              <tbody id="yearlyTableBodyA"></tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="scenario-header">
-          <h2 class="scenario-name" id="scenarioBTitle">Scenario B</h2>
-          <span class="scenario-tag">Alternative / grown-up / suspiciously responsible</span>
-        </div>
-
-        <div class="message" id="messageB"></div>
-
-        <div class="results-grid">
-          <div class="stat">
-            <div class="label">Time left to pay off</div>
-            <div class="value" id="timeLeftB">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Total interest</div>
-            <div class="value" id="totalInterestB">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Interest-charged loan after offset</div>
-            <div class="value" id="effectiveLoanB">-</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">First repayment: interest</div>
-            <div class="value" id="firstInterestB">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">First repayment: principal</div>
-            <div class="value" id="firstPrincipalB">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Repayment needed if rate changes</div>
-            <div class="value" id="rateChangeRepaymentB">-</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Repayment for target balance</div>
-            <div class="value" id="targetRepaymentB">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Balance at target date</div>
-            <div class="value" id="targetBalanceResultB">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">Offset interest benefit</div>
-            <div class="value" id="offsetBenefitB">-</div>
+      <div class="card scenario-card scenario-b">
+        <div class="scenario-top">
+          <div class="scenario-header">
+            <h2 class="scenario-name" id="scenarioBTitle">Scenario B</h2>
+            <span class="scenario-tag">ORANGE SCENARIO</span>
           </div>
         </div>
 
-        <div id="notesB"></div>
+        <div class="scenario-body">
+          <div class="message scenario-message-b" id="messageB"></div>
 
-        <div class="mini-grid">
-          <div>
-            <h3>Yearly breakdown</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Year</th>
-                    <th>Opening</th>
-                    <th>Principal</th>
-                    <th>Interest</th>
-                    <th>Closing</th>
-                  </tr>
-                </thead>
-                <tbody id="yearlyTableBodyB"></tbody>
-              </table>
+          <div class="results-grid">
+            <div class="stat">
+              <div class="label">Time left to pay off</div>
+              <div class="value" id="timeLeftB">-</div>
             </div>
+            <div class="stat">
+              <div class="label">Total interest</div>
+              <div class="value" id="totalInterestB">-</div>
+            </div>
+            <div class="label">Interest-charged loan after offset</div>
+              <div class="value" id="effectiveLoanB">-</div>
+            </div>
+
+            <div class="stat">
+              <div class="label">First repayment: interest</div>
+              <div class="value" id="firstInterestB">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">First repayment: principal</div>
+              <div class="value" id="firstPrincipalB">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Repayment needed if rate changes</div>
+              <div class="value" id="rateChangeRepaymentB">-</div>
+            </div>
+
+            <div class="stat">
+              <div class="label">Repayment for target balance</div>
+              <div class="value" id="targetRepaymentB">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Balance at target date</div>
+              <div class="value" id="targetBalanceResultB">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Offset interest benefit</div>
+              <div class="value" id="offsetBenefitB">-</div>
+            </div>
+          </div>
+
+          <div id="notesB"></div>
+
+          <h3>Yearly breakdown</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Opening</th>
+                  <th>Principal</th>
+                  <th>Interest</th>
+                  <th>Closing</th>
+                </tr>
+              </thead>
+              <tbody id="yearlyTableBodyB"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -602,6 +756,7 @@
     }) {
       const periodsPerYear = getPeriodsPerYear(frequency);
       const ratePerPeriod = annualRate / 100 / periodsPerYear;
+
       let currentBalance = balance;
       let totalInterest = 0;
       let totalPrincipal = 0;
@@ -669,7 +824,7 @@
             firstPrincipal,
             endingBalance: currentBalance,
             yearlyData,
-            error: 'Repayment is too low. This loan is basically just being moisturised, not reduced.'
+            error: 'Repayment is too low. This mortgage is basically being lightly dusted, not reduced.'
           };
         }
 
@@ -944,25 +1099,25 @@
       } else {
         let extraLine = '';
         if (inputData.lumpSum > 0) {
-          extraLine = ` A one-off payment of <strong>${formatMoney(inputData.lumpSum)}</strong> hits in <strong>${inputData.lumpWhenYears} years</strong>.`;
+          extraLine = ` A one-off payment of <strong>${formatMoney(inputData.lumpSum)}</strong> lands in <strong>${inputData.lumpWhenYears} years</strong>.`;
         }
 
         messageBox.innerHTML = `
           <strong>${scenarioName}:</strong> This setup would pay off the mortgage in
           <strong>${formatYearsFromPeriods(result.periods, inputData.frequency)}</strong>,
-          with total interest of <strong>${formatMoney(result.totalInterest)}</strong>.
-          ${extraLine}
+          with total interest of <strong>${formatMoney(result.totalInterest)}</strong>.${extraLine}
         `;
       }
 
+      const pillClass = prefix === 'A' ? 'pill pill-a' : 'pill pill-b';
       const notes = [];
-      notes.push(`<span class="pill">Repayment: ${formatMoney2(inputData.repayment)} per ${frequencyLabel(inputData.frequency)}</span>`);
-      notes.push(`<span class="pill">Rate: ${inputData.rate.toFixed(2)}%</span>`);
-      notes.push(`<span class="pill">Offset: ${formatMoney(inputData.offset)}</span>`);
+      notes.push(`<span class="${pillClass}">Repayment: ${formatMoney2(inputData.repayment)} per ${frequencyLabel(inputData.frequency)}</span>`);
+      notes.push(`<span class="${pillClass}">Rate: ${inputData.rate.toFixed(2)}%</span>`);
+      notes.push(`<span class="${pillClass}">Offset: ${formatMoney(inputData.offset)}</span>`);
       if (inputData.lumpSum > 0) {
-        notes.push(`<span class="pill">One-off payment: ${formatMoney(inputData.lumpSum)}</span>`);
+        notes.push(`<span class="${pillClass}">One-off: ${formatMoney(inputData.lumpSum)}</span>`);
       }
-      notes.push(`<span class="pill">Balance in ${targetYears} years: ${formatMoney(balanceAtTargetDate)}</span>`);
+      notes.push(`<span class="${pillClass}">Balance in ${targetYears} years: ${formatMoney(balanceAtTargetDate)}</span>`);
 
       document.getElementById(`notes${prefix}`).innerHTML = notes.join('');
 
@@ -1054,12 +1209,7 @@
       const chartWidth = width - padding.left - padding.right;
       const chartHeight = height - padding.top - padding.bottom;
 
-      const allValues = [
-        0,
-        ...dataA.map(d => d.closingBalance),
-        ...dataB.map(d => d.closingBalance)
-      ];
-
+      const allValues = [0, ...dataA.map(d => d.closingBalance), ...dataB.map(d => d.closingBalance)];
       const maxValue = Math.max(...allValues, 1);
       const maxLength = Math.max(dataA.length, dataB.length, 1);
 
@@ -1088,11 +1238,11 @@
       ctx.lineTo(width - padding.right, height - padding.bottom);
       ctx.stroke();
 
-      function drawLine(data, strokeColor, dotFill) {
+      function drawLine(data, color) {
         if (!data.length) return;
 
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
         ctx.beginPath();
 
         data.forEach((point, index) => {
@@ -1110,14 +1260,14 @@
           const y = padding.top + chartHeight - (point.closingBalance / maxValue) * chartHeight;
 
           ctx.beginPath();
-          ctx.arc(x, y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = dotFill;
+          ctx.fillStyle = color;
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
           ctx.fill();
         });
       }
 
-      drawLine(dataA, '#1f1f1f', '#1f1f1f');
-      drawLine(dataB, '#a37b1f', '#a37b1f');
+      drawLine(dataA, '#245c73');
+      drawLine(dataB, '#8a4f17');
 
       for (let i = 0; i < maxLength; i++) {
         if (maxLength <= 12 || i % Math.ceil(maxLength / 10) === 0 || i === maxLength - 1) {
@@ -1127,38 +1277,41 @@
         }
       }
 
+      ctx.fillStyle = '#245c73';
+      ctx.fillRect(width - 240, 18, 14, 14);
       ctx.fillStyle = '#1f1f1f';
-      ctx.fillRect(width - 240, 18, 12, 12);
-      ctx.fillText(labelA, width - 220, 28);
+      ctx.fillText(labelA, width - 218, 30);
 
-      ctx.fillStyle = '#a37b1f';
-      ctx.fillRect(width - 240, 42, 12, 12);
-      ctx.fillText(labelB, width - 220, 52);
+      ctx.fillStyle = '#8a4f17';
+      ctx.fillRect(width - 240, 44, 14, 14);
+      ctx.fillStyle = '#1f1f1f';
+      ctx.fillText(labelB, width - 218, 56);
     }
 
-    function updateHeadline(nameA, nameB, resultA, resultB) {
+    function updateHeadline(nameA, nameB, resultA, resultB, scenarioA, scenarioB) {
       const box = document.getElementById('headlineMessage');
 
       if (!(resultA.paidOff && resultB.paidOff)) {
         box.innerHTML = `
           One of these scenarios does not fully pay off the mortgage within the model period.
-          Which is not a strategy. That is just vibes in a cardigan.
+          Which is not so much a plan as a prolonged spiritual attachment to debt.
         `;
         return;
       }
 
-      const yearsA = resultA.periods / 12;
-      const yearsB = resultB.periods / 12;
+      const yearsA = resultA.periods / getPeriodsPerYear(scenarioA.frequency);
+      const yearsB = resultB.periods / getPeriodsPerYear(scenarioB.frequency);
+
       const faster = yearsA < yearsB ? nameA : nameB;
       const slower = yearsA < yearsB ? nameB : nameA;
-      const periodDifference = Math.abs(yearsA - yearsB).toFixed(1);
+      const yearDiff = Math.abs(yearsA - yearsB).toFixed(1);
       const interestDifference = Math.abs(resultA.totalInterest - resultB.totalInterest);
 
       box.innerHTML = `
         <strong>${faster}</strong> comes out ahead.
-        It saves about <strong>${periodDifference} years</strong> versus <strong>${slower}</strong>
+        It saves about <strong>${yearDiff} years</strong> versus <strong>${slower}</strong>
         and changes lifetime interest by roughly <strong>${formatMoney(interestDifference)}</strong>.
-        The bank hates this sort of thing. As it should.
+        That, in mortgage terms, is called “less tragic.”
       `;
     }
 
@@ -1189,6 +1342,8 @@
 
       document.getElementById('scenarioATitle').textContent = nameA;
       document.getElementById('scenarioBTitle').textContent = nameB;
+      document.getElementById('compHeadA').textContent = nameA;
+      document.getElementById('compHeadB').textContent = nameB;
 
       const lumpWhenPeriodsA = Math.round(scenarioA.lumpWhenYears * getPeriodsPerYear(scenarioA.frequency));
       const lumpWhenPeriodsB = Math.round(scenarioB.lumpWhenYears * getPeriodsPerYear(scenarioB.frequency));
@@ -1237,7 +1392,7 @@
       const extrasB = updateScenarioUI('B', nameB, scenarioB, resultB, baseWithoutOffsetB, targetBalance, targetYears, whatIfRate);
 
       setComparisonTable(nameA, nameB, scenarioA, resultA, extrasA, scenarioB, resultB, extrasB);
-      updateHeadline(nameA, nameB, resultA, resultB);
+      updateHeadline(nameA, nameB, resultA, resultB, scenarioA, scenarioB);
       drawComparisonChart(
         document.getElementById('comparisonChart'),
         resultA.yearlyData,
@@ -1249,6 +1404,7 @@
 
     function swapScenarios() {
       const fields = ['repayment', 'frequency', 'rate', 'offset', 'lumpSum', 'lumpWhenYears'];
+
       fields.forEach(field => {
         const a = document.getElementById(`${field}A`);
         const b = document.getElementById(`${field}B`);
