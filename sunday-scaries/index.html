@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunday Scaries Interrogation Machine</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffe3e3, #fff0f6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .app {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 100px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    resize: none;
+    font-size: 14px;
+  }
+
+  button {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .result {
+    margin-top: 15px;
+    text-align: left;
+    font-size: 14px;
+  }
+
+  .card {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 8px;
+  }
+
+  .roast {
+    color: #d6336c;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h1>Sunday Scaries Interrogation Machine</h1>
+  <p>Type your worries. Be honest. I will judge.</p>
+
+  <textarea id="worryInput" placeholder="e.g. I have 47 emails and my life is falling apart"></textarea>
+  <button onclick="analyse()">Analyse My Poor Decisions</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+function analyse() {
+  const input = document.getElementById("worryInput").value.toLowerCase();
+  const resultDiv = document.getElementById("result");
+
+  if (!input) {
+    resultDiv.innerHTML = "You gave me nothing. Even your anxiety is lazy.";
+    return;
+  }
+
+  let category = "";
+  let action = "";
+  let roast = "";
+
+  if (input.includes("email") || input.includes("work") || input.includes("deadline")) {
+    category = "Work Panic";
+    action = "Open your inbox. Reply to ONE email. Congratulations, you're now 1% less dramatic.";
+    roast = "You are not the CEO of Panic Incorporated.";
+  } 
+  else if (input.includes("money") || input.includes("mortgage") || input.includes("bill")) {
+    category = "Financial Existential Crisis";
+    action = "Check your balance. Breathe. You're still alive. Consider one small overpayment.";
+    roast = "You opened this app instead of your banking app. Interesting choice.";
+  } 
+  else if (input.includes("tired") || input.includes("sleep")) {
+    category = "You Need Sleep";
+    action = "Go to bed earlier. Revolutionary concept, I know.";
+    roast = "You are not a productivity machine. You're a tired potato.";
+  } 
+  else {
+    category = "General Life Spiral";
+    action = "Pick ONE tiny task and do it for 5 minutes.";
+    roast = "Ah yes, the classic 'everything is wrong' diagnosis.";
+  }
+
+  const dramaticLines = [
+    "Monday is coming whether you panic or not.",
+    "Your problems are real but so is your ability to avoid them.",
+    "You survived worse. Probably with snacks.",
+    "Future you is already annoyed at current you."
+  ];
+
+  const randomLine = dramaticLines[Math.floor(Math.random() * dramaticLines.length)];
+
+  resultDiv.innerHTML = `
+    <div class="card"><strong>Category:</strong> ${category}</div>
+    <div class="card"><strong>Action:</strong> ${action}</div>
+    <div class="card roast">Roast: ${roast}</div>
+    <div class="card">Reality Check: ${randomLine}</div>
+  `;
+}
+</script>
+
+</body>
+</html>
