@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mortgage Reality Check</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f6f4ef;
+      color: #1f1f1f;
+      line-height: 1.4;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: #555;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd6c8;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .section-title {
+      margin: 18px 0 10px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #7a6f5a;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-weight: bold;
+      font-size: 0.92rem;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #cfc7b8;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid #d9c38a;
+      border-color: #bba25c;
+    }
+
+    button {
+      margin-top: 14px;
+      background: #1f1f1f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #383838;
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: #faf8f4;
+      border: 1px solid #e4dccf;
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 96px;
+    }
+
+    .stat .label {
+      font-size: 0.85rem;
+      color: #6f6759;
+      margin-bottom: 6px;
+    }
+
+    .stat .value {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .message {
+      background: #fff8e8;
+      border: 1px solid #ecd9a2;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e3dccf;
+      border-radius: 12px;
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee7db;
+      text-align: right;
+      font-size: 0.93rem;
+    }
+
+    th {
+      background: #f5f1e8;
+      color: #4b4337;
+      text-align: right;
+      position: sticky;
+      top: 0;
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+
+    canvas {
+      width: 100%;
+      height: 320px;
+      border: 1px solid #e3dccf;
+      border-radius: 12px;
+      background: white;
+      display: block;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f2ede2;
+      font-size: 0.84rem;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-grid,
+      .split {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mortgage Reality Check</h1>
+    <p class="subtitle">
+      A calculator for people who would quite like to stop donating their life force to a bank.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Your mortgage details</h2>
+
+        <label for="balance">Current mortgage balance</label>
+        <input id="balance" type="number" value="650000" min="0" step="1000" />
+
+        <label for="rate">Interest rate (% p.a.)</label>
+        <input id="rate" type="number" value="6.19" min="0" step="0.01" />
+
+        <label for="repayment">Regular repayment amount</label>
+        <input id="repayment" type="number" value="4200" min="0" step="1" />
+
+        <label for="frequency">Repayment frequency</label>
+        <select id="frequency">
+          <option value="monthly" selected>Monthly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+
+        <div class="section-title">Offset account</div>
+
+        <label for="offset">Offset balance</label>
+        <input id="offset" type="number" value="50000" min="0" step="1000" />
+        <div class="small">Interest is calculated on balance minus offset, but never below zero.</div>
+
+        <div class="section-title">Interest change scenario</div>
+
+        <label for="newRate">New interest rate (% p.a.)</label>
+        <input id="newRate" type="number" value="6.80" min="0" step="0.01" />
+        <div class="small">Used to estimate the repayment needed to keep your remaining term the same.</div>
+
+        <div class="section-title">One-off extra payment</div>
+
+        <label for="lumpSum">One-off payment amount</label>
+        <input id="lumpSum" type="number" value="10000" min="0" step="1000" />
+
+        <label for="lumpWhenYears">When to make it (years from now)</label>
+        <input id="lumpWhenYears" type="number" value="0" min="0" step="0.1" />
+
+        <div class="section-title">Target balance scenario</div>
+
+        <label for="targetBalance">Desired balance by target date</label>
+        <input id="targetBalance" type="number" value="400000" min="0" step="1000" />
+
+        <label for="targetYears">Years until target date</label>
+        <input id="targetYears" type="number" value="5" min="0.1" step="0.1" />
+
+        <button id="calculateBtn">Calculate my financial fate</button>
+        <div class="footer-note">
+          This app uses standard amortisation logic. Real bank calculations can vary slightly depending on how interest is charged and when repayments actually land. Because naturally they can never just keep things charmingly simple.
+        </div>
+      </div>
+
+      <div>
+        <div class="message" id="messageBox"></div>
+
+        <div class="results-grid">
+          <div class="stat">
+            <div class="label">Time left to pay off</div>
+            <div class="value" id="timeLeft">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Total interest from now</div>
+            <div class="value" id="totalInterest">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Effective loan charged interest</div>
+            <div class="value" id="effectiveLoan">-</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Interest in first payment</div>
+            <div class="value" id="firstInterest">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Principal in first payment</div>
+            <div class="value" id="firstPrincipal">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Repayment needed if rate changes</div>
+            <div class="value" id="requiredRepayment">-</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Offset interest saved</div>
+            <div class="value" id="offsetSaved">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Time saved by one-off payment</div>
+            <div class="value" id="lumpSaved">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Repayment needed for target balance</div>
+            <div class="value" id="targetRepayment">-</div>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="card">
+            <h2>Quick scenario notes</h2>
+            <div id="scenarioNotes"></div>
+          </div>
+
+          <div class="card">
+            <h2>Yearly balance graph</h2>
+            <canvas id="balanceChart" width="800" height="320"></canvas>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 18px;">
+          <h2>Year-by-year breakdown</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Opening Balance</th>
+                  <th>Principal Paid</th>
+                  <th>Interest Paid</th>
+                  <th>Closing Balance</th>
+                </tr>
+              </thead>
+              <tbody id="yearlyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Formatting helpers ----------
+    function toNumber(value) {
+      const num = parseFloat(value);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD',
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatMoney2(value) {
+      return new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function formatYearsFromPeriods(periods, frequency) {
+      const perYear = getPeriodsPerYear(frequency);
+      const years = periods / perYear;
+      const wholeYears = Math.floor(years);
+      const remainingPeriods = Math.round((years - wholeYears) * perYear);
+
+      if (wholeYears <= 0) {
+        return `${remainingPeriods} ${frequency === 'monthly' ? 'months' : frequency === 'fortnightly' ? 'fortnights' : 'weeks'}`;
+      }
+
+      const remainderLabel =
+        frequency === 'monthly' ? 'months' :
+        frequency === 'fortnightly' ? 'fortnights' : 'weeks';
+
+      return `${wholeYears}y ${remainingPeriods} ${remainderLabel}`;
+    }
+
+    function getPeriodsPerYear(frequency) {
+      if (frequency === 'weekly') return 52;
+      if (frequency === 'fortnightly') return 26;
+      return 12;
+    }
+
+    // ---------- Mortgage engine ----------
+    function simulateMortgage({
+      balance,
+      annualRate,
+      repayment,
+      frequency,
+      offset = 0,
+      lumpSum = 0,
+      lumpWhenPeriods = 0,
+      maxYears = 50
+    }) {
+      const periodsPerYear = getPeriodsPerYear(frequency);
+      const ratePerPeriod = annualRate / 100 / periodsPerYear;
+      let currentBalance = balance;
+      let totalInterest = 0;
+      let totalPrincipal = 0;
+      let period = 0;
+      let firstInterest = 0;
+      let firstPrincipal = 0;
+      let lumpApplied = false;
+      let yearlyData = [];
+      let openingYearBalance = currentBalance;
+      let yearInterest = 0;
+      let yearPrincipal = 0;
+
+      const maxPeriods = maxYears * periodsPerYear;
+
+      if (currentBalance <= 0) {
+        return {
+          paidOff: true,
+          periods: 0,
+          totalInterest: 0,
+          totalPrincipal: 0,
+          firstInterest: 0,
+          firstPrincipal: 0,
+          endingBalance: 0,
+          yearlyData: []
+        };
+      }
+
+      if (repayment <= 0) {
+        return {
+          paidOff: false,
+          periods: 0,
+          totalInterest: 0,
+          totalPrincipal: 0,
+          firstInterest: 0,
+          firstPrincipal: 0,
+          endingBalance: currentBalance,
+          yearlyData: [],
+          error: "Repayment must be above zero."
+        };
+      }
+
+      for (period = 1; period <= maxPeriods; period++) {
+        if (!lumpApplied && lumpSum > 0 && period - 1 >= lumpWhenPeriods) {
+          currentBalance = Math.max(0, currentBalance - lumpSum);
+          lumpApplied = true;
+        }
+
+        const chargedBalance = Math.max(0, currentBalance - offset);
+        const interest = chargedBalance * ratePerPeriod;
+        let principal = repayment - interest;
+
+        if (period === 1) {
+          firstInterest = interest;
+          firstPrincipal = principal;
+        }
+
+        if (principal <= 0) {
+          return {
+            paidOff: false,
+            periods: period,
+            totalInterest,
+            totalPrincipal,
+            firstInterest,
+            firstPrincipal,
+            endingBalance: currentBalance,
+            yearlyData,
+            error: "Repayment is too low. The loan will not reduce at this rate."
+          };
+        }
+
+        if (principal > currentBalance) {
+          principal = currentBalance;
+        }
+
+        currentBalance -= principal;
+        totalInterest += interest;
+        totalPrincipal += principal;
+        yearInterest += interest;
+        yearPrincipal += principal;
+
+        if (period % periodsPerYear === 0 || currentBalance <= 0) {
+          yearlyData.push({
+            year: yearlyData.length + 1,
+            openingBalance: openingYearBalance,
+            principalPaid: yearPrincipal,
+            interestPaid: yearInterest,
+            closingBalance: currentBalance
+          });
+
+          openingYearBalance = currentBalance;
+          yearInterest = 0;
+          yearPrincipal = 0;
+        }
+
+        if (currentBalance <= 0) {
+          return {
+            paidOff: true,
+            periods: period,
+            totalInterest,
+            totalPrincipal,
+            firstInterest,
+            firstPrincipal,
+            endingBalance: 0,
+            yearlyData
+          };
+        }
+      }
+
+      return {
+        paidOff: false,
+        periods: maxPeriods,
+        totalInterest,
+        totalPrincipal,
+        firstInterest,
+        firstPrincipal,
+        endingBalance: currentBalance,
+        yearlyData,
+        error: "The loan was not fully repaid within the modelling period."
+      };
+    }
+
+    function findRequiredRepaymentForTerm({
+      balance,
+      annualRate,
+      frequency,
+      targetPeriods,
+      offset = 0
+    }) {
+      if (targetPeriods <= 0 || balance <= 0) return 0;
+
+      let low = 0;
+      let high = balance;
+      // Increase upper bound until mortgage pays off inside target term
+      while (true) {
+        const test = simulateMortgage({
+          balance,
+          annualRate,
+          repayment: high,
+          frequency,
+          offset,
+          maxYears: 80
+        });
+
+        if (test.paidOff && test.periods <= targetPeriods) break;
+        high *= 1.5;
+        if (high > balance * 10) break;
+      }
+
+      for (let i = 0; i < 80; i++) {
+        const mid = (low + high) / 2;
+        const result = simulateMortgage({
+          balance,
+          annualRate,
+          repayment: mid,
+          frequency,
+          offset,
+          maxYears: 80
+        });
+
+        if (result.paidOff && result.periods <= targetPeriods) {
+          high = mid;
+        } else {
+          low = mid;
+        }
+      }
+
+      return high;
+    }
+
+    function findRepaymentForTargetBalance({
+      balance,
+      annualRate,
+      frequency,
+      offset = 0,
+      targetBalance,
+      targetPeriods
+    }) {
+      if (targetPeriods <= 0) return 0;
+      if (targetBalance >= balance) return 0;
+
+      let low = 0;
+      let high = balance;
+
+      while (true) {
+        const test = simulateMortgage({
+          balance,
+          annualRate,
+          repayment: high,
+          frequency,
+          offset,
+          maxYears: 80
+        });
+
+        const ending = getBalanceAfterPeriods({
+          balance,
+          annualRate,
+          repayment: high,
+          frequency,
+          offset,
+          periods: targetPeriods
+        });
+
+        if (ending <= targetBalance) break;
+        high *= 1.5;
+        if (high > balance * 10) break;
+      }
+
+      for (let i = 0; i < 80; i++) {
+        const mid = (low + high) / 2;
+        const ending = getBalanceAfterPeriods({
+          balance,
+          annualRate,
+          repayment: mid,
+          frequency,
+          offset,
+          periods: targetPeriods
+        });
+
+        if (ending <= targetBalance) {
+          high = mid;
+        } else {
+          low = mid;
+        }
+      }
+
+      return high;
+    }
+
+    function getBalanceAfterPeriods({
+      balance,
+      annualRate,
+      repayment,
+      frequency,
+      offset = 0,
+      periods
+    }) {
+      const periodsPerYear = getPeriodsPerYear(frequency);
+      const ratePerPeriod = annualRate / 100 / periodsPerYear;
+      let currentBalance = balance;
+
+      for (let i = 0; i < periods; i++) {
+        if (currentBalance <= 0) return 0;
+        const chargedBalance = Math.max(0, currentBalance - offset);
+        const interest = chargedBalance * ratePerPeriod;
+        const principal = repayment - interest;
+
+        if (principal <= 0) return currentBalance;
+        currentBalance -= Math.min(principal, currentBalance);
+      }
+
+      return Math.max(0, currentBalance);
+    }
+
+    // ---------- Chart ----------
+    function drawChart(canvas, yearlyData) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Chart area
+      const padding = { top: 20, right: 20, bottom: 40, left: 70 };
+      const chartWidth = width - padding.left - padding.right;
+      const chartHeight = height - padding.top - padding.bottom;
+
+      const values = [0, ...yearlyData.map(d => d.closingBalance)];
+      const maxValue = Math.max(...values, 1);
+
+      // Grid lines
+      ctx.strokeStyle = '#e8e1d4';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#6a6255';
+      ctx.font = '12px Arial';
+
+      const gridLines = 5;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = padding.top + (chartHeight / gridLines) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+
+        const value = maxValue - (maxValue / gridLines) * i;
+        ctx.fillText(formatCompactMoney(value), 8, y + 4);
+      }
+
+      // Axes
+      ctx.strokeStyle = '#8e836f';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, padding.top);
+      ctx.lineTo(padding.left, height - padding.bottom);
+      ctx.lineTo(width - padding.right, height - padding.bottom);
+      ctx.stroke();
+
+      if (!yearlyData.length) return;
+
+      // Line
+      ctx.strokeStyle = '#1f1f1f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      yearlyData.forEach((point, index) => {
+        const x = padding.left + (chartWidth * index) / Math.max(yearlyData.length - 1, 1);
+        const y = padding.top + chartHeight - (point.closingBalance / maxValue) * chartHeight;
+
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+
+      // Points + x labels
+      yearlyData.forEach((point, index) => {
+        const x = padding.left + (chartWidth * index) / Math.max(yearlyData.length - 1, 1);
+        const y = padding.top + chartHeight - (point.closingBalance / maxValue) * chartHeight;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#1f1f1f';
+        ctx.fill();
+
+        if (yearlyData.length <= 12 || index % Math.ceil(yearlyData.length / 10) === 0 || index === yearlyData.length - 1) {
+          ctx.fillStyle = '#6a6255';
+          ctx.fillText(`Y${point.year}`, x - 10, height - 14);
+        }
+      });
+    }
+
+    function formatCompactMoney(value) {
+      if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}m`;
+      if (value >= 1000) return `$${Math.round(value / 1000)}k`;
+      return `$${Math.round(value)}`;
+    }
+
+    // ---------- UI update ----------
+    function calculateMortgage() {
+      const balance = toNumber(document.getElementById('balance').value);
+      const rate = toNumber(document.getElementById('rate').value);
+      const repayment = toNumber(document.getElementById('repayment').value);
+      const frequency = document.getElementById('frequency').value;
+      const offset = toNumber(document.getElementById('offset').value);
+      const newRate = toNumber(document.getElementById('newRate').value);
+      const lumpSum = toNumber(document.getElementById('lumpSum').value);
+      const lumpWhenYears = toNumber(document.getElementById('lumpWhenYears').value);
+      const targetBalance = toNumber(document.getElementById('targetBalance').value);
+      const targetYears = toNumber(document.getElementById('targetYears').value);
+
+      const periodsPerYear = getPeriodsPerYear(frequency);
+      const lumpWhenPeriods = Math.round(lumpWhenYears * periodsPerYear);
+      const targetPeriods = Math.round(targetYears * periodsPerYear);
+
+      const baseScenario = simulateMortgage({
+        balance,
+        annualRate: rate,
+        repayment,
+        frequency,
+        offset: 0
+      });
+
+      const offsetScenario = simulateMortgage({
+        balance,
+        annualRate: rate,
+        repayment,
+        frequency,
+        offset
+      });
+
+      const lumpScenario = simulateMortgage({
+        balance,
+        annualRate: rate,
+        repayment,
+        frequency,
+        offset,
+        lumpSum,
+        lumpWhenPeriods
+      });
+
+      const requiredRepaymentIfRateChanges =
+        offsetScenario.paidOff
+          ? findRequiredRepaymentForTerm({
+              balance,
+              annualRate: newRate,
+              frequency,
+              targetPeriods: offsetScenario.periods,
+              offset
+            })
+          : 0;
+
+      const targetRepayment = findRepaymentForTargetBalance({
+        balance,
+        annualRate: rate,
+        frequency,
+        offset,
+        targetBalance,
+        targetPeriods
+      });
+
+      // Main stats
+      document.getElementById('timeLeft').textContent = offsetScenario.paidOff
+        ? formatYearsFromPeriods(offsetScenario.periods, frequency)
+        : 'Does not pay off';
+
+      document.getElementById('totalInterest').textContent = formatMoney(offsetScenario.totalInterest);
+      document.getElementById('effectiveLoan').textContent = formatMoney(Math.max(0, balance - offset));
+      document.getElementById('firstInterest').textContent = formatMoney2(offsetScenario.firstInterest);
+      document.getElementById('firstPrincipal').textContent = formatMoney2(offsetScenario.firstPrincipal);
+      document.getElementById('requiredRepayment').textContent = requiredRepaymentIfRateChanges > 0
+        ? formatMoney2(requiredRepaymentIfRateChanges)
+        : '-';
+
+      const offsetInterestSaved = Math.max(0, baseScenario.totalInterest - offsetScenario.totalInterest);
+      document.getElementById('offsetSaved').textContent = formatMoney(offsetInterestSaved);
+
+      let lumpSavedText = '-';
+      if (offsetScenario.paidOff && lumpScenario.paidOff) {
+        const diffPeriods = offsetScenario.periods - lumpScenario.periods;
+        lumpSavedText = diffPeriods > 0 ? formatYearsFromPeriods(diffPeriods, frequency) : 'No material change';
+      }
+      document.getElementById('lumpSaved').textContent = lumpSavedText;
+
+      document.getElementById('targetRepayment').textContent =
+        targetRepayment > 0 ? formatMoney2(targetRepayment) : '-';
+
+      updateMessageBox(balance, offsetScenario, baseScenario, offset, lumpScenario, lumpSum, targetBalance, targetYears, targetRepayment, frequency);
+      updateScenarioNotes(baseScenario, offsetScenario, lumpScenario, requiredRepaymentIfRateChanges, newRate, targetBalance, targetYears, targetRepayment, frequency);
+      updateYearlyTable(offsetScenario.yearlyData);
+      drawChart(document.getElementById('balanceChart'), offsetScenario.yearlyData);
+    }
+
+    function updateMessageBox(balance, offsetScenario, baseScenario, offset, lumpScenario, lumpSum, targetBalance, targetYears, targetRepayment, frequency) {
+      const box = document.getElementById('messageBox');
+
+      if (offsetScenario.error) {
+        box.innerHTML = `<strong>Well.</strong> ${offsetScenario.error}`;
+        return;
+      }
+
+      const messages = [];
+
+      if (offsetScenario.paidOff) {
+        messages.push(`<strong>Mortgage payoff:</strong> You are on track to pay this off in <strong>${formatYearsFromPeriods(offsetScenario.periods, frequency)}</strong>. So yes, freedom exists. It is just annoyingly itemised.`);
+      }
+
+      if (offset > 0) {
+        messages.push(`<strong>Offset effect:</strong> Your offset reduces the interest-charged balance to <strong>${formatMoney(Math.max(0, balance - offset))}</strong>, saving about <strong>${formatMoney(Math.max(0, baseScenario.totalInterest - offsetScenario.totalInterest))}</strong> in interest over the life of the loan.`);
+      }
+
+      if (lumpSum > 0 && lumpScenario.paidOff && offsetScenario.paidOff) {
+        const savedPeriods = offsetScenario.periods - lumpScenario.periods;
+        messages.push(`<strong>One-off payment:</strong> A lump sum of <strong>${formatMoney(lumpSum)}</strong> could save about <strong>${savedPeriods > 0 ? formatYearsFromPeriods(savedPeriods, frequency) : 'basically no time'}</strong>. Delightful. Violence, but to the principal.`);
+      }
+
+      if (targetRepayment > 0) {
+        messages.push(`<strong>Target balance plan:</strong> To get your loan down to <strong>${formatMoney(targetBalance)}</strong> in <strong>${targetYears} years</strong>, you’d need repayments of about <strong>${formatMoney2(targetRepayment)}</strong> per ${frequency.slice(0, -2) === 'month' ? 'month' : frequency === 'fortnightly' ? 'fortnight' : 'week'}.`);
+      }
+
+      box.innerHTML = messages.join('<br><br>');
+    }
+
+    function updateScenarioNotes(baseScenario, offsetScenario, lumpScenario, requiredRepaymentIfRateChanges, newRate, targetBalance, targetYears, targetRepayment, frequency) {
+      const notes = document.getElementById('scenarioNotes');
+      const pills = [];
+
+      if (baseScenario.paidOff && offsetScenario.paidOff) {
+        const periodsSaved = baseScenario.periods - offsetScenario.periods;
+        pills.push(`<span class="pill">Offset saves ${periodsSaved > 0 ? formatYearsFromPeriods(periodsSaved, frequency) : 'interest more than time'}</span>`);
+      }
+
+      if (requiredRepaymentIfRateChanges > 0) {
+        pills.push(`<span class="pill">At ${newRate.toFixed(2)}%, repayment should be ${formatMoney2(requiredRepaymentIfRateChanges)}</span>`);
+      }
+
+      if (lumpScenario.paidOff && offsetScenario.paidOff) {
+        const interestSaved = offsetScenario.totalInterest - lumpScenario.totalInterest;
+        pills.push(`<span class="pill">One-off payment saves ${formatMoney(Math.max(0, interestSaved))} interest</span>`);
+      }
+
+      if (targetRepayment > 0) {
+        pills.push(`<span class="pill">To reach ${formatMoney(targetBalance)} in ${targetYears} years: ${formatMoney2(targetRepayment)}</span>`);
+      }
+
+      if (!pills.length) {
+        notes.innerHTML = `<p>No extra scenario notes yet. Which is rude, because the mortgage definitely still has notes for you.</p>`;
+        return;
+      }
+
+      notes.innerHTML = pills.join(' ') + `
+        <p class="small" style="margin-top:12px;">
+          Repayment frequency matters because more frequent repayments can reduce principal a bit earlier, which means slightly less interest over time. Tiny differences, big emotional payoff.
+        </p>
+      `;
+    }
+
+    function updateYearlyTable(yearlyData) {
+      const tbody = document.getElementById('yearlyTableBody');
+      tbody.innerHTML = '';
+
+      yearlyData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>Year ${row.year}</td>
+          <td>${formatMoney(row.openingBalance)}</td>
+          <td>${formatMoney(row.principalPaid)}</td>
+          <td>${formatMoney(row.interestPaid)}</td>
+          <td>${formatMoney(row.closingBalance)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (!yearlyData.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="5" style="text-align:center;">No yearly breakdown available yet.</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    document.getElementById('calculateBtn').addEventListener('click', calculateMortgage);
+
+    // Run once on page load so it shows something immediately
+    calculateMortgage();
+  </script>
+</body>
+</html>
