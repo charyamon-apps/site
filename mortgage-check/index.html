@@ -15,19 +15,19 @@
       --muted: #5f5a52;
       --border: #ddd6c8;
       --panel: #ffffff;
-      --soft: #faf8f4;
 
       --a-main: #245c73;
       --a-soft: #eef7fb;
+      --a-soft-2: #f7fcfe;
       --a-border: #b9d8e6;
       --a-pill: #d9eef7;
 
       --b-main: #8a4f17;
       --b-soft: #fff5ea;
+      --b-soft-2: #fffaf5;
       --b-border: #efcfab;
       --b-pill: #f7e2ca;
 
-      --summary-main: #5d4a2d;
       --summary-soft: #fff8e8;
       --summary-border: #ecd9a2;
     }
@@ -41,7 +41,7 @@
     }
 
     .container {
-      max-width: 1450px;
+      max-width: 1460px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -58,7 +58,7 @@
 
     .top-grid {
       display: grid;
-      grid-template-columns: 390px 1fr;
+      grid-template-columns: 420px 1fr;
       gap: 20px;
       align-items: start;
     }
@@ -68,10 +68,11 @@
       border: 1px solid var(--border);
       border-radius: 18px;
       padding: 16px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
     }
 
-    .card h2, .card h3 {
+    .card h2,
+    .card h3 {
       margin-top: 0;
     }
 
@@ -91,18 +92,22 @@
       font-weight: bold;
     }
 
-    input, select, button {
+    input,
+    select,
+    button {
       width: 100%;
       padding: 11px 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #cfc7b8;
       font-size: 1rem;
       font-family: inherit;
+      background: #fff;
+      color: var(--text);
     }
 
-    input:focus, select:focus {
-      outline: 2px solid #d9c38a;
-      border-color: #bba25c;
+    input:focus,
+    select:focus {
+      outline: none;
     }
 
     button {
@@ -135,6 +140,77 @@
       margin-top: 6px;
     }
 
+    .footer-note {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* INPUT PANELS */
+    .scenario-input-card {
+      border-width: 2px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+
+    .scenario-input-card h3 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .scenario-input-a {
+      background: var(--a-soft);
+      border-color: var(--a-border);
+    }
+
+    .scenario-input-a h3 {
+      color: var(--a-main);
+    }
+
+    .scenario-input-a input,
+    .scenario-input-a select {
+      background: var(--a-soft-2);
+      border: 1px solid var(--a-border);
+    }
+
+    .scenario-input-a input:focus,
+    .scenario-input-a select:focus {
+      border-color: var(--a-main);
+      box-shadow: 0 0 0 3px rgba(36, 92, 115, 0.12);
+    }
+
+    .scenario-input-b {
+      background: var(--b-soft);
+      border-color: var(--b-border);
+    }
+
+    .scenario-input-b h3 {
+      color: var(--b-main);
+    }
+
+    .scenario-input-b input,
+    .scenario-input-b select {
+      background: var(--b-soft-2);
+      border: 1px solid var(--b-border);
+    }
+
+    .scenario-input-b input:focus,
+    .scenario-input-b select:focus {
+      border-color: var(--b-main);
+      box-shadow: 0 0 0 3px rgba(138, 79, 23, 0.12);
+    }
+
+    .scenario-label-a {
+      color: #183f50;
+    }
+
+    .scenario-label-b {
+      color: #6f3d10;
+    }
+
+    /* SUMMARY */
     .message {
       border-radius: 14px;
       padding: 14px;
@@ -146,6 +222,99 @@
       border: 1px solid var(--summary-border);
     }
 
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .summary-table-wrap {
+      border: 1px solid #e3dccf;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee7db;
+      font-size: 0.92rem;
+      text-align: right;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+    }
+
+    .summary-table th {
+      background: #f5f1e8;
+      color: #4b4337;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      text-align: left;
+    }
+
+    .comparison-table td.num {
+      text-align: right;
+    }
+
+    .scenario-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
+
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .legend-a {
+      background: var(--a-main);
+    }
+
+    .legend-b {
+      background: var(--b-main);
+    }
+
+    .chart-wrap {
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #e3dccf;
+      margin-top: 18px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 340px;
+      display: block;
+    }
+
+    /* RESULT SCENARIOS */
     .compare-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -161,17 +330,17 @@
 
     .scenario-a {
       border-color: var(--a-border);
-      background: linear-gradient(to bottom, var(--a-soft) 0, var(--a-soft) 72px, #fff 72px, #fff 100%);
+      background: linear-gradient(to bottom, var(--a-soft) 0, var(--a-soft) 74px, #fff 74px, #fff 100%);
     }
 
     .scenario-b {
       border-color: var(--b-border);
-      background: linear-gradient(to bottom, var(--b-soft) 0, var(--b-soft) 72px, #fff 72px, #fff 100%);
+      background: linear-gradient(to bottom, var(--b-soft) 0, var(--b-soft) 74px, #fff 74px, #fff 100%);
     }
 
     .scenario-top {
       padding: 16px 16px 12px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .scenario-a .scenario-top {
@@ -191,7 +360,6 @@
       justify-content: space-between;
       align-items: center;
       gap: 10px;
-      margin-bottom: 8px;
       flex-wrap: wrap;
     }
 
@@ -225,6 +393,16 @@
     .scenario-b .scenario-tag {
       background: var(--b-pill);
       color: var(--b-main);
+    }
+
+    .scenario-message-a {
+      background: var(--a-soft);
+      border: 1px solid var(--a-border);
+    }
+
+    .scenario-message-b {
+      background: var(--b-soft);
+      border: 1px solid var(--b-border);
     }
 
     .results-grid {
@@ -270,16 +448,6 @@
       color: var(--b-main);
     }
 
-    .scenario-message-a {
-      background: var(--a-soft);
-      border: 1px solid var(--a-border);
-    }
-
-    .scenario-message-b {
-      background: var(--b-soft);
-      border: 1px solid var(--b-border);
-    }
-
     .pill {
       display: inline-block;
       padding: 6px 10px;
@@ -299,45 +467,12 @@
       color: var(--b-main);
     }
 
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 12px;
-      background: #fff;
-    }
-
     .scenario-a .table-wrap {
       border: 1px solid var(--a-border);
     }
 
     .scenario-b .table-wrap {
       border: 1px solid var(--b-border);
-    }
-
-    .summary-table-wrap {
-      border: 1px solid #e3dccf;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 680px;
-    }
-
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #eee7db;
-      font-size: 0.92rem;
-      text-align: right;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-    }
-
-    .summary-table th {
-      background: #f5f1e8;
-      color: #4b4337;
     }
 
     .scenario-a table th {
@@ -348,68 +483,6 @@
     .scenario-b table th {
       background: #fcebd8;
       color: var(--b-main);
-    }
-
-    th:first-child, td:first-child {
-      text-align: left;
-    }
-
-    .comparison-table th, .comparison-table td {
-      text-align: left;
-    }
-
-    .comparison-table td.num {
-      text-align: right;
-    }
-
-    .chart-wrap {
-      border-radius: 12px;
-      background: #fff;
-      padding: 10px;
-      border: 1px solid #e3dccf;
-      margin-top: 18px;
-    }
-
-    canvas {
-      width: 100%;
-      height: 340px;
-      display: block;
-    }
-
-    .footer-note {
-      margin-top: 16px;
-      font-size: 0.85rem;
-      color: #666;
-    }
-
-    .scenario-legend {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: bold;
-    }
-
-    .legend-swatch {
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
-      display: inline-block;
-    }
-
-    .legend-a {
-      background: var(--a-main);
-    }
-
-    .legend-b {
-      background: var(--b-main);
     }
 
     @media (max-width: 1100px) {
@@ -423,9 +496,9 @@
 </head>
 <body>
   <div class="container">
-    <h1>Mortgage Reality Check — Clear Compare Mode</h1>
+    <h1>Mortgage Reality Check — Colour-Coded Compare Mode</h1>
     <p class="subtitle">
-      Compare two mortgage scenarios side by side, but now in a way your eyeballs can actually tolerate.
+      Compare two mortgage scenarios side by side, now with colour-coded input blocks because confusion was already doing enough.
     </p>
 
     <div class="top-grid">
@@ -441,53 +514,57 @@
         <label for="scenarioBName">Scenario B name</label>
         <input id="scenarioBName" type="text" value="More Aggressive Plan" />
 
-        <div class="section-title">Scenario A</div>
+        <div class="card scenario-input-card scenario-input-a">
+          <h3>Scenario A</h3>
 
-        <label for="repaymentA">Regular repayment</label>
-        <input id="repaymentA" type="number" value="4200" min="0" step="1" />
+          <label class="scenario-label-a" for="repaymentA">Regular repayment</label>
+          <input id="repaymentA" type="number" value="4200" min="0" step="1" />
 
-        <label for="frequencyA">Repayment frequency</label>
-        <select id="frequencyA">
-          <option value="monthly" selected>Monthly</option>
-          <option value="fortnightly">Fortnightly</option>
-          <option value="weekly">Weekly</option>
-        </select>
+          <label class="scenario-label-a" for="frequencyA">Repayment frequency</label>
+          <select id="frequencyA">
+            <option value="monthly" selected>Monthly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="weekly">Weekly</option>
+          </select>
 
-        <label for="rateA">Interest rate (% p.a.)</label>
-        <input id="rateA" type="number" value="6.19" min="0" step="0.01" />
+          <label class="scenario-label-a" for="rateA">Interest rate (% p.a.)</label>
+          <input id="rateA" type="number" value="6.19" min="0" step="0.01" />
 
-        <label for="offsetA">Offset balance</label>
-        <input id="offsetA" type="number" value="0" min="0" step="1000" />
+          <label class="scenario-label-a" for="offsetA">Offset balance</label>
+          <input id="offsetA" type="number" value="0" min="0" step="1000" />
 
-        <label for="lumpSumA">One-off payment</label>
-        <input id="lumpSumA" type="number" value="0" min="0" step="1000" />
+          <label class="scenario-label-a" for="lumpSumA">One-off payment</label>
+          <input id="lumpSumA" type="number" value="0" min="0" step="1000" />
 
-        <label for="lumpWhenYearsA">One-off timing (years from now)</label>
-        <input id="lumpWhenYearsA" type="number" value="0" min="0" step="0.1" />
+          <label class="scenario-label-a" for="lumpWhenYearsA">One-off timing (years from now)</label>
+          <input id="lumpWhenYearsA" type="number" value="0" min="0" step="0.1" />
+        </div>
 
-        <div class="section-title">Scenario B</div>
+        <div class="card scenario-input-card scenario-input-b">
+          <h3>Scenario B</h3>
 
-        <label for="repaymentB">Regular repayment</label>
-        <input id="repaymentB" type="number" value="4700" min="0" step="1" />
+          <label class="scenario-label-b" for="repaymentB">Regular repayment</label>
+          <input id="repaymentB" type="number" value="4700" min="0" step="1" />
 
-        <label for="frequencyB">Repayment frequency</label>
-        <select id="frequencyB">
-          <option value="monthly" selected>Monthly</option>
-          <option value="fortnightly">Fortnightly</option>
-          <option value="weekly">Weekly</option>
-        </select>
+          <label class="scenario-label-b" for="frequencyB">Repayment frequency</label>
+          <select id="frequencyB">
+            <option value="monthly" selected>Monthly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="weekly">Weekly</option>
+          </select>
 
-        <label for="rateB">Interest rate (% p.a.)</label>
-        <input id="rateB" type="number" value="6.19" min="0" step="0.01" />
+          <label class="scenario-label-b" for="rateB">Interest rate (% p.a.)</label>
+          <input id="rateB" type="number" value="6.19" min="0" step="0.01" />
 
-        <label for="offsetB">Offset balance</label>
-        <input id="offsetB" type="number" value="50000" min="0" step="1000" />
+          <label class="scenario-label-b" for="offsetB">Offset balance</label>
+          <input id="offsetB" type="number" value="50000" min="0" step="1000" />
 
-        <label for="lumpSumB">One-off payment</label>
-        <input id="lumpSumB" type="number" value="10000" min="0" step="1000" />
+          <label class="scenario-label-b" for="lumpSumB">One-off payment</label>
+          <input id="lumpSumB" type="number" value="10000" min="0" step="1000" />
 
-        <label for="lumpWhenYearsB">One-off timing (years from now)</label>
-        <input id="lumpWhenYearsB" type="number" value="0" min="0" step="0.1" />
+          <label class="scenario-label-b" for="lumpWhenYearsB">One-off timing (years from now)</label>
+          <input id="lumpWhenYearsB" type="number" value="0" min="0" step="0.1" />
+        </div>
 
         <div class="section-title">Extra planning tool</div>
 
@@ -633,7 +710,8 @@
               <div class="label">Total interest</div>
               <div class="value" id="totalInterestB">-</div>
             </div>
-            <div class="label">Interest-charged loan after offset</div>
+            <div class="stat">
+              <div class="label">Interest-charged loan after offset</div>
               <div class="value" id="effectiveLoanB">-</div>
             </div>
 
@@ -1024,7 +1102,7 @@
       tbody.innerHTML = '';
 
       if (!yearlyData.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No data available.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No data available.</td></tr>';
         return;
       }
 
@@ -1342,8 +1420,6 @@
 
       document.getElementById('scenarioATitle').textContent = nameA;
       document.getElementById('scenarioBTitle').textContent = nameB;
-      document.getElementById('compHeadA').textContent = nameA;
-      document.getElementById('compHeadB').textContent = nameB;
 
       const lumpWhenPeriodsA = Math.round(scenarioA.lumpWhenYears * getPeriodsPerYear(scenarioA.frequency));
       const lumpWhenPeriodsB = Math.round(scenarioB.lumpWhenYears * getPeriodsPerYear(scenarioB.frequency));
@@ -1393,6 +1469,7 @@
 
       setComparisonTable(nameA, nameB, scenarioA, resultA, extrasA, scenarioB, resultB, extrasB);
       updateHeadline(nameA, nameB, resultA, resultB, scenarioA, scenarioB);
+
       drawComparisonChart(
         document.getElementById('comparisonChart'),
         resultA.yearlyData,
