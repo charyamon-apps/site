@@ -192,7 +192,7 @@
       table-layout: fixed;
     }
 
-    th, td {
+    td {
       border-bottom: 1px solid #eee6f0;
       vertical-align: top;
     }
@@ -259,26 +259,6 @@
       padding: 12px 4px 0;
     }
 
-    .print-full-year .month {
-      display: block;
-    }
-
-    .print-single-month .month {
-      display: none !important;
-    }
-
-    .print-single-month .month.print-target {
-      display: block !important;
-      width: 100% !important;
-      max-width: 100% !important;
-    }
-
-    .print-single-month .year-grid {
-      display: block !important;
-      min-width: 0 !important;
-      width: 100% !important;
-    }
-
     @media (max-width: 1200px) {
       .controls {
         grid-template-columns: repeat(2, 1fr);
@@ -325,14 +305,6 @@
         min-width: 0 !important;
         gap: 6px;
         width: 100%;
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-
-      .month {
-        break-inside: avoid;
-        page-break-inside: avoid;
-        box-shadow: none;
       }
 
       textarea.day-input {
@@ -360,21 +332,31 @@
         padding: 6px 6px 5px;
       }
 
-      .month,
-      .year-grid,
-      .planner-wrap {
-        page-break-after: avoid !important;
+      body.print-month .month {
+        display: none !important;
+      }
+
+      body.print-month .month.print-target {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      body.print-month .year-grid {
+        display: block !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
       }
     }
   </style>
 </head>
-<body class="print-full-year">
+<body>
   <div class="app">
     <section class="topbar">
       <h1>Pastel Rainbow Year-at-a-Glance Planner</h1>
       <p>
-        Fill your whole year, print it with colours, and export it to Excel.
-        Still a spreadsheet at heart, obviously. Just wearing a cardigan now.
+        Fill your whole year, print it with colours, and export it to Excel. Still a spreadsheet at heart, obviously.
+        Just wearing a cardigan now.
       </p>
 
       <div class="controls">
@@ -592,7 +574,7 @@
     function getMonthSurvivalTip(monthIndex) {
       const tips = [
         "Survive January: hydrate and lower expectations.",
-        "Survive February: it’s short, thank God.",
+        "Survive February: it's short, thank God.",
         "Survive March: admin begins its annual attack.",
         "Survive April: Easter chocolate and strategic disappearing.",
         "Survive May: Mother's Day and emotional paperwork.",
@@ -622,7 +604,7 @@
       monthNames.forEach((monthName, monthIndex) => {
         const monthEl = document.createElement("div");
         monthEl.className = `month month-${monthIndex}`;
-        monthEl.dataset.monthIndex = monthIndex;
+        monthEl.dataset.monthIndex = String(monthIndex);
 
         const header = document.createElement("div");
         header.className = "month-header";
@@ -640,7 +622,7 @@
           const dateKey = formatDateKey(year, monthIndex, day);
           const weekday = getDayOfWeek(year, monthIndex, day);
           const holidayText = holidays[dateKey] || "";
-          const savedText = savedData[dateKey] ?? holidayText;
+          const savedText = savedData[dateKey] !== undefined ? savedData[dateKey] : holidayText;
 
           if (holidayText) tr.classList.add("holiday-row");
 
@@ -732,6 +714,7 @@
 
       const styleId = "dynamic-print-style";
       let styleTag = document.getElementById(styleId);
+
       if (!styleTag) {
         styleTag = document.createElement("style");
         styleTag.id = styleId;
@@ -746,32 +729,15 @@
       `;
     }
 
-    function applyPrintMode() {
-      const mode = printModeEl.value;
-      const monthIndex = Number(printMonthEl.value);
-
-      document.body.classList.remove("print-full-year", "print-single-month");
-
-      document.querySelectorAll(".month").forEach(month => {
-        month.classList.remove("print-target");
-      });
-
-      if (mode === "month") {
-        document.body.classList.add("print-single-month");
-        const target = document.querySelector(\`.month[data-month-index="\${monthIndex}"]\`);
-        if (target) target.classList.add("print-target");
-      } else {
-        document.body.classList.add("print-full-year");
-      }
-    }
-
     function fitYearToSinglePage() {
       yearGrid.style.transform = "scale(1)";
       yearGrid.style.width = "";
       yearGrid.style.height = "";
+      plannerWrap.style.minHeight = "";
 
-      const mode = printModeEl.value;
-      if (mode === "month") return;
+      if (printModeEl.value === "month") {
+        return;
+      }
 
       const size = paperSizeEl.value;
       const orientation = orientationEl.value;
@@ -793,8 +759,9 @@
         pageHeightMm = 297;
       }
 
-      const printableWidthPx = ((pageWidthMm - 12) / 25.4) * 96;
-      const printableHeightPx = ((pageHeightMm - 12) / 25.4) * 96;
+      const marginMm = 12;
+      const printableWidthPx = ((pageWidthMm - marginMm) / 25.4) * 96;
+      const printableHeightPx = ((pageHeightMm - marginMm) / 25.4) * 96;
 
       const contentWidth = yearGrid.scrollWidth;
       const contentHeight = yearGrid.scrollHeight;
@@ -803,35 +770,46 @@
       const scaleY = printableHeightPx / contentHeight;
       const scale = Math.min(scaleX, scaleY, 1);
 
-      yearGrid.style.transform = `scale(${scale})`;
       yearGrid.style.width = `${contentWidth}px`;
       yearGrid.style.height = `${contentHeight}px`;
-
+      yearGrid.style.transform = `scale(${scale})`;
       plannerWrap.style.minHeight = `${contentHeight * scale}px`;
     }
 
     function resetAfterPrint() {
+      document.body.classList.remove("print-month");
+      document.querySelectorAll(".month").forEach(month => {
+        month.classList.remove("print-target");
+      });
+
       yearGrid.style.transform = "scale(1)";
       yearGrid.style.width = "";
       yearGrid.style.height = "";
       plannerWrap.style.minHeight = "";
-      document.body.classList.remove("print-single-month", "print-full-year");
-      document.body.classList.add("print-full-year");
-
-      document.querySelectorAll(".month").forEach(month => {
-        month.classList.remove("print-target");
-      });
     }
 
     function printPlanner() {
       saveCurrentYear();
       setPrintPageStyle();
-      applyPrintMode();
+
+      document.body.classList.remove("print-month");
+      document.querySelectorAll(".month").forEach(month => {
+        month.classList.remove("print-target");
+      });
+
+      if (printModeEl.value === "month") {
+        document.body.classList.add("print-month");
+        const targetMonth = document.querySelector(`.month[data-month-index="${printMonthEl.value}"]`);
+        if (targetMonth) {
+          targetMonth.classList.add("print-target");
+        }
+      }
+
       fitYearToSinglePage();
 
       setTimeout(() => {
         window.print();
-      }, 150);
+      }, 100);
     }
 
     window.addEventListener("afterprint", resetAfterPrint);
