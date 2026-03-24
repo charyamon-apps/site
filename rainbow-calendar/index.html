@@ -12,7 +12,6 @@
       --muted: #746c78;
       --line: #e7dfea;
       --shadow: 0 10px 30px rgba(87, 66, 100, 0.08);
-      --radius: 18px;
       --font: Arial, Helvetica, sans-serif;
     }
 
@@ -20,14 +19,19 @@
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       font-family: var(--font);
       background:
         radial-gradient(circle at top left, #fff2f7 0%, transparent 28%),
         radial-gradient(circle at top right, #eef7ff 0%, transparent 28%),
         var(--bg);
       color: var(--ink);
+    }
+
+    body {
+      min-height: 100vh;
     }
 
     .app {
@@ -37,7 +41,7 @@
     }
 
     .topbar {
-      background: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,0.9);
       border: 1px solid var(--line);
       border-radius: 24px;
       box-shadow: var(--shadow);
@@ -62,7 +66,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 130px 140px 150px repeat(5, minmax(120px, 1fr));
+      grid-template-columns: 110px 120px 140px 170px 170px repeat(5, minmax(110px, 1fr));
       gap: 10px;
       margin-top: 16px;
       align-items: end;
@@ -151,6 +155,7 @@
       grid-template-columns: repeat(12, minmax(180px, 1fr));
       gap: 10px;
       min-width: 2200px;
+      transform-origin: top left;
     }
 
     .month {
@@ -254,7 +259,27 @@
       padding: 12px 4px 0;
     }
 
-    @media (max-width: 1100px) {
+    .print-full-year .month {
+      display: block;
+    }
+
+    .print-single-month .month {
+      display: none !important;
+    }
+
+    .print-single-month .month.print-target {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .print-single-month .year-grid {
+      display: block !important;
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    @media (max-width: 1200px) {
       .controls {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -265,13 +290,10 @@
     }
 
     @media print {
-      @page {
-        size: A3 landscape;
-        margin: 8mm;
-      }
-
       html, body {
         background: #fff !important;
+        width: 100%;
+        height: 100%;
       }
 
       body {
@@ -287,51 +309,72 @@
       .app {
         max-width: none;
         padding: 0;
+        margin: 0;
       }
 
       .planner-wrap {
         box-shadow: none;
         border: none;
+        border-radius: 0;
         padding: 0;
         overflow: visible;
+        background: #fff;
       }
 
       .year-grid {
-        min-width: 0;
+        min-width: 0 !important;
         gap: 6px;
+        width: 100%;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
 
       .month {
         break-inside: avoid;
+        page-break-inside: avoid;
         box-shadow: none;
       }
 
       textarea.day-input {
-        min-height: 22px;
-        font-size: 8.5pt;
+        min-height: 18px;
+        font-size: 7pt;
       }
 
       .day-num {
-        font-size: 8.5pt;
+        font-size: 7pt;
+        width: 22px;
+        min-width: 22px;
+        padding: 4px 2px;
       }
 
       .month-title {
-        font-size: 10pt;
+        font-size: 8.5pt;
       }
 
       .month-tip {
-        font-size: 6.6pt;
+        font-size: 5.8pt;
+        min-height: auto;
+      }
+
+      .month-header {
+        padding: 6px 6px 5px;
+      }
+
+      .month,
+      .year-grid,
+      .planner-wrap {
+        page-break-after: avoid !important;
       }
     }
   </style>
 </head>
-<body>
+<body class="print-full-year">
   <div class="app">
     <section class="topbar">
       <h1>Pastel Rainbow Year-at-a-Glance Planner</h1>
       <p>
         Fill your whole year, print it with colours, and export it to Excel.
-        Basically a cheerful administrative spreadsheet, which is still a spreadsheet, but at least now it’s trying.
+        Still a spreadsheet at heart, obviously. Just wearing a cardigan now.
       </p>
 
       <div class="controls">
@@ -356,22 +399,35 @@
           </select>
         </div>
 
+        <div class="field">
+          <label for="printMode">Print what</label>
+          <select id="printMode">
+            <option value="year" selected>Entire year</option>
+            <option value="month">One month only</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="printMonth">Month to print</label>
+          <select id="printMonth"></select>
+        </div>
+
         <button class="primary" id="generateBtn">Generate / Refresh</button>
         <button id="saveBtn">Save to browser</button>
-        <button id="printBtn">Print with colours</button>
-        <button id="csvBtn">Download CSV for Excel</button>
+        <button id="printBtn">Print</button>
+        <button id="csvBtn">Download CSV</button>
         <button class="danger" id="clearBtn">Clear this year</button>
       </div>
 
       <div class="status" id="status"></div>
     </section>
 
-    <section class="planner-wrap">
+    <section class="planner-wrap" id="plannerWrap">
       <div class="year-grid" id="yearGrid"></div>
     </section>
 
     <div class="footer-note">
-      Blank days stay blank. Which feels right, honestly.
+      Blank days stay blank. Which is frankly the most emotionally mature feature here.
     </div>
   </div>
 
@@ -386,8 +442,18 @@
     const statusEl = document.getElementById("status");
     const paperSizeEl = document.getElementById("paperSize");
     const orientationEl = document.getElementById("orientation");
+    const printModeEl = document.getElementById("printMode");
+    const printMonthEl = document.getElementById("printMonth");
+    const plannerWrap = document.getElementById("plannerWrap");
 
     yearInput.value = new Date().getFullYear();
+
+    monthNames.forEach((month, index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.textContent = month;
+      printMonthEl.appendChild(option);
+    });
 
     function storageKey(year) {
       return `year-at-a-glance-${year}`;
@@ -426,7 +492,6 @@
       return new Date(year, month, day).getDay();
     }
 
-    // Easter calculation (Anonymous Gregorian algorithm)
     function getEasterSunday(year) {
       const a = year % 19;
       const b = Math.floor(year / 100);
@@ -473,13 +538,11 @@
     function getNswPublicHolidays(year) {
       const holidays = {};
 
-      // Fixed / observed
       addHoliday(holidays, new Date(year, 0, 1), "New Year's Day");
 
       const australiaDayActual = new Date(year, 0, 26);
       addHoliday(holidays, observedIfWeekend(australiaDayActual), "Australia Day");
 
-      // Easter
       const easterSunday = getEasterSunday(year);
       const goodFriday = new Date(easterSunday);
       goodFriday.setDate(easterSunday.getDate() - 2);
@@ -495,16 +558,10 @@
       addHoliday(holidays, easterSunday, "Easter Sunday");
       addHoliday(holidays, easterMonday, "Easter Monday");
 
-      // Anzac Day
       addHoliday(holidays, new Date(year, 3, 25), "Anzac Day");
-
-      // King's Birthday - second Monday in June
       addHoliday(holidays, nthWeekdayOfMonth(year, 5, 1, 2), "King's Birthday");
-
-      // Labour Day - first Monday in October
       addHoliday(holidays, nthWeekdayOfMonth(year, 9, 1, 1), "Labour Day");
 
-      // Christmas / Boxing Day observed
       const christmas = new Date(year, 11, 25);
       const boxingDay = new Date(year, 11, 26);
 
@@ -513,9 +570,9 @@
         addHoliday(holidays, new Date(year, 11, 27), "Additional Day");
         addHoliday(holidays, new Date(year, 11, 28), "Boxing Day");
       } else if (christmas.getDay() === 0) {
+        addHoliday(holidays, christmas, "Christmas Day");
         addHoliday(holidays, new Date(year, 11, 26), "Additional Day");
         addHoliday(holidays, new Date(year, 11, 27), "Boxing Day");
-        addHoliday(holidays, christmas, "Christmas Day");
       } else if (boxingDay.getDay() === 6) {
         addHoliday(holidays, christmas, "Christmas Day");
         addHoliday(holidays, boxingDay, "Boxing Day");
@@ -534,18 +591,18 @@
 
     function getMonthSurvivalTip(monthIndex) {
       const tips = [
-        "Survive January: hydrate, recover, and pretend this is your fresh start.",
-        "Survive February: it’s short, cling to that like a life raft.",
-        "Survive March: the year is getting serious now, unfortunately.",
-        "Survive April: chocolate, public holidays, and strategic disappearing.",
-        "Survive May: Mother’s Day feelings and the first proper tiredness.",
-        "Survive June: long weekends and pretending winter builds character.",
-        "Survive July: school holidays, cold mornings, and low expectations.",
-        "Survive August: keep going. This month is mostly vibes and grit.",
-        "Survive September: spring optimism with a side of admin.",
-        "Survive October: Labour Day and the slow collapse into end-of-year chaos.",
-        "Survive November: too many events, not enough emotional bandwidth.",
-        "Survive December: festive sparkle hiding logistical violence."
+        "Survive January: hydrate and lower expectations.",
+        "Survive February: it’s short, thank God.",
+        "Survive March: admin begins its annual attack.",
+        "Survive April: Easter chocolate and strategic disappearing.",
+        "Survive May: Mother's Day and emotional paperwork.",
+        "Survive June: long weekend, cold toes, keep moving.",
+        "Survive July: school holidays and soup-based survival.",
+        "Survive August: this month is basically stubbornness.",
+        "Survive September: spring optimism with hidden admin.",
+        "Survive October: Labour Day, then chaos resumes.",
+        "Survive November: too many things, not enough soul.",
+        "Survive December: festive sparkle, logistical violence."
       ];
       return tips[monthIndex];
     }
@@ -565,6 +622,7 @@
       monthNames.forEach((monthName, monthIndex) => {
         const monthEl = document.createElement("div");
         monthEl.className = `month month-${monthIndex}`;
+        monthEl.dataset.monthIndex = monthIndex;
 
         const header = document.createElement("div");
         header.className = "month-header";
@@ -638,7 +696,7 @@
       if (!ok) return;
       localStorage.removeItem(storageKey(year));
       buildYearPlanner();
-      showStatus(`Cleared ${year}. Ruthless, but fair.`);
+      showStatus(`Cleared ${year}. A brutal reset.`);
     }
 
     function exportCSV() {
@@ -665,12 +723,10 @@
       a.remove();
       URL.revokeObjectURL(url);
 
-      showStatus("CSV downloaded. Excel should behave itself.");
+      showStatus("CSV downloaded.");
     }
 
-    function printPlanner() {
-      saveCurrentYear();
-
+    function setPrintPageStyle() {
       const size = paperSizeEl.value;
       const orientation = orientationEl.value;
 
@@ -685,12 +741,100 @@
       styleTag.textContent = `
         @page {
           size: ${size} ${orientation};
-          margin: 8mm;
+          margin: 6mm;
         }
       `;
-
-      window.print();
     }
+
+    function applyPrintMode() {
+      const mode = printModeEl.value;
+      const monthIndex = Number(printMonthEl.value);
+
+      document.body.classList.remove("print-full-year", "print-single-month");
+
+      document.querySelectorAll(".month").forEach(month => {
+        month.classList.remove("print-target");
+      });
+
+      if (mode === "month") {
+        document.body.classList.add("print-single-month");
+        const target = document.querySelector(\`.month[data-month-index="\${monthIndex}"]\`);
+        if (target) target.classList.add("print-target");
+      } else {
+        document.body.classList.add("print-full-year");
+      }
+    }
+
+    function fitYearToSinglePage() {
+      yearGrid.style.transform = "scale(1)";
+      yearGrid.style.width = "";
+      yearGrid.style.height = "";
+
+      const mode = printModeEl.value;
+      if (mode === "month") return;
+
+      const size = paperSizeEl.value;
+      const orientation = orientationEl.value;
+
+      let pageWidthMm = 297;
+      let pageHeightMm = 210;
+
+      if (size === "A4" && orientation === "portrait") {
+        pageWidthMm = 210;
+        pageHeightMm = 297;
+      } else if (size === "A4" && orientation === "landscape") {
+        pageWidthMm = 297;
+        pageHeightMm = 210;
+      } else if (size === "A3" && orientation === "portrait") {
+        pageWidthMm = 297;
+        pageHeightMm = 420;
+      } else if (size === "A3" && orientation === "landscape") {
+        pageWidthMm = 420;
+        pageHeightMm = 297;
+      }
+
+      const printableWidthPx = ((pageWidthMm - 12) / 25.4) * 96;
+      const printableHeightPx = ((pageHeightMm - 12) / 25.4) * 96;
+
+      const contentWidth = yearGrid.scrollWidth;
+      const contentHeight = yearGrid.scrollHeight;
+
+      const scaleX = printableWidthPx / contentWidth;
+      const scaleY = printableHeightPx / contentHeight;
+      const scale = Math.min(scaleX, scaleY, 1);
+
+      yearGrid.style.transform = `scale(${scale})`;
+      yearGrid.style.width = `${contentWidth}px`;
+      yearGrid.style.height = `${contentHeight}px`;
+
+      plannerWrap.style.minHeight = `${contentHeight * scale}px`;
+    }
+
+    function resetAfterPrint() {
+      yearGrid.style.transform = "scale(1)";
+      yearGrid.style.width = "";
+      yearGrid.style.height = "";
+      plannerWrap.style.minHeight = "";
+      document.body.classList.remove("print-single-month", "print-full-year");
+      document.body.classList.add("print-full-year");
+
+      document.querySelectorAll(".month").forEach(month => {
+        month.classList.remove("print-target");
+      });
+    }
+
+    function printPlanner() {
+      saveCurrentYear();
+      setPrintPageStyle();
+      applyPrintMode();
+      fitYearToSinglePage();
+
+      setTimeout(() => {
+        window.print();
+      }, 150);
+    }
+
+    window.addEventListener("afterprint", resetAfterPrint);
 
     document.getElementById("generateBtn").addEventListener("click", buildYearPlanner);
 
@@ -703,6 +847,12 @@
     document.getElementById("printBtn").addEventListener("click", printPlanner);
     document.getElementById("clearBtn").addEventListener("click", clearYear);
     yearInput.addEventListener("change", buildYearPlanner);
+
+    printModeEl.addEventListener("change", () => {
+      printMonthEl.disabled = printModeEl.value !== "month";
+    });
+
+    printMonthEl.disabled = true;
 
     buildYearPlanner();
   </script>
