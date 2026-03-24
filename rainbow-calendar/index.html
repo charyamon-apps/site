@@ -239,18 +239,18 @@
       font-weight: 600;
     }
 
-    .month-0  .month-header { background: #ffd9e5; }
-    .month-1  .month-header { background: #ffe7cf; }
-    .month-2  .month-header { background: #fff4c7; }
-    .month-3  .month-header { background: #e3f5d5; }
-    .month-4  .month-header { background: #d8f4df; }
-    .month-5  .month-header { background: #d9f4f1; }
-    .month-6  .month-header { background: #ddeeff; }
-    .month-7  .month-header { background: #e5e2ff; }
-    .month-8  .month-header { background: #efe1ff; }
-    .month-9  .month-header { background: #ffe2f4; }
-    .month-10 .month-header { background: #eee7f7; }
-    .month-11 .month-header { background: #ffdce7; }
+    .month-0  .month-header, .month-print-view.month-0 .month-print-header { background: #ffd9e5; }
+    .month-1  .month-header, .month-print-view.month-1 .month-print-header { background: #ffe7cf; }
+    .month-2  .month-header, .month-print-view.month-2 .month-print-header { background: #fff4c7; }
+    .month-3  .month-header, .month-print-view.month-3 .month-print-header { background: #e3f5d5; }
+    .month-4  .month-header, .month-print-view.month-4 .month-print-header { background: #d8f4df; }
+    .month-5  .month-header, .month-print-view.month-5 .month-print-header { background: #d9f4f1; }
+    .month-6  .month-header, .month-print-view.month-6 .month-print-header { background: #ddeeff; }
+    .month-7  .month-header, .month-print-view.month-7 .month-print-header { background: #e5e2ff; }
+    .month-8  .month-header, .month-print-view.month-8 .month-print-header { background: #efe1ff; }
+    .month-9  .month-header, .month-print-view.month-9 .month-print-header { background: #ffe2f4; }
+    .month-10 .month-header, .month-print-view.month-10 .month-print-header { background: #eee7f7; }
+    .month-11 .month-header, .month-print-view.month-11 .month-print-header { background: #ffdce7; }
 
     .footer-note {
       text-align: center;
@@ -259,7 +259,6 @@
       padding: 12px 4px 0;
     }
 
-    /* Full page monthly print calendar */
     .month-print-view {
       display: none;
       background: #fff;
@@ -342,8 +341,12 @@
       color: #2f2a33;
     }
 
-    .month-print-events.blank::before {
-      content: "";
+    .print-year-page {
+      display: none;
+    }
+
+    .print-year-header {
+      display: none;
     }
 
     @media (max-width: 1200px) {
@@ -395,21 +398,53 @@
         height: 100%;
       }
 
+      body.print-year .month-print-view {
+        display: none !important;
+      }
+
+      body.print-year .planner-wrap {
+        display: none !important;
+      }
+
+      body.print-year .print-year-page {
+        display: flex !important;
+        width: 100vw;
+        height: 100vh;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4mm;
+      }
+
+      body.print-year .print-year-header {
+        display: block !important;
+        width: 100%;
+        text-align: left;
+        font-size: 14pt;
+        font-weight: 700;
+        color: #2f2a33;
+        margin-bottom: 4mm;
+      }
+
+      body.print-year .print-year-content {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        overflow: hidden;
+      }
+
       body.print-year .year-grid {
         display: grid !important;
         min-width: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         gap: 4px !important;
-        transform-origin: top left !important;
+        transform-origin: center center !important;
       }
 
       body.print-year .month-column {
         display: block !important;
-      }
-
-      body.print-year .month-print-view {
-        display: none !important;
       }
 
       body.print-year textarea.day-input {
@@ -439,6 +474,10 @@
 
       body.print-year .month-header {
         padding: 4px 4px 3px !important;
+      }
+
+      body.print-month .print-year-page {
+        display: none !important;
       }
 
       body.print-month .year-grid {
@@ -552,6 +591,13 @@
       <div class="month-print-view" id="monthPrintView"></div>
     </section>
 
+    <section class="print-year-page" id="printYearPage">
+      <div class="print-year-header" id="printYearHeader"></div>
+      <div class="print-year-content">
+        <div class="year-grid" id="printYearGrid"></div>
+      </div>
+    </section>
+
     <div class="footer-note">
       Blank days stay blank. Which is frankly the most emotionally mature feature here.
     </div>
@@ -567,7 +613,9 @@
 
     const yearInput = document.getElementById("yearInput");
     const yearGrid = document.getElementById("yearGrid");
+    const printYearGrid = document.getElementById("printYearGrid");
     const monthPrintView = document.getElementById("monthPrintView");
+    const printYearHeader = document.getElementById("printYearHeader");
     const statusEl = document.getElementById("status");
     const paperSizeEl = document.getElementById("paperSize");
     const orientationEl = document.getElementById("orientation");
@@ -748,16 +796,12 @@
     function getDayValue(year, monthIndex, day, savedData, holidays) {
       const dateKey = formatDateKey(year, monthIndex, day);
       const holidayText = holidays[dateKey] || "";
-      const savedText = savedData[dateKey] !== undefined ? savedData[dateKey] : holidayText;
-      return savedText;
+      return savedData[dateKey] !== undefined ? savedData[dateKey] : holidayText;
     }
 
-    function buildYearPlanner() {
-      const year = Number(yearInput.value);
-      const savedData = loadData(year);
-      const holidays = getNswPublicHolidays(year);
-
-      yearGrid.innerHTML = "";
+    function buildYearGridHTML(year, savedData, holidays, forPrint = false) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "year-grid";
 
       monthNames.forEach((monthName, monthIndex) => {
         const monthEl = document.createElement("div");
@@ -791,33 +835,70 @@
           const eventTd = document.createElement("td");
           eventTd.className = "event-cell";
 
-          const textarea = document.createElement("textarea");
-          textarea.className = "day-input";
-          textarea.value = savedText;
-          textarea.dataset.date = dateKey;
-          textarea.spellcheck = false;
+          if (forPrint) {
+            const div = document.createElement("div");
+            div.className = "day-input";
+            div.style.whiteSpace = "pre-wrap";
+            div.textContent = savedText;
+            eventTd.appendChild(div);
+          } else {
+            const textarea = document.createElement("textarea");
+            textarea.className = "day-input";
+            textarea.value = savedText;
+            textarea.dataset.date = dateKey;
+            textarea.spellcheck = false;
 
-          textarea.addEventListener("input", () => {
-            autoResize(textarea);
-            saveCurrentYear();
-          });
+            textarea.addEventListener("input", () => {
+              autoResize(textarea);
+              saveCurrentYear();
+            });
 
-          eventTd.appendChild(textarea);
+            eventTd.appendChild(textarea);
+            requestAnimationFrame(() => autoResize(textarea));
+          }
+
           tr.appendChild(dayTd);
           tr.appendChild(eventTd);
           tbody.appendChild(tr);
-
-          requestAnimationFrame(() => autoResize(textarea));
         }
 
         table.appendChild(tbody);
         monthEl.appendChild(header);
         monthEl.appendChild(table);
-        yearGrid.appendChild(monthEl);
+        wrapper.appendChild(monthEl);
       });
 
+      return wrapper;
+    }
+
+    function buildYearPlanner() {
+      const year = Number(yearInput.value);
+      const savedData = loadData(year);
+      const holidays = getNswPublicHolidays(year);
+
+      yearGrid.innerHTML = "";
+      const screenGrid = buildYearGridHTML(year, savedData, holidays, false);
+      while (screenGrid.firstChild) {
+        yearGrid.appendChild(screenGrid.firstChild);
+      }
+
+      buildPrintYearView();
       buildMonthPrintView();
       showStatus(`Loaded ${year}. NSW public holidays are included.`);
+    }
+
+    function buildPrintYearView() {
+      const year = Number(yearInput.value);
+      const savedData = loadData(year);
+      const holidays = getNswPublicHolidays(year);
+
+      printYearHeader.textContent = `Year at a Glance ${year}`;
+      printYearGrid.innerHTML = "";
+
+      const printGrid = buildYearGridHTML(year, savedData, holidays, true);
+      while (printGrid.firstChild) {
+        printYearGrid.appendChild(printGrid.firstChild);
+      }
     }
 
     function buildMonthPrintView() {
@@ -831,9 +912,7 @@
       const daysInMonth = getDaysInMonth(year, monthIndex);
       const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
 
-      const monthClass = `month-${monthIndex}`;
-
-      monthPrintView.className = `month-print-view ${monthClass}`;
+      monthPrintView.className = `month-print-view month-${monthIndex}`;
       monthPrintView.innerHTML = "";
 
       const header = document.createElement("div");
@@ -874,7 +953,7 @@
         dayNum.textContent = day;
 
         const events = document.createElement("div");
-        events.className = "month-print-events" + (value.trim() === "" ? " blank" : "");
+        events.className = "month-print-events";
         events.textContent = value;
 
         cell.appendChild(dayNum);
@@ -890,12 +969,13 @@
     function saveCurrentYear() {
       const year = Number(yearInput.value);
       const data = {};
-      document.querySelectorAll(".day-input").forEach(input => {
+      document.querySelectorAll("#yearGrid .day-input").forEach(input => {
         if (input.value.trim() !== "") {
           data[input.dataset.date] = input.value.trim();
         }
       });
       saveData(year, data);
+      buildPrintYearView();
       buildMonthPrintView();
     }
 
@@ -956,15 +1036,12 @@
       `;
     }
 
-    function fitYearToSinglePage() {
-      yearGrid.style.transform = "scale(1)";
-      yearGrid.style.width = "";
-      yearGrid.style.height = "";
-      plannerWrap.style.minHeight = "";
+    function fitYearPrintToSinglePage() {
+      printYearGrid.style.transform = "scale(1)";
+      printYearGrid.style.width = "";
+      printYearGrid.style.height = "";
 
-      if (printModeEl.value === "month") {
-        return;
-      }
+      if (printModeEl.value === "month") return;
 
       const size = paperSizeEl.value;
       const orientation = orientationEl.value;
@@ -986,23 +1063,20 @@
         pageHeightMm = 297;
       }
 
-      const pageMarginMm = 8;
-      const printableWidthPx = ((pageWidthMm - pageMarginMm) / 25.4) * 96;
-      const printableHeightPx = ((pageHeightMm - pageMarginMm) / 25.4) * 96;
+      const usableWidthPx = ((pageWidthMm - 8) / 25.4) * 96;
+      const usableHeightPx = ((pageHeightMm - 18) / 25.4) * 96;
 
-      const contentWidth = yearGrid.scrollWidth;
-      const contentHeight = yearGrid.scrollHeight;
+      const contentWidth = printYearGrid.scrollWidth;
+      const contentHeight = printYearGrid.scrollHeight;
 
-      const safetyFactor = 0.88;
+      const scaleX = usableWidthPx / contentWidth;
+      const scaleY = usableHeightPx / contentHeight;
+      const safetyFactor = 0.9;
+      const scale = Math.min(scaleX, scaleY, 1) * safetyFactor;
 
-      const scaleX = printableWidthPx / contentWidth;
-      const scaleY = printableHeightPx / contentHeight;
-      const scale = Math.min(scaleX, scaleY) * safetyFactor;
-
-      yearGrid.style.width = `${contentWidth}px`;
-      yearGrid.style.height = `${contentHeight}px`;
-      yearGrid.style.transform = `scale(${scale})`;
-      plannerWrap.style.minHeight = `${contentHeight * scale}px`;
+      printYearGrid.style.width = `${contentWidth}px`;
+      printYearGrid.style.height = `${contentHeight}px`;
+      printYearGrid.style.transform = `scale(${scale})`;
     }
 
     function preparePrintMode() {
@@ -1011,23 +1085,23 @@
         buildMonthPrintView();
         document.body.classList.add("print-month");
       } else {
+        buildPrintYearView();
         document.body.classList.add("print-year");
       }
     }
 
     function resetAfterPrint() {
       document.body.classList.remove("print-year", "print-month");
-      yearGrid.style.transform = "scale(1)";
-      yearGrid.style.width = "";
-      yearGrid.style.height = "";
-      plannerWrap.style.minHeight = "";
+      printYearGrid.style.transform = "scale(1)";
+      printYearGrid.style.width = "";
+      printYearGrid.style.height = "";
     }
 
     function printPlanner() {
       saveCurrentYear();
       setPrintPageStyle();
       preparePrintMode();
-      fitYearToSinglePage();
+      fitYearPrintToSinglePage();
 
       setTimeout(() => {
         window.print();
