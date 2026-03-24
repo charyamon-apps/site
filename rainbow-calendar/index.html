@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pastel Rainbow Year Planner</title>
+  <title>Pastel Rainbow Year-at-a-Glance Planner</title>
   <style>
     :root {
-      --bg: #fffafc;
+      --bg: #faf7fb;
       --card: #ffffff;
-      --ink: #3f3a46;
-      --muted: #7b7280;
-      --line: #e8dfeb;
-      --shadow: 0 10px 30px rgba(120, 102, 122, 0.12);
-      --radius: 18px;
+      --ink: #2f2a33;
+      --muted: #746c78;
+      --line: #e7dfea;
+      --shadow: 0 10px 30px rgba(87, 66, 100, 0.08);
       --font: Arial, Helvetica, sans-serif;
     }
 
@@ -20,318 +19,289 @@
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       font-family: var(--font);
       background:
-        radial-gradient(circle at top left, #fff6fa 0%, transparent 35%),
-        radial-gradient(circle at top right, #f7fbff 0%, transparent 35%),
+        radial-gradient(circle at top left, #fff2f7 0%, transparent 28%),
+        radial-gradient(circle at top right, #eef7ff 0%, transparent 28%),
         var(--bg);
       color: var(--ink);
     }
 
-    .app {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
+    body {
+      min-height: 100vh;
     }
 
-    .hero {
-      background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(232,223,235,0.9);
+    .app {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .topbar {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--line);
       border-radius: 24px;
       box-shadow: var(--shadow);
-      padding: 20px;
-      margin-bottom: 20px;
+      padding: 18px;
+      margin-bottom: 18px;
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      backdrop-filter: blur(10px);
     }
 
-    .hero h1 {
+    .topbar h1 {
       margin: 0 0 8px;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-size: clamp(1.4rem, 2.6vw, 2.2rem);
     }
 
-    .hero p {
+    .topbar p {
       margin: 0;
       color: var(--muted);
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     .controls {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 18px;
+      grid-template-columns: 110px 120px 140px 170px 170px repeat(5, minmax(110px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+      align-items: end;
     }
 
-    .control-card {
-      background: var(--card);
+    .field {
+      background: #fff;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
+      border-radius: 14px;
+      padding: 10px;
     }
 
-    .control-card label {
+    .field label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      font-weight: bold;
       color: var(--muted);
       margin-bottom: 6px;
-      font-weight: bold;
     }
 
-    select,
-    input,
-    button,
-    textarea {
+    input, select, button, textarea {
       font: inherit;
     }
 
-    select,
-    input[type="number"] {
+    input[type="number"], select {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 12px;
       border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
       background: #fff;
       color: var(--ink);
     }
 
-    .button-stack {
-      display: grid;
-      gap: 8px;
-    }
-
     button {
+      width: 100%;
       border: none;
       border-radius: 12px;
-      padding: 10px 12px;
-      cursor: pointer;
+      padding: 11px 12px;
       font-weight: bold;
-      background: #f3ecf7;
+      cursor: pointer;
+      background: #f1e8f7;
       color: var(--ink);
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-      box-shadow: 0 4px 10px rgba(90, 75, 95, 0.08);
+      box-shadow: 0 4px 10px rgba(87, 66, 100, 0.08);
+      transition: transform 0.12s ease, background 0.12s ease;
     }
 
     button:hover {
       transform: translateY(-1px);
-      background: #eee4f4;
+      background: #e9dbf4;
     }
 
-    button.primary {
-      background: #e9f5ef;
+    .primary {
+      background: #dff4e6;
     }
 
-    button.primary:hover {
-      background: #dcf0e5;
+    .primary:hover {
+      background: #d1eedc;
     }
 
-    button.warning {
-      background: #fff0f2;
+    .danger {
+      background: #ffe6eb;
     }
 
-    button.warning:hover {
-      background: #ffe2e7;
+    .danger:hover {
+      background: #ffd8e1;
     }
 
     .status {
-      margin-top: 12px;
+      margin-top: 10px;
+      min-height: 18px;
       font-size: 0.9rem;
       color: var(--muted);
-      min-height: 20px;
     }
 
-    .planner {
-      display: grid;
-      gap: 24px;
-    }
-
-    .month-page {
-      background: #fff;
+    .planner-wrap {
+      background: var(--card);
       border: 1px solid var(--line);
       border-radius: 24px;
-      overflow: hidden;
       box-shadow: var(--shadow);
-      page-break-after: always;
-      break-after: page;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .year-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(180px, 1fr));
+      gap: 10px;
+      min-width: 2200px;
+      transform-origin: top left;
+    }
+
+    .month {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
     }
 
     .month-header {
-      padding: 18px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 12px;
-      color: #4a4450;
+      padding: 10px 10px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
     }
 
     .month-title {
       margin: 0;
-      font-size: clamp(1.2rem, 2vw, 1.8rem);
-    }
-
-    .month-subtitle {
-      margin: 4px 0 0;
-      font-size: 0.92rem;
-      color: rgba(70, 62, 74, 0.72);
-    }
-
-    .month-toolbar {
-      padding: 12px 20px 0;
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .month-toolbar button {
-      padding: 8px 10px;
-      font-size: 0.9rem;
-    }
-
-    .calendar {
-      padding: 16px 16px 20px;
-    }
-
-    .weekday-row,
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-    }
-
-    .weekday {
       text-align: center;
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       font-weight: bold;
-      color: var(--muted);
-      padding: 8px 4px 10px;
     }
 
-    .day-cell {
-      border: 1px solid #efe8f1;
-      min-height: 132px;
-      background: rgba(255,255,255,0.86);
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .month-tip {
+      margin: 5px 0 0;
+      font-size: 0.68rem;
+      text-align: center;
+      color: #524b58;
+      line-height: 1.25;
+      min-height: 34px;
     }
 
-    .day-cell.empty {
-      background: #faf7fb;
-    }
-
-    .day-number {
-      font-size: 0.82rem;
-      font-weight: bold;
-      color: #5c5462;
-      align-self: flex-start;
-      background: rgba(255,255,255,0.75);
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-
-    .day-note {
+    table {
       width: 100%;
-      flex: 1;
-      min-height: 82px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border-bottom: 1px solid #eee6f0;
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .day-num {
+      width: 28px;
+      min-width: 28px;
+      text-align: center;
+      font-size: 0.75rem;
+      padding: 6px 4px;
+      color: #3d3742;
+      border-right: 1px solid #eee6f0;
+      background: rgba(255,255,255,0.55);
+    }
+
+    .day-num.weekend {
+      color: #d94a57;
+      font-weight: bold;
+    }
+
+    .event-cell {
+      padding: 0;
+    }
+
+    textarea.day-input {
+      width: 100%;
+      min-height: 26px;
       border: none;
       resize: none;
+      padding: 6px 7px;
       background: transparent;
       color: var(--ink);
-      line-height: 1.35;
-      font-size: 0.88rem;
+      font-size: 0.72rem;
+      line-height: 1.2;
       outline: none;
+      overflow: hidden;
     }
 
-    .day-note::placeholder {
-      color: #b4a9b8;
+    .holiday-row .day-input {
+      font-weight: 600;
     }
+
+    .month-0  .month-header { background: #ffd9e5; }
+    .month-1  .month-header { background: #ffe7cf; }
+    .month-2  .month-header { background: #fff4c7; }
+    .month-3  .month-header { background: #e3f5d5; }
+    .month-4  .month-header { background: #d8f4df; }
+    .month-5  .month-header { background: #d9f4f1; }
+    .month-6  .month-header { background: #ddeeff; }
+    .month-7  .month-header { background: #e5e2ff; }
+    .month-8  .month-header { background: #efe1ff; }
+    .month-9  .month-header { background: #ffe2f4; }
+    .month-10 .month-header { background: #eee7f7; }
+    .month-11 .month-header { background: #ffdce7; }
 
     .footer-note {
       text-align: center;
       color: var(--muted);
       font-size: 0.9rem;
-      padding: 10px 6px 30px;
+      padding: 12px 4px 0;
     }
 
-    /* Pastel month colours */
-    .month-0  .month-header { background: #ffdfe8; }
-    .month-1  .month-header { background: #ffe7cc; }
-    .month-2  .month-header { background: #fff3bf; }
-    .month-3  .month-header { background: #e6f7c8; }
-    .month-4  .month-header { background: #d8f5dd; }
-    .month-5  .month-header { background: #d8f3f0; }
-    .month-6  .month-header { background: #dceeff; }
-    .month-7  .month-header { background: #e3e0ff; }
-    .month-8  .month-header { background: #efe0ff; }
-    .month-9  .month-header { background: #ffdff5; }
-    .month-10 .month-header { background: #f9e2d2; }
-    .month-11 .month-header { background: #ece7f2; }
+    .print-full-year .month {
+      display: block;
+    }
 
-    @media (max-width: 900px) {
+    .print-single-month .month {
+      display: none !important;
+    }
+
+    .print-single-month .month.print-target {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .print-single-month .year-grid {
+      display: block !important;
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    @media (max-width: 1200px) {
       .controls {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .day-cell {
-        min-height: 110px;
+      .topbar {
+        position: static;
       }
-
-      .day-note {
-        min-height: 65px;
-        font-size: 0.82rem;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
-      .calendar {
-        overflow-x: auto;
-      }
-
-      .weekday-row,
-      .grid {
-        min-width: 780px;
-      }
-    }
-
-    /* Print styles */
-    body.print-a4-landscape {
-      --print-size: A4 landscape;
-      --print-min-height: 190mm;
-    }
-
-    body.print-a3-landscape {
-      --print-size: A3 landscape;
-      --print-min-height: 270mm;
-    }
-
-    body.print-a4-portrait {
-      --print-size: A4 portrait;
-      --print-min-height: 265mm;
-    }
-
-    body.print-a3-portrait {
-      --print-size: A3 portrait;
-      --print-min-height: 390mm;
     }
 
     @media print {
-      @page {
-        size: auto;
-        margin: 10mm;
+      html, body {
+        background: #fff !important;
+        width: 100%;
+        height: 100%;
       }
 
       body {
-        background: #fff;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
-      .hero,
-      .month-toolbar,
+      .topbar,
       .footer-note {
         display: none !important;
       }
@@ -339,134 +309,154 @@
       .app {
         max-width: none;
         padding: 0;
+        margin: 0;
       }
 
-      .planner {
-        gap: 0;
-      }
-
-      .month-page {
+      .planner-wrap {
         box-shadow: none;
-        border: 1px solid #ddd;
+        border: none;
         border-radius: 0;
-        margin: 0 0 8mm 0;
-        min-height: var(--print-min-height, 190mm);
-        break-after: page;
-        page-break-after: always;
+        padding: 0;
+        overflow: visible;
+        background: #fff;
       }
 
-      .calendar {
-        padding: 10px;
+      .year-grid {
+        min-width: 0 !important;
+        gap: 6px;
+        width: 100%;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
 
-      .day-cell {
-        min-height: 34mm;
+      .month {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
       }
 
-      .day-note {
-        font-size: 10.5pt;
+      textarea.day-input {
+        min-height: 18px;
+        font-size: 7pt;
       }
 
-      .weekday {
-        font-size: 10pt;
+      .day-num {
+        font-size: 7pt;
+        width: 22px;
+        min-width: 22px;
+        padding: 4px 2px;
       }
 
       .month-title {
-        font-size: 18pt;
+        font-size: 8.5pt;
       }
 
-      .month-subtitle {
-        font-size: 10pt;
+      .month-tip {
+        font-size: 5.8pt;
+        min-height: auto;
+      }
+
+      .month-header {
+        padding: 6px 6px 5px;
+      }
+
+      .month,
+      .year-grid,
+      .planner-wrap {
+        page-break-after: avoid !important;
       }
     }
   </style>
 </head>
-<body>
+<body class="print-full-year">
   <div class="app">
-    <section class="hero">
-      <h1>Pastel Rainbow Year Planner</h1>
+    <section class="topbar">
+      <h1>Pastel Rainbow Year-at-a-Glance Planner</h1>
       <p>
-        Fill your entire month or year with birthdays, school things, appointments, dramatic obligations,
-        and all the other little calendar goblins. Then print it in A4 or A3, or export it for Excel.
+        Fill your whole year, print it with colours, and export it to Excel.
+        Still a spreadsheet at heart, obviously. Just wearing a cardigan now.
       </p>
 
       <div class="controls">
-        <div class="control-card">
+        <div class="field">
           <label for="yearInput">Year</label>
-          <input id="yearInput" type="number" min="1900" max="2100" />
+          <input id="yearInput" type="number" min="2020" max="2035" />
         </div>
 
-        <div class="control-card">
-          <label for="printSize">Print paper size</label>
-          <select id="printSize">
-            <option value="a4">A4</option>
-            <option value="a3">A3</option>
+        <div class="field">
+          <label for="paperSize">Print size</label>
+          <select id="paperSize">
+            <option value="A4">A4</option>
+            <option value="A3" selected>A3</option>
           </select>
         </div>
 
-        <div class="control-card">
-          <label for="printOrientation">Print orientation</label>
-          <select id="printOrientation">
-            <option value="landscape">Landscape</option>
+        <div class="field">
+          <label for="orientation">Orientation</label>
+          <select id="orientation">
+            <option value="landscape" selected>Landscape</option>
             <option value="portrait">Portrait</option>
           </select>
         </div>
 
-        <div class="control-card">
-          <label>Year tools</label>
-          <div class="button-stack">
-            <button class="primary" id="generateBtn">Generate / Refresh</button>
-            <button id="saveBtn">Save to browser</button>
-          </div>
+        <div class="field">
+          <label for="printMode">Print what</label>
+          <select id="printMode">
+            <option value="year" selected>Entire year</option>
+            <option value="month">One month only</option>
+          </select>
         </div>
 
-        <div class="control-card">
-          <label>Print</label>
-          <div class="button-stack">
-            <button id="printBtn">Print planner</button>
-            <button id="expandBtn">Expand all textareas</button>
-          </div>
+        <div class="field">
+          <label for="printMonth">Month to print</label>
+          <select id="printMonth"></select>
         </div>
 
-        <div class="control-card">
-          <label>Export</label>
-          <div class="button-stack">
-            <button id="csvBtn">Download for Excel (.csv)</button>
-            <button class="warning" id="clearBtn">Clear this year</button>
-          </div>
-        </div>
+        <button class="primary" id="generateBtn">Generate / Refresh</button>
+        <button id="saveBtn">Save to browser</button>
+        <button id="printBtn">Print</button>
+        <button id="csvBtn">Download CSV</button>
+        <button class="danger" id="clearBtn">Clear this year</button>
       </div>
 
       <div class="status" id="status"></div>
     </section>
 
-    <main class="planner" id="planner"></main>
+    <section class="planner-wrap" id="plannerWrap">
+      <div class="year-grid" id="yearGrid"></div>
+    </section>
 
     <div class="footer-note">
-      Tiny but useful. Like a biscuit you eat standing up in the kitchen while ignoring your responsibilities.
+      Blank days stay blank. Which is frankly the most emotionally mature feature here.
     </div>
   </div>
 
   <script>
-    const planner = document.getElementById("planner");
-    const yearInput = document.getElementById("yearInput");
-    const printSize = document.getElementById("printSize");
-    const printOrientation = document.getElementById("printOrientation");
-    const statusEl = document.getElementById("status");
-
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
 
-    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const yearInput = document.getElementById("yearInput");
+    const yearGrid = document.getElementById("yearGrid");
+    const statusEl = document.getElementById("status");
+    const paperSizeEl = document.getElementById("paperSize");
+    const orientationEl = document.getElementById("orientation");
+    const printModeEl = document.getElementById("printMode");
+    const printMonthEl = document.getElementById("printMonth");
+    const plannerWrap = document.getElementById("plannerWrap");
 
-    // Default to current year
-    const today = new Date();
-    yearInput.value = today.getFullYear();
+    yearInput.value = new Date().getFullYear();
+
+    monthNames.forEach((month, index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.textContent = month;
+      printMonthEl.appendChild(option);
+    });
 
     function storageKey(year) {
-      return `pastelPlanner-${year}`;
+      return `year-at-a-glance-${year}`;
     }
 
     function showStatus(message) {
@@ -486,238 +476,385 @@
       localStorage.setItem(storageKey(year), JSON.stringify(data));
     }
 
-    function getDaysInMonth(year, monthIndex) {
-      return new Date(year, monthIndex + 1, 0).getDate();
+    function pad(num) {
+      return String(num).padStart(2, "0");
     }
 
-    function getFirstDay(year, monthIndex) {
-      return new Date(year, monthIndex, 1).getDay();
+    function formatDateKey(year, month, day) {
+      return `${year}-${pad(month + 1)}-${pad(day)}`;
     }
 
-    function buildPlanner() {
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getDayOfWeek(year, month, day) {
+      return new Date(year, month, day).getDay();
+    }
+
+    function getEasterSunday(year) {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month, day);
+    }
+
+    function nthWeekdayOfMonth(year, month, weekday, nth) {
+      let count = 0;
+      for (let day = 1; day <= 31; day++) {
+        const date = new Date(year, month, day);
+        if (date.getMonth() !== month) break;
+        if (date.getDay() === weekday) {
+          count++;
+          if (count === nth) return date;
+        }
+      }
+      return null;
+    }
+
+    function observedIfWeekend(date) {
+      const day = date.getDay();
+      if (day === 6) return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 2);
+      if (day === 0) return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+      return date;
+    }
+
+    function addHoliday(map, date, name) {
+      const key = formatDateKey(date.getFullYear(), date.getMonth(), date.getDate());
+      map[key] = name;
+    }
+
+    function getNswPublicHolidays(year) {
+      const holidays = {};
+
+      addHoliday(holidays, new Date(year, 0, 1), "New Year's Day");
+
+      const australiaDayActual = new Date(year, 0, 26);
+      addHoliday(holidays, observedIfWeekend(australiaDayActual), "Australia Day");
+
+      const easterSunday = getEasterSunday(year);
+      const goodFriday = new Date(easterSunday);
+      goodFriday.setDate(easterSunday.getDate() - 2);
+
+      const easterSaturday = new Date(easterSunday);
+      easterSaturday.setDate(easterSunday.getDate() - 1);
+
+      const easterMonday = new Date(easterSunday);
+      easterMonday.setDate(easterSunday.getDate() + 1);
+
+      addHoliday(holidays, goodFriday, "Good Friday");
+      addHoliday(holidays, easterSaturday, "Easter Saturday");
+      addHoliday(holidays, easterSunday, "Easter Sunday");
+      addHoliday(holidays, easterMonday, "Easter Monday");
+
+      addHoliday(holidays, new Date(year, 3, 25), "Anzac Day");
+      addHoliday(holidays, nthWeekdayOfMonth(year, 5, 1, 2), "King's Birthday");
+      addHoliday(holidays, nthWeekdayOfMonth(year, 9, 1, 1), "Labour Day");
+
+      const christmas = new Date(year, 11, 25);
+      const boxingDay = new Date(year, 11, 26);
+
+      if (christmas.getDay() === 6) {
+        addHoliday(holidays, christmas, "Christmas Day");
+        addHoliday(holidays, new Date(year, 11, 27), "Additional Day");
+        addHoliday(holidays, new Date(year, 11, 28), "Boxing Day");
+      } else if (christmas.getDay() === 0) {
+        addHoliday(holidays, christmas, "Christmas Day");
+        addHoliday(holidays, new Date(year, 11, 26), "Additional Day");
+        addHoliday(holidays, new Date(year, 11, 27), "Boxing Day");
+      } else if (boxingDay.getDay() === 6) {
+        addHoliday(holidays, christmas, "Christmas Day");
+        addHoliday(holidays, boxingDay, "Boxing Day");
+        addHoliday(holidays, new Date(year, 11, 28), "Additional Day");
+      } else if (boxingDay.getDay() === 0) {
+        addHoliday(holidays, christmas, "Christmas Day");
+        addHoliday(holidays, boxingDay, "Boxing Day");
+        addHoliday(holidays, new Date(year, 11, 28), "Additional Day");
+      } else {
+        addHoliday(holidays, christmas, "Christmas Day");
+        addHoliday(holidays, boxingDay, "Boxing Day");
+      }
+
+      return holidays;
+    }
+
+    function getMonthSurvivalTip(monthIndex) {
+      const tips = [
+        "Survive January: hydrate and lower expectations.",
+        "Survive February: it’s short, thank God.",
+        "Survive March: admin begins its annual attack.",
+        "Survive April: Easter chocolate and strategic disappearing.",
+        "Survive May: Mother's Day and emotional paperwork.",
+        "Survive June: long weekend, cold toes, keep moving.",
+        "Survive July: school holidays and soup-based survival.",
+        "Survive August: this month is basically stubbornness.",
+        "Survive September: spring optimism with hidden admin.",
+        "Survive October: Labour Day, then chaos resumes.",
+        "Survive November: too many things, not enough soul.",
+        "Survive December: festive sparkle, logistical violence."
+      ];
+      return tips[monthIndex];
+    }
+
+    function autoResize(el) {
+      el.style.height = "auto";
+      el.style.height = Math.max(el.scrollHeight, 24) + "px";
+    }
+
+    function buildYearPlanner() {
       const year = Number(yearInput.value);
-      const data = loadData(year);
+      const savedData = loadData(year);
+      const holidays = getNswPublicHolidays(year);
 
-      planner.innerHTML = "";
+      yearGrid.innerHTML = "";
 
       monthNames.forEach((monthName, monthIndex) => {
-        const monthPage = document.createElement("section");
-        monthPage.className = `month-page month-${monthIndex}`;
+        const monthEl = document.createElement("div");
+        monthEl.className = `month month-${monthIndex}`;
+        monthEl.dataset.monthIndex = monthIndex;
 
         const header = document.createElement("div");
         header.className = "month-header";
         header.innerHTML = `
-          <div>
-            <h2 class="month-title">${monthName} ${year}</h2>
-            <p class="month-subtitle">Pastel planning, but make it mildly competent.</p>
-          </div>
-          <div style="font-size:0.9rem; color:rgba(70,62,74,0.72); font-weight:bold;">
-            ${monthIndex + 1}/12
-          </div>
+          <h2 class="month-title">${monthName}</h2>
+          <div class="month-tip">${getMonthSurvivalTip(monthIndex)}</div>
         `;
 
-        const toolbar = document.createElement("div");
-        toolbar.className = "month-toolbar";
-        toolbar.innerHTML = `
-          <button type="button" data-action="clear-month" data-month="${monthIndex}">Clear ${monthName}</button>
-        `;
-
-        const calendar = document.createElement("div");
-        calendar.className = "calendar";
-
-        const weekdayRow = document.createElement("div");
-        weekdayRow.className = "weekday-row";
-        weekdays.forEach(day => {
-          const cell = document.createElement("div");
-          cell.className = "weekday";
-          cell.textContent = day;
-          weekdayRow.appendChild(cell);
-        });
-
-        const grid = document.createElement("div");
-        grid.className = "grid";
-
-        const firstDay = getFirstDay(year, monthIndex);
+        const table = document.createElement("table");
+        const tbody = document.createElement("tbody");
         const daysInMonth = getDaysInMonth(year, monthIndex);
 
-        for (let i = 0; i < firstDay; i++) {
-          const emptyCell = document.createElement("div");
-          emptyCell.className = "day-cell empty";
-          grid.appendChild(emptyCell);
-        }
-
         for (let day = 1; day <= daysInMonth; day++) {
-          const key = `${monthIndex + 1}-${day}`;
-          const savedText = data[key] || "";
+          const tr = document.createElement("tr");
+          const dateKey = formatDateKey(year, monthIndex, day);
+          const weekday = getDayOfWeek(year, monthIndex, day);
+          const holidayText = holidays[dateKey] || "";
+          const savedText = savedData[dateKey] ?? holidayText;
 
-          const dayCell = document.createElement("div");
-          dayCell.className = "day-cell";
+          if (holidayText) tr.classList.add("holiday-row");
 
-          const dayNumber = document.createElement("div");
-          dayNumber.className = "day-number";
-          dayNumber.textContent = day;
+          const dayTd = document.createElement("td");
+          dayTd.className = "day-num" + ((weekday === 0 || weekday === 6) ? " weekend" : "");
+          dayTd.textContent = day;
 
-          const note = document.createElement("textarea");
-          note.className = "day-note";
-          note.placeholder = "Add events...";
-          note.value = savedText;
-          note.dataset.key = key;
-          note.dataset.month = monthIndex;
-          note.dataset.day = day;
+          const eventTd = document.createElement("td");
+          eventTd.className = "event-cell";
 
-          note.addEventListener("input", () => {
-            const currentYear = Number(yearInput.value);
-            const currentData = loadData(currentYear);
-            currentData[note.dataset.key] = note.value;
-            saveData(currentYear, currentData);
+          const textarea = document.createElement("textarea");
+          textarea.className = "day-input";
+          textarea.value = savedText;
+          textarea.dataset.date = dateKey;
+          textarea.spellcheck = false;
+
+          textarea.addEventListener("input", () => {
+            autoResize(textarea);
+            saveCurrentYear();
           });
 
-          dayCell.appendChild(dayNumber);
-          dayCell.appendChild(note);
-          grid.appendChild(dayCell);
+          eventTd.appendChild(textarea);
+          tr.appendChild(dayTd);
+          tr.appendChild(eventTd);
+          tbody.appendChild(tr);
+
+          requestAnimationFrame(() => autoResize(textarea));
         }
 
-        // Fill out the last row so calendar stays neat
-        const totalCells = firstDay + daysInMonth;
-        const remainingCells = (7 - (totalCells % 7)) % 7;
-
-        for (let i = 0; i < remainingCells; i++) {
-          const emptyCell = document.createElement("div");
-          emptyCell.className = "day-cell empty";
-          grid.appendChild(emptyCell);
-        }
-
-        calendar.appendChild(weekdayRow);
-        calendar.appendChild(grid);
-
-        monthPage.appendChild(header);
-        monthPage.appendChild(toolbar);
-        monthPage.appendChild(calendar);
-        planner.appendChild(monthPage);
+        table.appendChild(tbody);
+        monthEl.appendChild(header);
+        monthEl.appendChild(table);
+        yearGrid.appendChild(monthEl);
       });
 
-      attachMonthClearHandlers();
-      autoResizeAllTextareas();
-      showStatus(`Planner loaded for ${year}.`);
+      showStatus(`Loaded ${year}. NSW public holidays are included.`);
     }
 
-    function attachMonthClearHandlers() {
-      document.querySelectorAll('[data-action="clear-month"]').forEach(button => {
-        button.addEventListener("click", () => {
-          const year = Number(yearInput.value);
-          const monthIndex = Number(button.dataset.month);
-          const data = loadData(year);
-
-          Object.keys(data).forEach(key => {
-            const [month] = key.split("-").map(Number);
-            if (month === monthIndex + 1) {
-              delete data[key];
-            }
-          });
-
-          saveData(year, data);
-          buildPlanner();
-          showStatus(`${monthNames[monthIndex]} cleared. A bold choice.`);
-        });
-      });
-    }
-
-    function autoResizeTextarea(textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = Math.max(textarea.scrollHeight, 80) + "px";
-    }
-
-    function autoResizeAllTextareas() {
-      document.querySelectorAll(".day-note").forEach(textarea => {
-        autoResizeTextarea(textarea);
-        textarea.addEventListener("input", () => autoResizeTextarea(textarea));
-      });
-    }
-
-    function saveCurrentState() {
+    function saveCurrentYear() {
       const year = Number(yearInput.value);
       const data = {};
-      document.querySelectorAll(".day-note").forEach(note => {
-        if (note.value.trim() !== "") {
-          data[note.dataset.key] = note.value.trim();
+      document.querySelectorAll(".day-input").forEach(input => {
+        if (input.value.trim() !== "") {
+          data[input.dataset.date] = input.value.trim();
         }
       });
       saveData(year, data);
-      showStatus(`Saved ${year} to your browser.`);
     }
 
     function clearYear() {
       const year = Number(yearInput.value);
-      const confirmed = confirm(`Clear all saved events for ${year}?`);
-      if (!confirmed) return;
-
+      const ok = confirm(`Clear everything for ${year}?`);
+      if (!ok) return;
       localStorage.removeItem(storageKey(year));
-      buildPlanner();
-      showStatus(`All events cleared for ${year}. The slate is now offensively clean.`);
+      buildYearPlanner();
+      showStatus(`Cleared ${year}. A brutal reset.`);
     }
 
     function exportCSV() {
       const year = Number(yearInput.value);
       const data = loadData(year);
-
-      let csv = "Year,Month,Day,Date,Event\n";
+      let csv = "Date,Month,Day,Event\n";
 
       monthNames.forEach((monthName, monthIndex) => {
         const daysInMonth = getDaysInMonth(year, monthIndex);
-
         for (let day = 1; day <= daysInMonth; day++) {
-          const key = `${monthIndex + 1}-${day}`;
-          const eventText = (data[key] || "").replace(/"/g, '""').replace(/\n/g, " | ");
-          const fullDate = `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-          csv += `"${year}","${monthName}","${day}","${fullDate}","${eventText}"\n`;
+          const key = formatDateKey(year, monthIndex, day);
+          const value = (data[key] || "").replace(/"/g, '""').replace(/\n/g, " | ");
+          csv += `"${key}","${monthName}","${day}","${value}"\n`;
         }
       });
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `pastel-rainbow-planner-${year}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `year-at-a-glance-${year}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       URL.revokeObjectURL(url);
 
-      showStatus("CSV downloaded. Excel should open it just fine.");
+      showStatus("CSV downloaded.");
+    }
+
+    function setPrintPageStyle() {
+      const size = paperSizeEl.value;
+      const orientation = orientationEl.value;
+
+      const styleId = "dynamic-print-style";
+      let styleTag = document.getElementById(styleId);
+      if (!styleTag) {
+        styleTag = document.createElement("style");
+        styleTag.id = styleId;
+        document.head.appendChild(styleTag);
+      }
+
+      styleTag.textContent = `
+        @page {
+          size: ${size} ${orientation};
+          margin: 6mm;
+        }
+      `;
+    }
+
+    function applyPrintMode() {
+      const mode = printModeEl.value;
+      const monthIndex = Number(printMonthEl.value);
+
+      document.body.classList.remove("print-full-year", "print-single-month");
+
+      document.querySelectorAll(".month").forEach(month => {
+        month.classList.remove("print-target");
+      });
+
+      if (mode === "month") {
+        document.body.classList.add("print-single-month");
+        const target = document.querySelector(\`.month[data-month-index="\${monthIndex}"]\`);
+        if (target) target.classList.add("print-target");
+      } else {
+        document.body.classList.add("print-full-year");
+      }
+    }
+
+    function fitYearToSinglePage() {
+      yearGrid.style.transform = "scale(1)";
+      yearGrid.style.width = "";
+      yearGrid.style.height = "";
+
+      const mode = printModeEl.value;
+      if (mode === "month") return;
+
+      const size = paperSizeEl.value;
+      const orientation = orientationEl.value;
+
+      let pageWidthMm = 297;
+      let pageHeightMm = 210;
+
+      if (size === "A4" && orientation === "portrait") {
+        pageWidthMm = 210;
+        pageHeightMm = 297;
+      } else if (size === "A4" && orientation === "landscape") {
+        pageWidthMm = 297;
+        pageHeightMm = 210;
+      } else if (size === "A3" && orientation === "portrait") {
+        pageWidthMm = 297;
+        pageHeightMm = 420;
+      } else if (size === "A3" && orientation === "landscape") {
+        pageWidthMm = 420;
+        pageHeightMm = 297;
+      }
+
+      const printableWidthPx = ((pageWidthMm - 12) / 25.4) * 96;
+      const printableHeightPx = ((pageHeightMm - 12) / 25.4) * 96;
+
+      const contentWidth = yearGrid.scrollWidth;
+      const contentHeight = yearGrid.scrollHeight;
+
+      const scaleX = printableWidthPx / contentWidth;
+      const scaleY = printableHeightPx / contentHeight;
+      const scale = Math.min(scaleX, scaleY, 1);
+
+      yearGrid.style.transform = `scale(${scale})`;
+      yearGrid.style.width = `${contentWidth}px`;
+      yearGrid.style.height = `${contentHeight}px`;
+
+      plannerWrap.style.minHeight = `${contentHeight * scale}px`;
+    }
+
+    function resetAfterPrint() {
+      yearGrid.style.transform = "scale(1)";
+      yearGrid.style.width = "";
+      yearGrid.style.height = "";
+      plannerWrap.style.minHeight = "";
+      document.body.classList.remove("print-single-month", "print-full-year");
+      document.body.classList.add("print-full-year");
+
+      document.querySelectorAll(".month").forEach(month => {
+        month.classList.remove("print-target");
+      });
     }
 
     function printPlanner() {
-      saveCurrentState();
+      saveCurrentYear();
+      setPrintPageStyle();
+      applyPrintMode();
+      fitYearToSinglePage();
 
-      document.body.classList.remove(
-        "print-a4-landscape",
-        "print-a3-landscape",
-        "print-a4-portrait",
-        "print-a3-portrait"
-      );
-
-      const size = printSize.value;
-      const orientation = printOrientation.value;
-      document.body.classList.add(`print-${size}-${orientation}`);
-
-      // Browser print settings still win sometimes, because of course they do.
-      window.print();
+      setTimeout(() => {
+        window.print();
+      }, 150);
     }
 
-    document.getElementById("generateBtn").addEventListener("click", buildPlanner);
-    document.getElementById("saveBtn").addEventListener("click", saveCurrentState);
-    document.getElementById("printBtn").addEventListener("click", printPlanner);
-    document.getElementById("csvBtn").addEventListener("click", exportCSV);
-    document.getElementById("clearBtn").addEventListener("click", clearYear);
+    window.addEventListener("afterprint", resetAfterPrint);
 
-    document.getElementById("expandBtn").addEventListener("click", () => {
-      autoResizeAllTextareas();
-      showStatus("Expanded the text boxes so your plans can really sprawl.");
+    document.getElementById("generateBtn").addEventListener("click", buildYearPlanner);
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      saveCurrentYear();
+      showStatus("Saved to this browser.");
     });
 
-    yearInput.addEventListener("change", buildPlanner);
+    document.getElementById("csvBtn").addEventListener("click", exportCSV);
+    document.getElementById("printBtn").addEventListener("click", printPlanner);
+    document.getElementById("clearBtn").addEventListener("click", clearYear);
+    yearInput.addEventListener("change", buildYearPlanner);
 
-    buildPlanner();
+    printModeEl.addEventListener("change", () => {
+      printMonthEl.disabled = printModeEl.value !== "month";
+    });
+
+    printMonthEl.disabled = true;
+
+    buildYearPlanner();
   </script>
 </body>
 </html>
