@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Funny Lines for People Hanging by a Thread</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg1: #fff7f0;
+      --bg2: #ffe8ef;
+      --card: rgba(255, 255, 255, 0.88);
+      --text: #2c2230;
+      --muted: #6f6373;
+      --accent: #ff6f91;
+      --accent-dark: #d94d72;
+      --border: rgba(44, 34, 48, 0.08);
+      --shadow: 0 16px 40px rgba(44, 34, 48, 0.12);
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #fff3c9 0%, transparent 30%),
+        radial-gradient(circle at top right, #ffd9e8 0%, transparent 35%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 760px;
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      font-size: 0.98rem;
+      outline: none;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: rgba(255, 111, 145, 0.55);
+      box-shadow: 0 0 0 4px rgba(255, 111, 145, 0.15);
+    }
+
+    .mood-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .mood-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .mood-btn:hover,
+    .mood-btn.active {
+      transform: translateY(-2px);
+      border-color: rgba(255, 111, 145, 0.5);
+      box-shadow: 0 10px 22px rgba(255, 111, 145, 0.18);
+    }
+
+    .line-box {
+      background: linear-gradient(180deg, #ffffff, #fff6fa);
+      border: 1px solid rgba(255, 111, 145, 0.2);
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .line-box::before {
+      content: "“";
+      position: absolute;
+      top: -20px;
+      left: 16px;
+      font-size: 6rem;
+      color: rgba(255, 111, 145, 0.12);
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .line-text {
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      line-height: 1.35;
+      margin: 0 0 14px;
+      font-weight: 800;
+      z-index: 1;
+    }
+
+    .line-meta {
+      font-size: 0.92rem;
+      color: var(--muted);
+      z-index: 1;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button.action {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button.action:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .reactions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      background: rgba(255, 111, 145, 0.12);
+      color: var(--accent-dark);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .status-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .status-label {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .status-value {
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .daily-box {
+      background: linear-gradient(180deg, #fffdf8, #fff3f8);
+      border: 1px dashed rgba(255, 111, 145, 0.35);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .daily-box h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .daily-box p {
+      margin: 0;
+      line-height: 1.5;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .favorites-list {
+      display: grid;
+      gap: 10px;
+      max-height: 350px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .favorite-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .favorite-text {
+      margin: 0 0 10px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .favorite-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .favorite-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .small-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-style: italic;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2c2230;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .mood-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 20px;
+      }
+
+      .mood-row {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row {
+        flex-direction: column;
+      }
+
+      button.action,
+      .small-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <h1>Funny Lines for People Hanging by a Thread</h1>
+      <p>
+        Pick your category, choose your emotional seasoning, and let this app deliver a line
+        that is unhelpfully accurate. Like a friend who loves you, but also enjoys a little damage.
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <p class="section-title">Main Damage Generator</p>
+
+        <div class="controls">
+          <div>
+            <label for="category">Category of suffering</label>
+            <select id="category">
+              <option value="work">Work</option>
+              <option value="mortgage">Mortgage / Money</option>
+              <option value="parenting">Parenting</option>
+              <option value="sunday">Sunday Scaries</option>
+              <option value="health">Health / Diet</option>
+              <option value="general">General Meltdown</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="tone">Tone</label>
+            <select id="tone">
+              <option value="corporate">Corporate Safe-ish</option>
+              <option value="mild">Mildly Unwell</option>
+              <option value="unhinged">Fully Unhinged</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="nameInput">Optional name or job</label>
+            <input type="text" id="nameInput" placeholder="e.g. Charlie, finance goblin" />
+          </div>
+        </div>
+
+        <label>How are you today?</label>
+        <div class="mood-row">
+          <button class="mood-btn active" data-mood="barely okay">Barely okay</button>
+          <button class="mood-btn" data-mood="one email away">One email away</button>
+          <button class="mood-btn" data-mood="financially haunted">Financially haunted</button>
+          <button class="mood-btn" data-mood="pretending to be resilient">Pretending to be resilient</button>
+        </div>
+
+        <div class="line-box">
+          <p class="line-text" id="lineText">
+            Press the button and let the app professionally disrespect your emotional state.
+          </p>
+          <div class="line-meta" id="lineMeta">Category: Work · Tone: Corporate Safe-ish · Mood: Barely okay</div>
+        </div>
+
+        <div class="button-row">
+          <button class="action primary" id="generateBtn">Generate insultingly accurate line</button>
+          <button class="action secondary" id="copyBtn">Copy line</button>
+          <button class="action secondary" id="saveBtn">Save favourite</button>
+          <button class="action secondary" id="downloadBtn">Download favourites</button>
+        </div>
+
+        <div class="reactions">
+          <button class="pill" data-reaction="Too real.">Too real</button>
+          <button class="pill" data-reaction="Rude but fair.">Rude but fair</button>
+          <button class="pill" data-reaction="This healed nothing.">This healed nothing</button>
+          <button class="pill" data-reaction="Send another insult.">Send another insult</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom: 20px;">
+          <p class="section-title">Daily Emotional Report</p>
+
+          <div class="daily-box">
+            <h3>Today’s coping statement</h3>
+            <p id="dailyLine">Loading today’s damage...</p>
+          </div>
+
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-label">Emotional bandwidth</div>
+              <div class="status-value" id="statusBandwidth">Calculating collapse...</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Professionalism reserve</div>
+              <div class="status-value" id="statusProfessionalism">Holding on by acrylic nail...</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Likelihood of dramatic sighing</div>
+              <div class="status-value" id="statusSighing">Embarrassingly high</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-title">Saved favourites</p>
+          <div class="favorites-list" id="favoritesList">
+            <p class="empty-state">No favourites yet. Which is sad, but also organised.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Built for tired people with bills, responsibilities, and exactly four surviving brain cells.
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied.</div>
+
+  <script>
+    // App data: category + tone based funny lines
+    const lines = {
+      work: {
+        corporate: [
+          "Your inbox is not a to-do list. It is a museum of other people's poor planning.",
+          "You are not behind. You are participating in a highly dynamic environment with inadequate snacks.",
+          "This meeting could have been an email, and frankly the email could have been silence.",
+          "Your calendar is full because boundaries remain a theoretical concept.",
+          "Productivity today will be measured in emotional survival rather than output."
+        ],
+        mild: [
+          "I opened Excel and my soul left through a side door.",
+          "I am not underperforming. I am conserving my final teaspoon of dignity.",
+          "My job would be easier if work would stop arriving during work hours.",
+          "I have the energy of a disappointed aunt at a buffet.",
+          "I am replying to messages in the tone of a woman who has already been through enough."
+        ],
+        unhinged: [
+          "I am one 'quick question' away from living in the woods and charging my phone with grief.",
+          "My professionalism is being held together by lip balm and raw spite.",
+          "Every spreadsheet is a cry for help with borders.",
+          "I did not come here to thrive. I came here to click things until 4:30.",
+          "If this turns into another meeting, I will become folklore."
+        ]
+      },
+      mortgage: {
+        corporate: [
+          "Home ownership remains a long-term financial relationship built on repayment discipline and soft panic.",
+          "Your budget is functioning, which is more than can be said for your peace of mind.",
+          "Interest rates have once again chosen drama.",
+          "This month’s financial strategy is simply to avoid making it worse.",
+          "Your mortgage appreciates your loyalty, though sadly not in a fun way."
+        ],
+        mild: [
+          "My mortgage and I are in a committed relationship I did not read the terms for.",
+          "I would like to buy peace, but apparently I am busy buying interest.",
+          "Every time I check rates, my spirit adjusts downward.",
+          "Financial freedom is currently a bedtime story I tell myself.",
+          "I’m not bad with money. Money just acts strange around me."
+        ],
+        unhinged: [
+          "I work hard so a bank can watch me age in instalments.",
+          "My offset account is doing what it can, bless its tiny little heart.",
+          "Nothing says adulthood like paying obscene money to remain inside your own walls.",
+          "I do not own this house. I am just its long-term emotional support tenant.",
+          "My financial plan is half spreadsheet, half staring into the pantry."
+        ]
+      },
+      parenting: {
+        corporate: [
+          "Today’s parenting objective is to maintain order, nutrition, and a tone that does not scare the neighbours.",
+          "Your children are energetic stakeholders with no understanding of resource constraints.",
+          "You have repeated the instruction clearly and several times. The issue is not communication.",
+          "Parenting remains a high-contact leadership role with limited coffee breaks.",
+          "Performance today will be measured by whether everyone wore shoes outside."
+        ],
+        mild: [
+          "I have said the same sentence so many times it no longer sounds like language.",
+          "My children have endless energy and I have one haunted vertebra.",
+          "I am not raising my voice. I am just projecting maternal despair.",
+          "Parenting is mostly moving objects from the floor to slightly higher surfaces.",
+          "I would love one peaceful snack that nobody can sense psychically."
+        ],
+        unhinged: [
+          "The children are awake and already negotiating like tiny corrupt diplomats.",
+          "I didn’t lose my mind. It was simply relocated by repeated questions.",
+          "Someone yelled 'Mum' and my skeleton flinched.",
+          "I deserve a ceremonial ribbon for putting shoes on other humans before 8 am.",
+          "Parenting is basically customer service, but the customers lick things."
+        ]
+      },
+      sunday: {
+        corporate: [
+          "Sunday evening is a strategic transition period marked by dread and laundry.",
+          "You are not lazy. You are reacting normally to the concept of Monday.",
+          "Preparatory anxiety has entered the chat and brought a planner.",
+          "Tomorrow remains manageable in theory and offensive in practice.",
+          "Your only task tonight is to avoid spiralling before dinner."
+        ],
+        mild: [
+          "It’s not Sunday night. It’s a jump scare in slow motion.",
+          "I can hear Monday warming up in the hallway.",
+          "The weekend left so quickly it feels personal.",
+          "I wanted rest. Instead I got awareness.",
+          "Sunday scaries are just your nervous system doing improv."
+        ],
+        unhinged: [
+          "The air smells like incoming emails and broken promises.",
+          "I am marinating in pre-Monday sadness like a rotisserie chicken of dread.",
+          "Nothing ruins a Sunday like the violent memory of employment.",
+          "Tomorrow is stomping toward me in office shoes.",
+          "I would like to unsubscribe from the concept of weekdays."
+        ]
+      },
+      health: {
+        corporate: [
+          "Wellbeing remains an important priority, though motivation has declined materially.",
+          "Your body has submitted several concerns and would appreciate a nap and fewer decisions.",
+          "Health goals continue, albeit in a tone best described as reluctant.",
+          "Balance is ideal, but survival has entered as a competing strategy.",
+          "Today’s self-care may need to be suspiciously low effort."
+        ],
+        mild: [
+          "I want to become my best self, but sadly I live with my current self.",
+          "My body needs vegetables and my soul wants chips the size of regret.",
+          "I am trying to heal, stretch, hydrate, and not be dramatic about all of it.",
+          "Every wellness routine sounds beautiful until it involves consistency.",
+          "I did not fail my health goals. I simply renegotiated with snacks."
+        ],
+        unhinged: [
+          "My hormones are conducting a hostile takeover with no board approval.",
+          "I drank water and expected a spiritual rebirth. Nothing happened.",
+          "I am doing my best, which today looks like a banana and quiet resentment.",
+          "My metabolism now behaves like a retired magician: vague, distant, and refusing requests.",
+          "I would like to feel radiant. Currently I feel pre-owned."
+        ]
+      },
+      general: {
+        corporate: [
+          "You are managing multiple priorities with admirable composure and highly private despair.",
+          "Current capacity is limited but not yet legally concerning.",
+          "This period is best described as operationally fragile.",
+          "You continue to function, which remains inconveniently impressive.",
+          "Resilience is present, though perhaps a little overbooked."
+        ],
+        mild: [
+          "I’m not falling apart. I’m just opening like flat-pack furniture.",
+          "I would love a break, a miracle, and fewer notifications.",
+          "My brain has too many tabs open and at least one is playing invisible music.",
+          "I am technically coping, which is a very generous use of language.",
+          "Everything is fine if we define fine as weirdly upright."
+        ],
+        unhinged: [
+          "I am one minor inconvenience away from becoming a local legend.",
+          "My last nerve has a working-from-home arrangement and no intention of returning.",
+          "I don’t need motivation. I need silence, money, and a suspiciously long hotel stay.",
+          "At this point I am held together by moisturiser and administrative panic.",
+          "If life adds one more thing, I will simply become decorative."
+        ]
+      }
+    };
+
+    const statusOptions = {
+      bandwidth: [
+        "3% and buffering",
+        "Running on crumbs and ceremony",
+        "Technically available, spiritually absent",
+        "Low, but still weirdly billable",
+        "Dangerously dependent on caffeine"
+      ],
+      professionalism: [
+        "Stable from a distance",
+        "Held together by manners",
+        "Critically moisturised",
+        "One inconvenience from collapse",
+        "Borrowed from tomorrow"
+      ],
+      sighing: [
+        "Moderate but theatrical",
+        "Embarrassingly high",
+        "Echoing through the property",
+        "Unfit for open-plan offices",
+        "Now considered a communication style"
+      ]
+    };
+
+    const categorySelect = document.getElementById("category");
+    const toneSelect = document.getElementById("tone");
+    const nameInput = document.getElementById("nameInput");
+    const lineText = document.getElementById("lineText");
+    const lineMeta = document.getElementById("lineMeta");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const favoritesList = document.getElementById("favoritesList");
+    const dailyLine = document.getElementById("dailyLine");
+    const toast = document.getElementById("toast");
+
+    const statusBandwidth = document.getElementById("statusBandwidth");
+    const statusProfessionalism = document.getElementById("statusProfessionalism");
+    const statusSighing = document.getElementById("statusSighing");
+
+    let selectedMood = "barely okay";
+    let currentLine = "";
+
+    const moodButtons = document.querySelectorAll(".mood-btn");
+    const reactionButtons = document.querySelectorAll(".pill");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1800);
+    }
+
+    function prettyCategory(value) {
+      const map = {
+        work: "Work",
+        mortgage: "Mortgage / Money",
+        parenting: "Parenting",
+        sunday: "Sunday Scaries",
+        health: "Health / Diet",
+        general: "General Meltdown"
+      };
+      return map[value] || value;
+    }
+
+    function prettyTone(value) {
+      const map = {
+        corporate: "Corporate Safe-ish",
+        mild: "Mildly Unwell",
+        unhinged: "Fully Unhinged"
+      };
+      return map[value] || value;
+    }
+
+    function getRandomItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function personaliseLine(line) {
+      const name = nameInput.value.trim();
+      if (!name) return line;
+
+      const intros = [
+        `${name}, `,
+        `${name} — `,
+        `${name}, listen: `,
+        `For ${name}: `
+      ];
+
+      return getRandomItem(intros) + line.charAt(0).toLowerCase() + line.slice(1);
+    }
+
+    function updateStatusMeter() {
+      statusBandwidth.textContent = getRandomItem(statusOptions.bandwidth);
+      statusProfessionalism.textContent = getRandomItem(statusOptions.professionalism);
+      statusSighing.textContent = getRandomItem(statusOptions.sighing);
+    }
+
+    function generateLine() {
+      const category = categorySelect.value;
+      const tone = toneSelect.value;
+      const pool = lines[category][tone];
+      const rawLine = getRandomItem(pool);
+      currentLine = personaliseLine(rawLine);
+
+      lineText.textContent = currentLine;
+      lineMeta.textContent = `Category: ${prettyCategory(category)} · Tone: ${prettyTone(tone)} · Mood: ${capitalize(selectedMood)}`;
+      updateStatusMeter();
+    }
+
+    function capitalize(text) {
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function getFavorites() {
+      return JSON.parse(localStorage.getItem("threadFavorites") || "[]");
+    }
+
+    function saveFavorites(items) {
+      localStorage.setItem("threadFavorites", JSON.stringify(items));
+    }
+
+    function renderFavorites() {
+      const favorites = getFavorites();
+      favoritesList.innerHTML = "";
+
+      if (!favorites.length) {
+        favoritesList.innerHTML = `<p class="empty-state">No favourites yet. Which is sad, but also organised.</p>`;
+        return;
+      }
+
+      favorites.forEach((item, index) => {
+        const wrap = document.createElement("div");
+        wrap.className = "favorite-item";
+        wrap.innerHTML = `
+          <p class="favorite-text">${escapeHtml(item.text)}</p>
+          <div class="favorite-meta">${escapeHtml(item.meta)}</div>
+          <div class="favorite-actions">
+            <button class="small-btn" data-copy-index="${index}">Copy</button>
+            <button class="small-btn" data-delete-index="${index}">Delete</button>
+          </div>
+        `;
+        favoritesList.appendChild(wrap);
+      });
+
+      document.querySelectorAll("[data-copy-index]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.copyIndex);
+          navigator.clipboard.writeText(favorites[i].text);
+          showToast("Favourite copied.");
+        });
+      });
+
+      document.querySelectorAll("[data-delete-index]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.deleteIndex);
+          const favorites = getFavorites();
+          favorites.splice(i, 1);
+          saveFavorites(favorites);
+          renderFavorites();
+          showToast("Favourite removed.");
+        });
+      });
+    }
+
+    function saveCurrentLine() {
+      if (!currentLine) {
+        showToast("Generate a line first, brave soldier.");
+        return;
+      }
+
+      const favorites = getFavorites();
+      const meta = lineMeta.textContent;
+
+      const alreadyExists = favorites.some(item => item.text === currentLine);
+      if (alreadyExists) {
+        showToast("Already saved. Your suffering has been archived.");
+        return;
+      }
+
+      favorites.unshift({
+        text: currentLine,
+        meta
+      });
+
+      saveFavorites(favorites);
+      renderFavorites();
+      showToast("Favourite saved.");
+    }
+
+    function downloadFavorites() {
+      const favorites = getFavorites();
+
+      if (!favorites.length) {
+        showToast("No favourites to download.");
+        return;
+      }
+
+      const content = favorites
+        .map((item, index) => `${index + 1}. ${item.text}\n   ${item.meta}`)
+        .join("\n\n");
+
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "funny-lines-favourites.txt";
+      a.click();
+
+      URL.revokeObjectURL(url);
+      showToast("Favourites downloaded.");
+    }
+
+    function copyCurrentLine() {
+      if (!currentLine) {
+        showToast("Generate a line first.");
+        return;
+      }
+
+      navigator.clipboard.writeText(currentLine);
+      showToast("Line copied.");
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getDailyLine() {
+      // Flatten all lines into one giant list
+      const all = [];
+      Object.keys(lines).forEach(category => {
+        Object.keys(lines[category]).forEach(tone => {
+          lines[category][tone].forEach(line => all.push(line));
+        });
+      });
+
+      const today = new Date();
+      const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      const index = seed % all.length;
+      dailyLine.textContent = all[index];
+    }
+
+    moodButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        moodButtons.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+        selectedMood = button.dataset.mood;
+        if (currentLine) {
+          lineMeta.textContent = `Category: ${prettyCategory(categorySelect.value)} · Tone: ${prettyTone(toneSelect.value)} · Mood: ${capitalize(selectedMood)}`;
+        }
+      });
+    });
+
+    reactionButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        if (button.dataset.reaction === "Send another insult.") {
+          generateLine();
+          showToast("Fresh emotional damage served.");
+        } else {
+          showToast(button.dataset.reaction);
+        }
+      });
+    });
+
+    generateBtn.addEventListener("click", generateLine);
+    copyBtn.addEventListener("click", copyCurrentLine);
+    saveBtn.addEventListener("click", saveCurrentLine);
+    downloadBtn.addEventListener("click", downloadFavorites);
+
+    // First load
+    getDailyLine();
+    updateStatusMeter();
+    renderFavorites();
+    generateLine();
+  </script>
+</body>
+</html>
