@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pastel Rainbow Year Planner</title>
+  <style>
+    :root {
+      --bg: #fffafc;
+      --card: #ffffff;
+      --ink: #3f3a46;
+      --muted: #7b7280;
+      --line: #e8dfeb;
+      --shadow: 0 10px 30px rgba(120, 102, 122, 0.12);
+      --radius: 18px;
+      --font: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at top left, #fff6fa 0%, transparent 35%),
+        radial-gradient(circle at top right, #f7fbff 0%, transparent 35%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    .app {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(232,223,235,0.9);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .control-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .control-card label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    select,
+    input,
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    select,
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .button-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #f3ecf7;
+      color: var(--ink);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      box-shadow: 0 4px 10px rgba(90, 75, 95, 0.08);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #eee4f4;
+    }
+
+    button.primary {
+      background: #e9f5ef;
+    }
+
+    button.primary:hover {
+      background: #dcf0e5;
+    }
+
+    button.warning {
+      background: #fff0f2;
+    }
+
+    button.warning:hover {
+      background: #ffe2e7;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .planner {
+      display: grid;
+      gap: 24px;
+    }
+
+    .month-page {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .month-header {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      color: #4a4450;
+    }
+
+    .month-title {
+      margin: 0;
+      font-size: clamp(1.2rem, 2vw, 1.8rem);
+    }
+
+    .month-subtitle {
+      margin: 4px 0 0;
+      font-size: 0.92rem;
+      color: rgba(70, 62, 74, 0.72);
+    }
+
+    .month-toolbar {
+      padding: 12px 20px 0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .month-toolbar button {
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .calendar {
+      padding: 16px 16px 20px;
+    }
+
+    .weekday-row,
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .weekday {
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: bold;
+      color: var(--muted);
+      padding: 8px 4px 10px;
+    }
+
+    .day-cell {
+      border: 1px solid #efe8f1;
+      min-height: 132px;
+      background: rgba(255,255,255,0.86);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .day-cell.empty {
+      background: #faf7fb;
+    }
+
+    .day-number {
+      font-size: 0.82rem;
+      font-weight: bold;
+      color: #5c5462;
+      align-self: flex-start;
+      background: rgba(255,255,255,0.75);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .day-note {
+      width: 100%;
+      flex: 1;
+      min-height: 82px;
+      border: none;
+      resize: none;
+      background: transparent;
+      color: var(--ink);
+      line-height: 1.35;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .day-note::placeholder {
+      color: #b4a9b8;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 10px 6px 30px;
+    }
+
+    /* Pastel month colours */
+    .month-0  .month-header { background: #ffdfe8; }
+    .month-1  .month-header { background: #ffe7cc; }
+    .month-2  .month-header { background: #fff3bf; }
+    .month-3  .month-header { background: #e6f7c8; }
+    .month-4  .month-header { background: #d8f5dd; }
+    .month-5  .month-header { background: #d8f3f0; }
+    .month-6  .month-header { background: #dceeff; }
+    .month-7  .month-header { background: #e3e0ff; }
+    .month-8  .month-header { background: #efe0ff; }
+    .month-9  .month-header { background: #ffdff5; }
+    .month-10 .month-header { background: #f9e2d2; }
+    .month-11 .month-header { background: #ece7f2; }
+
+    @media (max-width: 900px) {
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .day-cell {
+        min-height: 110px;
+      }
+
+      .day-note {
+        min-height: 65px;
+        font-size: 0.82rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .calendar {
+        overflow-x: auto;
+      }
+
+      .weekday-row,
+      .grid {
+        min-width: 780px;
+      }
+    }
+
+    /* Print styles */
+    body.print-a4-landscape {
+      --print-size: A4 landscape;
+      --print-min-height: 190mm;
+    }
+
+    body.print-a3-landscape {
+      --print-size: A3 landscape;
+      --print-min-height: 270mm;
+    }
+
+    body.print-a4-portrait {
+      --print-size: A4 portrait;
+      --print-min-height: 265mm;
+    }
+
+    body.print-a3-portrait {
+      --print-size: A3 portrait;
+      --print-min-height: 390mm;
+    }
+
+    @media print {
+      @page {
+        size: auto;
+        margin: 10mm;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .hero,
+      .month-toolbar,
+      .footer-note {
+        display: none !important;
+      }
+
+      .app {
+        max-width: none;
+        padding: 0;
+      }
+
+      .planner {
+        gap: 0;
+      }
+
+      .month-page {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        border-radius: 0;
+        margin: 0 0 8mm 0;
+        min-height: var(--print-min-height, 190mm);
+        break-after: page;
+        page-break-after: always;
+      }
+
+      .calendar {
+        padding: 10px;
+      }
+
+      .day-cell {
+        min-height: 34mm;
+      }
+
+      .day-note {
+        font-size: 10.5pt;
+      }
+
+      .weekday {
+        font-size: 10pt;
+      }
+
+      .month-title {
+        font-size: 18pt;
+      }
+
+      .month-subtitle {
+        font-size: 10pt;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <h1>Pastel Rainbow Year Planner</h1>
+      <p>
+        Fill your entire month or year with birthdays, school things, appointments, dramatic obligations,
+        and all the other little calendar goblins. Then print it in A4 or A3, or export it for Excel.
+      </p>
+
+      <div class="controls">
+        <div class="control-card">
+          <label for="yearInput">Year</label>
+          <input id="yearInput" type="number" min="1900" max="2100" />
+        </div>
+
+        <div class="control-card">
+          <label for="printSize">Print paper size</label>
+          <select id="printSize">
+            <option value="a4">A4</option>
+            <option value="a3">A3</option>
+          </select>
+        </div>
+
+        <div class="control-card">
+          <label for="printOrientation">Print orientation</label>
+          <select id="printOrientation">
+            <option value="landscape">Landscape</option>
+            <option value="portrait">Portrait</option>
+          </select>
+        </div>
+
+        <div class="control-card">
+          <label>Year tools</label>
+          <div class="button-stack">
+            <button class="primary" id="generateBtn">Generate / Refresh</button>
+            <button id="saveBtn">Save to browser</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <label>Print</label>
+          <div class="button-stack">
+            <button id="printBtn">Print planner</button>
+            <button id="expandBtn">Expand all textareas</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <label>Export</label>
+          <div class="button-stack">
+            <button id="csvBtn">Download for Excel (.csv)</button>
+            <button class="warning" id="clearBtn">Clear this year</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+    </section>
+
+    <main class="planner" id="planner"></main>
+
+    <div class="footer-note">
+      Tiny but useful. Like a biscuit you eat standing up in the kitchen while ignoring your responsibilities.
+    </div>
+  </div>
+
+  <script>
+    const planner = document.getElementById("planner");
+    const yearInput = document.getElementById("yearInput");
+    const printSize = document.getElementById("printSize");
+    const printOrientation = document.getElementById("printOrientation");
+    const statusEl = document.getElementById("status");
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Default to current year
+    const today = new Date();
+    yearInput.value = today.getFullYear();
+
+    function storageKey(year) {
+      return `pastelPlanner-${year}`;
+    }
+
+    function showStatus(message) {
+      statusEl.textContent = message;
+      clearTimeout(showStatus.timer);
+      showStatus.timer = setTimeout(() => {
+        statusEl.textContent = "";
+      }, 3000);
+    }
+
+    function loadData(year) {
+      const raw = localStorage.getItem(storageKey(year));
+      return raw ? JSON.parse(raw) : {};
+    }
+
+    function saveData(year, data) {
+      localStorage.setItem(storageKey(year), JSON.stringify(data));
+    }
+
+    function getDaysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+
+    function getFirstDay(year, monthIndex) {
+      return new Date(year, monthIndex, 1).getDay();
+    }
+
+    function buildPlanner() {
+      const year = Number(yearInput.value);
+      const data = loadData(year);
+
+      planner.innerHTML = "";
+
+      monthNames.forEach((monthName, monthIndex) => {
+        const monthPage = document.createElement("section");
+        monthPage.className = `month-page month-${monthIndex}`;
+
+        const header = document.createElement("div");
+        header.className = "month-header";
+        header.innerHTML = `
+          <div>
+            <h2 class="month-title">${monthName} ${year}</h2>
+            <p class="month-subtitle">Pastel planning, but make it mildly competent.</p>
+          </div>
+          <div style="font-size:0.9rem; color:rgba(70,62,74,0.72); font-weight:bold;">
+            ${monthIndex + 1}/12
+          </div>
+        `;
+
+        const toolbar = document.createElement("div");
+        toolbar.className = "month-toolbar";
+        toolbar.innerHTML = `
+          <button type="button" data-action="clear-month" data-month="${monthIndex}">Clear ${monthName}</button>
+        `;
+
+        const calendar = document.createElement("div");
+        calendar.className = "calendar";
+
+        const weekdayRow = document.createElement("div");
+        weekdayRow.className = "weekday-row";
+        weekdays.forEach(day => {
+          const cell = document.createElement("div");
+          cell.className = "weekday";
+          cell.textContent = day;
+          weekdayRow.appendChild(cell);
+        });
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        const firstDay = getFirstDay(year, monthIndex);
+        const daysInMonth = getDaysInMonth(year, monthIndex);
+
+        for (let i = 0; i < firstDay; i++) {
+          const emptyCell = document.createElement("div");
+          emptyCell.className = "day-cell empty";
+          grid.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const key = `${monthIndex + 1}-${day}`;
+          const savedText = data[key] || "";
+
+          const dayCell = document.createElement("div");
+          dayCell.className = "day-cell";
+
+          const dayNumber = document.createElement("div");
+          dayNumber.className = "day-number";
+          dayNumber.textContent = day;
+
+          const note = document.createElement("textarea");
+          note.className = "day-note";
+          note.placeholder = "Add events...";
+          note.value = savedText;
+          note.dataset.key = key;
+          note.dataset.month = monthIndex;
+          note.dataset.day = day;
+
+          note.addEventListener("input", () => {
+            const currentYear = Number(yearInput.value);
+            const currentData = loadData(currentYear);
+            currentData[note.dataset.key] = note.value;
+            saveData(currentYear, currentData);
+          });
+
+          dayCell.appendChild(dayNumber);
+          dayCell.appendChild(note);
+          grid.appendChild(dayCell);
+        }
+
+        // Fill out the last row so calendar stays neat
+        const totalCells = firstDay + daysInMonth;
+        const remainingCells = (7 - (totalCells % 7)) % 7;
+
+        for (let i = 0; i < remainingCells; i++) {
+          const emptyCell = document.createElement("div");
+          emptyCell.className = "day-cell empty";
+          grid.appendChild(emptyCell);
+        }
+
+        calendar.appendChild(weekdayRow);
+        calendar.appendChild(grid);
+
+        monthPage.appendChild(header);
+        monthPage.appendChild(toolbar);
+        monthPage.appendChild(calendar);
+        planner.appendChild(monthPage);
+      });
+
+      attachMonthClearHandlers();
+      autoResizeAllTextareas();
+      showStatus(`Planner loaded for ${year}.`);
+    }
+
+    function attachMonthClearHandlers() {
+      document.querySelectorAll('[data-action="clear-month"]').forEach(button => {
+        button.addEventListener("click", () => {
+          const year = Number(yearInput.value);
+          const monthIndex = Number(button.dataset.month);
+          const data = loadData(year);
+
+          Object.keys(data).forEach(key => {
+            const [month] = key.split("-").map(Number);
+            if (month === monthIndex + 1) {
+              delete data[key];
+            }
+          });
+
+          saveData(year, data);
+          buildPlanner();
+          showStatus(`${monthNames[monthIndex]} cleared. A bold choice.`);
+        });
+      });
+    }
+
+    function autoResizeTextarea(textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.max(textarea.scrollHeight, 80) + "px";
+    }
+
+    function autoResizeAllTextareas() {
+      document.querySelectorAll(".day-note").forEach(textarea => {
+        autoResizeTextarea(textarea);
+        textarea.addEventListener("input", () => autoResizeTextarea(textarea));
+      });
+    }
+
+    function saveCurrentState() {
+      const year = Number(yearInput.value);
+      const data = {};
+      document.querySelectorAll(".day-note").forEach(note => {
+        if (note.value.trim() !== "") {
+          data[note.dataset.key] = note.value.trim();
+        }
+      });
+      saveData(year, data);
+      showStatus(`Saved ${year} to your browser.`);
+    }
+
+    function clearYear() {
+      const year = Number(yearInput.value);
+      const confirmed = confirm(`Clear all saved events for ${year}?`);
+      if (!confirmed) return;
+
+      localStorage.removeItem(storageKey(year));
+      buildPlanner();
+      showStatus(`All events cleared for ${year}. The slate is now offensively clean.`);
+    }
+
+    function exportCSV() {
+      const year = Number(yearInput.value);
+      const data = loadData(year);
+
+      let csv = "Year,Month,Day,Date,Event\n";
+
+      monthNames.forEach((monthName, monthIndex) => {
+        const daysInMonth = getDaysInMonth(year, monthIndex);
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const key = `${monthIndex + 1}-${day}`;
+          const eventText = (data[key] || "").replace(/"/g, '""').replace(/\n/g, " | ");
+          const fullDate = `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          csv += `"${year}","${monthName}","${day}","${fullDate}","${eventText}"\n`;
+        }
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `pastel-rainbow-planner-${year}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showStatus("CSV downloaded. Excel should open it just fine.");
+    }
+
+    function printPlanner() {
+      saveCurrentState();
+
+      document.body.classList.remove(
+        "print-a4-landscape",
+        "print-a3-landscape",
+        "print-a4-portrait",
+        "print-a3-portrait"
+      );
+
+      const size = printSize.value;
+      const orientation = printOrientation.value;
+      document.body.classList.add(`print-${size}-${orientation}`);
+
+      // Browser print settings still win sometimes, because of course they do.
+      window.print();
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", buildPlanner);
+    document.getElementById("saveBtn").addEventListener("click", saveCurrentState);
+    document.getElementById("printBtn").addEventListener("click", printPlanner);
+    document.getElementById("csvBtn").addEventListener("click", exportCSV);
+    document.getElementById("clearBtn").addEventListener("click", clearYear);
+
+    document.getElementById("expandBtn").addEventListener("click", () => {
+      autoResizeAllTextareas();
+      showStatus("Expanded the text boxes so your plans can really sprawl.");
+    });
+
+    yearInput.addEventListener("change", buildPlanner);
+
+    buildPlanner();
+  </script>
+</body>
+</html>
