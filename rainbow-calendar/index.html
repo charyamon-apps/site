@@ -155,7 +155,6 @@
       grid-template-columns: repeat(12, minmax(180px, 1fr));
       gap: 10px;
       min-width: 2200px;
-      transform-origin: top left;
     }
 
     .month-column {
@@ -221,7 +220,7 @@
       padding: 0;
     }
 
-    textarea.day-input {
+    .day-input {
       width: 100%;
       min-height: 26px;
       border: none;
@@ -233,6 +232,11 @@
       line-height: 1.2;
       outline: none;
       overflow: hidden;
+      white-space: pre-wrap;
+    }
+
+    textarea.day-input {
+      display: block;
     }
 
     .holiday-row .day-input {
@@ -349,6 +353,13 @@
       display: none;
     }
 
+    #printYearGrid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(180px, 1fr));
+      gap: 10px;
+      transform-origin: center center;
+    }
+
     @media (max-width: 1200px) {
       .controls {
         grid-template-columns: repeat(2, 1fr);
@@ -398,10 +409,6 @@
         height: 100%;
       }
 
-      body.print-year .month-print-view {
-        display: none !important;
-      }
-
       body.print-year .planner-wrap {
         display: none !important;
       }
@@ -428,51 +435,49 @@
 
       body.print-year .print-year-content {
         width: 100%;
+        flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
-        flex: 1;
         overflow: hidden;
       }
 
-      body.print-year .year-grid {
-        display: grid !important;
+      body.print-year #printYearGrid {
         min-width: 0 !important;
         margin: 0 auto !important;
         gap: 4px !important;
-        transform-origin: center center !important;
       }
 
-      body.print-year .month-column {
+      body.print-year #printYearGrid .month-column {
         display: block !important;
       }
 
-      body.print-year textarea.day-input {
+      body.print-year #printYearGrid .day-input {
         min-height: 14px !important;
         font-size: 6pt !important;
         line-height: 1.05 !important;
         padding: 3px 4px !important;
       }
 
-      body.print-year .day-num {
+      body.print-year #printYearGrid .day-num {
         font-size: 6pt !important;
         width: 18px !important;
         min-width: 18px !important;
         padding: 2px 1px !important;
       }
 
-      body.print-year .month-title {
+      body.print-year #printYearGrid .month-title {
         font-size: 7pt !important;
       }
 
-      body.print-year .month-tip {
+      body.print-year #printYearGrid .month-tip {
         font-size: 4.8pt !important;
         line-height: 1.1 !important;
         min-height: auto !important;
         margin-top: 3px !important;
       }
 
-      body.print-year .month-header {
+      body.print-year #printYearGrid .month-header {
         padding: 4px 4px 3px !important;
       }
 
@@ -586,7 +591,7 @@
       <div class="status" id="status"></div>
     </section>
 
-    <section class="planner-wrap" id="plannerWrap">
+    <section class="planner-wrap">
       <div class="year-grid" id="yearGrid"></div>
       <div class="month-print-view" id="monthPrintView"></div>
     </section>
@@ -594,7 +599,7 @@
     <section class="print-year-page" id="printYearPage">
       <div class="print-year-header" id="printYearHeader"></div>
       <div class="print-year-content">
-        <div class="year-grid" id="printYearGrid"></div>
+        <div id="printYearGrid"></div>
       </div>
     </section>
 
@@ -621,7 +626,6 @@
     const orientationEl = document.getElementById("orientation");
     const printModeEl = document.getElementById("printMode");
     const printMonthEl = document.getElementById("printMonth");
-    const plannerWrap = document.getElementById("plannerWrap");
 
     yearInput.value = new Date().getFullYear();
 
@@ -799,95 +803,81 @@
       return savedData[dateKey] !== undefined ? savedData[dateKey] : holidayText;
     }
 
-    function buildYearGridHTML(year, savedData, holidays, forPrint = false) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "year-grid";
+    function buildMonthColumn(year, savedData, holidays, monthIndex, printable) {
+      const monthName = monthNames[monthIndex];
+      const monthEl = document.createElement("div");
+      monthEl.className = `month-column month-${monthIndex}`;
+      monthEl.dataset.monthIndex = String(monthIndex);
 
-      monthNames.forEach((monthName, monthIndex) => {
-        const monthEl = document.createElement("div");
-        monthEl.className = `month-column month-${monthIndex}`;
-        monthEl.dataset.monthIndex = String(monthIndex);
+      const header = document.createElement("div");
+      header.className = "month-header";
+      header.innerHTML = `
+        <h2 class="month-title">${monthName}</h2>
+        <div class="month-tip">${getMonthSurvivalTip(monthIndex)}</div>
+      `;
 
-        const header = document.createElement("div");
-        header.className = "month-header";
-        header.innerHTML = `
-          <h2 class="month-title">${monthName}</h2>
-          <div class="month-tip">${getMonthSurvivalTip(monthIndex)}</div>
-        `;
+      const table = document.createElement("table");
+      const tbody = document.createElement("tbody");
+      const daysInMonth = getDaysInMonth(year, monthIndex);
 
-        const table = document.createElement("table");
-        const tbody = document.createElement("tbody");
-        const daysInMonth = getDaysInMonth(year, monthIndex);
+      for (let day = 1; day <= daysInMonth; day++) {
+        const tr = document.createElement("tr");
+        const dateKey = formatDateKey(year, monthIndex, day);
+        const weekday = getDayOfWeek(year, monthIndex, day);
+        const holidayText = holidays[dateKey] || "";
+        const savedText = getDayValue(year, monthIndex, day, savedData, holidays);
 
-        for (let day = 1; day <= daysInMonth; day++) {
-          const tr = document.createElement("tr");
-          const dateKey = formatDateKey(year, monthIndex, day);
-          const weekday = getDayOfWeek(year, monthIndex, day);
-          const holidayText = holidays[dateKey] || "";
-          const savedText = getDayValue(year, monthIndex, day, savedData, holidays);
+        if (holidayText) tr.classList.add("holiday-row");
 
-          if (holidayText) tr.classList.add("holiday-row");
+        const dayTd = document.createElement("td");
+        dayTd.className = "day-num" + ((weekday === 0 || weekday === 6) ? " weekend" : "");
+        dayTd.textContent = day;
 
-          const dayTd = document.createElement("td");
-          dayTd.className = "day-num" + ((weekday === 0 || weekday === 6) ? " weekend" : "");
-          dayTd.textContent = day;
+        const eventTd = document.createElement("td");
+        eventTd.className = "event-cell";
 
-          const eventTd = document.createElement("td");
-          eventTd.className = "event-cell";
-
-          if (forPrint) {
-            const div = document.createElement("div");
-            div.className = "day-input";
-            div.style.whiteSpace = "pre-wrap";
-            div.textContent = savedText;
-            eventTd.appendChild(div);
-          } else {
-            const textarea = document.createElement("textarea");
-            textarea.className = "day-input";
-            textarea.value = savedText;
-            textarea.dataset.date = dateKey;
-            textarea.spellcheck = false;
-
-            textarea.addEventListener("input", () => {
-              autoResize(textarea);
-              saveCurrentYear();
-            });
-
-            eventTd.appendChild(textarea);
-            requestAnimationFrame(() => autoResize(textarea));
-          }
-
-          tr.appendChild(dayTd);
-          tr.appendChild(eventTd);
-          tbody.appendChild(tr);
+        if (printable) {
+          const div = document.createElement("div");
+          div.className = "day-input";
+          div.textContent = savedText;
+          eventTd.appendChild(div);
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.className = "day-input";
+          textarea.value = savedText;
+          textarea.dataset.date = dateKey;
+          textarea.spellcheck = false;
+          textarea.addEventListener("input", () => {
+            autoResize(textarea);
+            saveCurrentYear();
+          });
+          eventTd.appendChild(textarea);
+          requestAnimationFrame(() => autoResize(textarea));
         }
 
-        table.appendChild(tbody);
-        monthEl.appendChild(header);
-        monthEl.appendChild(table);
-        wrapper.appendChild(monthEl);
-      });
+        tr.appendChild(dayTd);
+        tr.appendChild(eventTd);
+        tbody.appendChild(tr);
+      }
 
-      return wrapper;
+      table.appendChild(tbody);
+      monthEl.appendChild(header);
+      monthEl.appendChild(table);
+      return monthEl;
     }
 
-    function buildYearPlanner() {
+    function buildScreenYearGrid() {
       const year = Number(yearInput.value);
       const savedData = loadData(year);
       const holidays = getNswPublicHolidays(year);
 
       yearGrid.innerHTML = "";
-      const screenGrid = buildYearGridHTML(year, savedData, holidays, false);
-      while (screenGrid.firstChild) {
-        yearGrid.appendChild(screenGrid.firstChild);
+      for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+        yearGrid.appendChild(buildMonthColumn(year, savedData, holidays, monthIndex, false));
       }
-
-      buildPrintYearView();
-      buildMonthPrintView();
-      showStatus(`Loaded ${year}. NSW public holidays are included.`);
     }
 
-    function buildPrintYearView() {
+    function buildPrintYearGrid() {
       const year = Number(yearInput.value);
       const savedData = loadData(year);
       const holidays = getNswPublicHolidays(year);
@@ -895,9 +885,8 @@
       printYearHeader.textContent = `Year at a Glance ${year}`;
       printYearGrid.innerHTML = "";
 
-      const printGrid = buildYearGridHTML(year, savedData, holidays, true);
-      while (printGrid.firstChild) {
-        printYearGrid.appendChild(printGrid.firstChild);
+      for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+        printYearGrid.appendChild(buildMonthColumn(year, savedData, holidays, monthIndex, true));
       }
     }
 
@@ -966,16 +955,23 @@
       monthPrintView.appendChild(calendarGrid);
     }
 
+    function buildAllViews() {
+      buildScreenYearGrid();
+      buildPrintYearGrid();
+      buildMonthPrintView();
+      showStatus(`Loaded ${yearInput.value}. NSW public holidays are included.`);
+    }
+
     function saveCurrentYear() {
       const year = Number(yearInput.value);
       const data = {};
-      document.querySelectorAll("#yearGrid .day-input").forEach(input => {
+      document.querySelectorAll("#yearGrid textarea.day-input").forEach(input => {
         if (input.value.trim() !== "") {
           data[input.dataset.date] = input.value.trim();
         }
       });
       saveData(year, data);
-      buildPrintYearView();
+      buildPrintYearGrid();
       buildMonthPrintView();
     }
 
@@ -984,7 +980,7 @@
       const ok = confirm(`Clear everything for ${year}?`);
       if (!ok) return;
       localStorage.removeItem(storageKey(year));
-      buildYearPlanner();
+      buildAllViews();
       showStatus(`Cleared ${year}. A brutal reset.`);
     }
 
@@ -1036,12 +1032,12 @@
       `;
     }
 
-    function fitYearPrintToSinglePage() {
+    function fitPrintYearToOnePage() {
       printYearGrid.style.transform = "scale(1)";
       printYearGrid.style.width = "";
       printYearGrid.style.height = "";
 
-      if (printModeEl.value === "month") return;
+      if (printModeEl.value !== "year") return;
 
       const size = paperSizeEl.value;
       const orientation = orientationEl.value;
@@ -1071,8 +1067,7 @@
 
       const scaleX = usableWidthPx / contentWidth;
       const scaleY = usableHeightPx / contentHeight;
-      const safetyFactor = 0.9;
-      const scale = Math.min(scaleX, scaleY, 1) * safetyFactor;
+      const scale = Math.min(scaleX, scaleY, 1) * 0.92;
 
       printYearGrid.style.width = `${contentWidth}px`;
       printYearGrid.style.height = `${contentHeight}px`;
@@ -1081,11 +1076,12 @@
 
     function preparePrintMode() {
       document.body.classList.remove("print-year", "print-month");
+
       if (printModeEl.value === "month") {
         buildMonthPrintView();
         document.body.classList.add("print-month");
       } else {
-        buildPrintYearView();
+        buildPrintYearGrid();
         document.body.classList.add("print-year");
       }
     }
@@ -1101,41 +1097,39 @@
       saveCurrentYear();
       setPrintPageStyle();
       preparePrintMode();
-      fitYearPrintToSinglePage();
+      fitPrintYearToOnePage();
 
-      setTimeout(() => {
-        window.print();
-      }, 120);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          window.print();
+        }, 80);
+      });
     }
 
     window.addEventListener("afterprint", resetAfterPrint);
 
-    document.getElementById("generateBtn").addEventListener("click", buildYearPlanner);
-
+    document.getElementById("generateBtn").addEventListener("click", buildAllViews);
     document.getElementById("saveBtn").addEventListener("click", () => {
       saveCurrentYear();
       showStatus("Saved to this browser.");
     });
-
-    document.getElementById("csvBtn").addEventListener("click", exportCSV);
     document.getElementById("printBtn").addEventListener("click", printPlanner);
+    document.getElementById("csvBtn").addEventListener("click", exportCSV);
     document.getElementById("clearBtn").addEventListener("click", clearYear);
 
-    yearInput.addEventListener("change", buildYearPlanner);
+    yearInput.addEventListener("change", buildAllViews);
 
     printModeEl.addEventListener("change", () => {
       const isMonth = printModeEl.value === "month";
       printMonthEl.disabled = !isMonth;
-      if (isMonth) {
-        buildMonthPrintView();
-      }
+      if (isMonth) buildMonthPrintView();
     });
 
     printMonthEl.addEventListener("change", buildMonthPrintView);
 
     printMonthEl.disabled = true;
 
-    buildYearPlanner();
+    buildAllViews();
   </script>
 </body>
 </html>
