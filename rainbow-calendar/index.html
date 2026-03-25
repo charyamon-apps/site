@@ -212,7 +212,9 @@
       font-weight: bold;
     }
 
-    .event-cell { padding: 0; }
+    .event-cell {
+      padding: 0;
+    }
 
     textarea.day-input {
       width: 100%;
@@ -513,6 +515,13 @@
       return tips[monthIndex];
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
     function getDayValue(year, monthIndex, day, savedData, holidays) {
       const dateKey = formatDateKey(year, monthIndex, day);
       const holidayText = holidays[dateKey] || "";
@@ -532,14 +541,13 @@
       yearGrid.innerHTML = "";
 
       for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-        const monthName = monthNames[monthIndex];
         const monthEl = document.createElement("div");
         monthEl.className = `month-column month-${monthIndex}`;
 
         const header = document.createElement("div");
         header.className = "month-header";
         header.innerHTML = `
-          <h2 class="month-title">${monthName}</h2>
+          <h2 class="month-title">${monthNames[monthIndex]}</h2>
           <div class="month-tip">${getMonthSurvivalTip(monthIndex)}</div>
         `;
 
@@ -638,38 +646,38 @@
       showStatus("CSV downloaded.");
     }
 
-    function getPaperDimensionsMm(size, orientation) {
-      if (size === "A4" && orientation === "portrait") return { width: 210, height: 297 };
-      if (size === "A4" && orientation === "landscape") return { width: 297, height: 210 };
-      if (size === "A3" && orientation === "portrait") return { width: 297, height: 420 };
-      return { width: 420, height: 297 };
+    function openPrintWindow() {
+      const w = window.open("", "_blank", "width=1400,height=1000");
+      if (!w) {
+        alert("Please allow pop-ups for this page, then try printing again.");
+        return null;
+      }
+      return w;
     }
 
-    function buildFullYearPrintHTML(year, savedData, holidays, size, orientation) {
-      const paper = getPaperDimensionsMm(size, orientation);
-      let monthsHtml = "";
+    function buildYearPrintMarkup(year, savedData, holidays, size, orientation) {
+      let monthsMarkup = "";
 
       for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-        const daysInMonth = getDaysInMonth(year, monthIndex);
         let rows = "";
+        const daysInMonth = getDaysInMonth(year, monthIndex);
 
         for (let day = 1; day <= daysInMonth; day++) {
           const weekday = getDayOfWeek(year, monthIndex, day);
-          const value = getDayValue(year, monthIndex, day, savedData, holidays);
-          const safeValue = escapeHtml(value);
+          const value = escapeHtml(getDayValue(year, monthIndex, day, savedData, holidays));
 
           rows += `
             <tr>
               <td class="day-num ${weekday === 0 || weekday === 6 ? "weekend" : ""}">${day}</td>
-              <td class="event-cell"><div class="day-input">${safeValue}</div></td>
+              <td class="event-cell"><div class="day-input">${value}</div></td>
             </tr>
           `;
         }
 
-        monthsHtml += `
+        monthsMarkup += `
           <div class="month-column">
             <div class="month-header" style="background:${monthColours[monthIndex]}">
-              <h2 class="month-title">${monthNames[monthIndex]}</h2>
+              <div class="month-title">${monthNames[monthIndex]}</div>
               <div class="month-tip">${escapeHtml(getMonthSurvivalTip(monthIndex))}</div>
             </div>
             <table><tbody>${rows}</tbody></table>
@@ -679,10 +687,10 @@
 
       return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Print Year</title>
+<title>Year Print</title>
 <style>
   @page { size: ${size} ${orientation}; margin: 4mm; }
   html, body {
@@ -696,14 +704,13 @@
     print-color-adjust: exact;
     overflow: hidden;
   }
+  * { box-sizing: border-box; }
   .page {
     width: 100%;
     height: 100%;
     padding: 4mm;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
   }
   .header {
     font-size: 14pt;
@@ -711,9 +718,11 @@
     color: #2f2a33;
     margin-bottom: 4mm;
     text-align: left;
+    flex: 0 0 auto;
   }
   .content {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -738,13 +747,13 @@
     border-bottom: 1px solid rgba(0,0,0,0.04);
   }
   .month-title {
-    margin: 0;
     text-align: center;
     font-size: 7pt;
     font-weight: bold;
+    margin: 0;
   }
   .month-tip {
-    margin: 3px 0 0;
+    margin-top: 3px;
     font-size: 4.8pt;
     text-align: center;
     color: #524b58;
@@ -774,7 +783,6 @@
     color: #d94a57;
     font-weight: bold;
   }
-  .event-cell { padding: 0; }
   .day-input {
     min-height: 14px;
     padding: 3px 4px;
@@ -790,58 +798,53 @@
     <div class="header">Year at a Glance ${year}</div>
     <div class="content">
       <div class="scale-box" id="scaleBox">
-        <div class="year-grid" id="yearGrid">${monthsHtml}</div>
+        <div class="year-grid" id="yearGrid">${monthsMarkup}</div>
       </div>
     </div>
   </div>
 
-<script>
-(function() {
-  const page = document.querySelector('.page');
-  const header = document.querySelector('.header');
-  const content = document.querySelector('.content');
-  const scaleBox = document.getElementById('scaleBox');
-  const grid = document.getElementById('yearGrid');
+  <script>
+    window.onload = function () {
+      const content = document.querySelector('.content');
+      const box = document.getElementById('scaleBox');
+      const grid = document.getElementById('yearGrid');
 
-  requestAnimationFrame(() => {
-    const availableWidth = content.clientWidth;
-    const availableHeight = content.clientHeight;
-    const gridWidth = grid.scrollWidth;
-    const gridHeight = grid.scrollHeight;
+      const availableWidth = content.clientWidth;
+      const availableHeight = content.clientHeight;
+      const gridWidth = grid.scrollWidth;
+      const gridHeight = grid.scrollHeight;
 
-    const scaleX = availableWidth / gridWidth;
-    const scaleY = availableHeight / gridHeight;
-    const scale = Math.min(scaleX, scaleY, 0.96);
+      const scaleX = availableWidth / gridWidth;
+      const scaleY = availableHeight / gridHeight;
+      const scale = Math.min(scaleX, scaleY, 0.96);
 
-    scaleBox.style.transform = 'scale(' + scale + ')';
+      box.style.transform = 'scale(' + scale + ')';
 
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => window.close(), 300);
-    }, 150);
-  });
-})();
-</script>
+      setTimeout(function () {
+        window.focus();
+        window.print();
+      }, 250);
+    };
+  </script>
 </body>
 </html>
       `;
     }
 
-    function buildMonthPrintHTML(year, monthIndex, savedData, holidays, size, orientation) {
-      const paper = getPaperDimensionsMm(size, orientation);
+    function buildMonthPrintMarkup(year, monthIndex, savedData, holidays, size, orientation) {
       const firstDay = getFirstDayOfMonth(year, monthIndex);
       const daysInMonth = getDaysInMonth(year, monthIndex);
       const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
 
-      let weekdayHtml = "";
+      let weekdayMarkup = "";
       weekdayNames.forEach(day => {
-        weekdayHtml += `<div class="weekday">${day}</div>`;
+        weekdayMarkup += `<div class="weekday">${day}</div>`;
       });
 
-      let gridHtml = "";
+      let cellsMarkup = "";
       for (let i = 0; i < totalCells; i++) {
         if (i < firstDay || i >= firstDay + daysInMonth) {
-          gridHtml += `<div class="day empty"></div>`;
+          cellsMarkup += `<div class="day empty"></div>`;
           continue;
         }
 
@@ -849,7 +852,7 @@
         const weekday = getDayOfWeek(year, monthIndex, day);
         const value = escapeHtml(getDayValue(year, monthIndex, day, savedData, holidays));
 
-        gridHtml += `
+        cellsMarkup += `
           <div class="day">
             <div class="day-number ${weekday === 0 || weekday === 6 ? "weekend" : ""}">${day}</div>
             <div class="day-events">${value}</div>
@@ -859,10 +862,10 @@
 
       return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Print Month</title>
+<title>Month Print</title>
 <style>
   @page { size: ${size} ${orientation}; margin: 4mm; }
   html, body {
@@ -876,17 +879,18 @@
     print-color-adjust: exact;
     overflow: hidden;
   }
+  * { box-sizing: border-box; }
   .page {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    border: none;
   }
   .header {
     background: ${monthColours[monthIndex]};
     padding: 10mm 8mm 6mm;
     border-bottom: 1px solid rgba(0,0,0,0.08);
+    flex: 0 0 auto;
   }
   .header h1 {
     margin: 0;
@@ -903,6 +907,7 @@
   .weekday-row {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    flex: 0 0 auto;
   }
   .weekday {
     padding: 3mm 2mm;
@@ -914,9 +919,9 @@
     background: rgba(255,255,255,0.7);
   }
   .weekday:nth-child(7) { border-right: none; }
-
   .calendar {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-auto-rows: 1fr;
@@ -937,9 +942,7 @@
     font-weight: bold;
     color: #3d3742;
   }
-  .day-number.weekend {
-    color: #d94a57;
-  }
+  .day-number.weekend { color: #d94a57; }
   .day-events {
     font-size: 8.5pt;
     line-height: 1.25;
@@ -954,36 +957,29 @@
       <h1>${monthNames[monthIndex]} ${year}</h1>
       <div class="tip">${escapeHtml(getMonthSurvivalTip(monthIndex))}</div>
     </div>
-    <div class="weekday-row">${weekdayHtml}</div>
-    <div class="calendar">${gridHtml}</div>
+    <div class="weekday-row">${weekdayMarkup}</div>
+    <div class="calendar">${cellsMarkup}</div>
   </div>
 
-<script>
-  setTimeout(() => {
-    window.print();
-    setTimeout(() => window.close(), 300);
-  }, 150);
-</script>
+  <script>
+    window.onload = function () {
+      setTimeout(function () {
+        window.focus();
+        window.print();
+      }, 250);
+    };
+  </script>
 </body>
 </html>
       `;
     }
 
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
+    function openPrintMarkup(markup) {
+      const printWindow = openPrintWindow();
+      if (!printWindow) return;
 
-    function openPrintWindow(html) {
-      const printWindow = window.open("", "_blank", "width=1200,height=900");
-      if (!printWindow) {
-        alert("Your browser blocked the print window. Please allow pop-ups for this page.");
-        return;
-      }
       printWindow.document.open();
-      printWindow.document.write(html);
+      printWindow.document.write(markup);
       printWindow.document.close();
     }
 
@@ -998,11 +994,9 @@
 
       if (printModeEl.value === "month") {
         const monthIndex = Number(printMonthEl.value || 0);
-        const html = buildMonthPrintHTML(year, monthIndex, savedData, holidays, size, orientation);
-        openPrintWindow(html);
+        openPrintMarkup(buildMonthPrintMarkup(year, monthIndex, savedData, holidays, size, orientation));
       } else {
-        const html = buildFullYearPrintHTML(year, savedData, holidays, size, orientation);
-        openPrintWindow(html);
+        openPrintMarkup(buildYearPrintMarkup(year, savedData, holidays, size, orientation));
       }
     }
 
