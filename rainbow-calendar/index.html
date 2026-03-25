@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pastel Rainbow Year-at-a-Glance Planner</title>
+  <title>Year-at-a-Glance PDF Planner</title>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <style>
     :root {
@@ -63,7 +63,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 110px 120px 140px 170px 170px repeat(5, minmax(110px, 1fr));
+      grid-template-columns: repeat(6, minmax(130px, 1fr));
       gap: 10px;
       margin-top: 16px;
       align-items: end;
@@ -95,6 +95,13 @@
       padding: 9px 10px;
       background: #fff;
       color: var(--ink);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
     }
 
     button {
@@ -235,19 +242,6 @@
       font-weight: 600;
     }
 
-    .month-0  .month-header { background: #ffd9e5; }
-    .month-1  .month-header { background: #ffe7cf; }
-    .month-2  .month-header { background: #fff4c7; }
-    .month-3  .month-header { background: #e3f5d5; }
-    .month-4  .month-header { background: #d8f4df; }
-    .month-5  .month-header { background: #d9f4f1; }
-    .month-6  .month-header { background: #ddeeff; }
-    .month-7  .month-header { background: #e5e2ff; }
-    .month-8  .month-header { background: #efe1ff; }
-    .month-9  .month-header { background: #ffe2f4; }
-    .month-10 .month-header { background: #eee7f7; }
-    .month-11 .month-header { background: #ffdce7; }
-
     .footer-note {
       text-align: center;
       color: var(--muted);
@@ -260,6 +254,10 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
+      .button-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
       .topbar {
         position: static;
       }
@@ -269,9 +267,9 @@
 <body>
   <div class="app">
     <section class="topbar">
-      <h1>Pastel Rainbow Year-at-a-Glance Planner</h1>
+      <h1>Year-at-a-Glance PDF Planner</h1>
       <p>
-        Fill your whole year, export it to Excel, and generate a PDF that behaves like it has basic home training.
+        Fill your whole year, export it to Excel, and generate a PDF that can be tiny, readable, or completely unhinged.
       </p>
 
       <div class="controls">
@@ -309,10 +307,29 @@
           <select id="printMonth"></select>
         </div>
 
+        <div class="field">
+          <label for="themeSelect">Theme</label>
+          <select id="themeSelect"></select>
+        </div>
+
+        <div class="field">
+          <label for="pdfScale">PDF text size</label>
+          <select id="pdfScale">
+            <option value="100">Standard</option>
+            <option value="150">Large</option>
+            <option value="500" selected>Ridiculously Large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="button-row">
         <button class="primary" id="generateBtn">Generate / Refresh</button>
         <button id="saveBtn">Save to browser</button>
         <button id="pdfBtn">Open PDF</button>
         <button id="csvBtn">Download CSV</button>
+      </div>
+
+      <div class="button-row">
         <button class="danger" id="clearBtn">Clear this year</button>
       </div>
 
@@ -324,7 +341,7 @@
     </section>
 
     <div class="footer-note">
-      Blank days stay blank. Which is frankly the most emotionally mature feature here.
+      Blank days stay blank. The rarest kind of emotional maturity.
     </div>
   </div>
 
@@ -338,11 +355,48 @@
 
     const weekdayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    const monthColours = [
-      [255, 217, 229], [255, 231, 207], [255, 244, 199], [227, 245, 213],
-      [216, 244, 223], [217, 244, 241], [221, 238, 255], [229, 226, 255],
-      [239, 225, 255], [255, 226, 244], [238, 231, 247], [255, 220, 231]
-    ];
+    const themes = {
+      pastel: {
+        name: "Soft Pastels",
+        months: [
+          [255, 217, 229], [255, 231, 207], [255, 244, 199], [227, 245, 213],
+          [216, 244, 223], [217, 244, 241], [221, 238, 255], [229, 226, 255],
+          [239, 225, 255], [255, 226, 244], [238, 231, 247], [255, 220, 231]
+        ]
+      },
+      boho: {
+        name: "Earth & Clay",
+        months: [
+          [230, 202, 183], [210, 178, 152], [191, 148, 112], [206, 188, 163],
+          [177, 156, 129], [221, 196, 164], [193, 162, 141], [218, 176, 137],
+          [198, 169, 145], [214, 186, 160], [186, 156, 133], [228, 204, 184]
+        ]
+      },
+      greenery: {
+        name: "Botanical Greens",
+        months: [
+          [222, 239, 220], [205, 230, 198], [190, 221, 182], [175, 214, 168],
+          [199, 232, 201], [182, 221, 188], [165, 209, 176], [210, 235, 207],
+          [193, 227, 192], [176, 214, 176], [160, 201, 162], [220, 240, 219]
+        ]
+      },
+      clean: {
+        name: "Clean & Bold",
+        months: [
+          [214, 226, 240], [198, 214, 231], [180, 200, 220], [214, 220, 228],
+          [197, 208, 218], [178, 191, 203], [206, 217, 228], [188, 201, 215],
+          [171, 187, 203], [219, 224, 230], [201, 209, 218], [184, 194, 206]
+        ]
+      },
+      feminine: {
+        name: "Blushed Bloom",
+        months: [
+          [255, 225, 233], [252, 213, 227], [248, 201, 220], [244, 210, 229],
+          [255, 221, 239], [246, 204, 223], [238, 194, 215], [255, 230, 242],
+          [249, 212, 231], [242, 198, 221], [251, 220, 235], [255, 229, 240]
+        ]
+      }
+    };
 
     const yearInput = document.getElementById("yearInput");
     const yearGrid = document.getElementById("yearGrid");
@@ -351,6 +405,8 @@
     const orientationEl = document.getElementById("orientation");
     const printModeEl = document.getElementById("printMode");
     const printMonthEl = document.getElementById("printMonth");
+    const themeSelect = document.getElementById("themeSelect");
+    const pdfScaleEl = document.getElementById("pdfScale");
 
     yearInput.value = new Date().getFullYear();
 
@@ -360,6 +416,18 @@
       option.textContent = month;
       printMonthEl.appendChild(option);
     });
+
+    Object.entries(themes).forEach(([key, value]) => {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = value.name;
+      themeSelect.appendChild(option);
+    });
+    themeSelect.value = "pastel";
+
+    function currentThemeMonths() {
+      return themes[themeSelect.value].months;
+    }
 
     function storageKey(year) {
       return `year-at-a-glance-${year}`;
@@ -537,8 +605,6 @@
       trimmed.forEach((line, i) => {
         if (align === "center") {
           doc.text(line, x, y + i * lineHeight, { align: "center" });
-        } else if (align === "right") {
-          doc.text(line, x, y + i * lineHeight, { align: "right" });
         } else {
           doc.text(line, x, y + i * lineHeight);
         }
@@ -549,15 +615,17 @@
       const year = Number(yearInput.value);
       const savedData = loadData(year);
       const holidays = getNswPublicHolidays(year);
+      const themeMonths = currentThemeMonths();
 
       yearGrid.innerHTML = "";
 
       for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
         const monthEl = document.createElement("div");
-        monthEl.className = `month-column month-${monthIndex}`;
+        monthEl.className = `month-column`;
 
         const header = document.createElement("div");
         header.className = "month-header";
+        header.style.background = `rgb(${themeMonths[monthIndex][0]}, ${themeMonths[monthIndex][1]}, ${themeMonths[monthIndex][2]})`;
         header.innerHTML = `
           <h2 class="month-title">${monthNames[monthIndex]}</h2>
           <div class="month-tip">${getMonthSurvivalTip(monthIndex)}</div>
@@ -662,34 +730,49 @@
       return new jsPDF({ orientation, unit: "mm", format: size, compress: true });
     }
 
-    function drawYearPdf(doc, year, savedData, holidays) {
+    function getMonthsPerPage(scaleValue, mode) {
+      if (mode === "month") return 1;
+      if (scaleValue >= 500) return 3;
+      if (scaleValue >= 150) return 6;
+      return 12;
+    }
+
+    function drawYearMonthsPage(doc, year, savedData, holidays, startMonth, monthsPerPage, pageIndex, totalPages) {
       const pageW = doc.internal.pageSize.getWidth();
       const pageH = doc.internal.pageSize.getHeight();
-      const isA4 = paperSizeEl.value === "a4";
+      const themeMonths = currentThemeMonths();
 
       const margin = 4;
-      const headerH = 8;
-      const contentTop = margin + headerH + 2;
+      const headerY = margin + 4;
+      const contentTop = margin + 8 + 2;
       const contentH = pageH - contentTop - margin;
+      const gap = 1;
+
+      const monthW = (pageW - margin * 2 - gap * (monthsPerPage - 1)) / monthsPerPage;
+      const monthH = contentH;
+
+      const headerBoxH = 6.6;
+      const rowH = (monthH - headerBoxH) / 31;
+      const dayColW = 5.8;
+      const textW = monthW - dayColW - 0.8;
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
       doc.setTextColor(47, 42, 51);
-      doc.text(`Year at a Glance ${year}`, margin, margin + 4);
 
-      const gap = isA4 ? 0.8 : 1;
-      const monthW = (pageW - margin * 2 - gap * 11) / 12;
-      const monthH = contentH;
+      const headerText = totalPages > 1
+        ? `Year at a Glance ${year} — Page ${pageIndex + 1} of ${totalPages}`
+        : `Year at a Glance ${year}`;
 
-      const headerBoxH = isA4 ? 5.9 : 8.5;
-      const rowH = (monthH - headerBoxH) / 31;
-      const dayColW = isA4 ? 5.1 : 4.6;
-      const textW = monthW - dayColW - 0.8;
+      doc.text(headerText, margin, headerY);
 
-      for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-        const x = margin + monthIndex * (monthW + gap);
+      for (let slot = 0; slot < monthsPerPage; slot++) {
+        const monthIndex = startMonth + slot;
+        if (monthIndex > 11) break;
+
+        const x = margin + slot * (monthW + gap);
         const y = contentTop;
-        const color = monthColours[monthIndex];
+        const color = themeMonths[monthIndex];
 
         doc.setDrawColor(231, 223, 234);
         doc.setFillColor(255, 255, 255);
@@ -699,9 +782,9 @@
         doc.rect(x, y, monthW, headerBoxH, "F");
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(isA4 ? 7.8 : 6.8);
+        doc.setFontSize(9.5);
         doc.setTextColor(47, 42, 51);
-        doc.text(monthNames[monthIndex], x + monthW / 2, y + (isA4 ? 3.9 : 4.3), { align: "center" });
+        doc.text(monthNames[monthIndex], x + monthW / 2, y + 4.2, { align: "center" });
 
         const daysInMonth = getDaysInMonth(year, monthIndex);
 
@@ -719,28 +802,20 @@
             doc.line(x + dayColW, rowY, x + dayColW, rowY + rowH);
 
             doc.setFont("helvetica", weekday === 0 || weekday === 6 ? "bold" : "normal");
-            doc.setFontSize(isA4 ? 6.2 : 5.1);
+            doc.setFontSize(7.2);
             if (weekday === 0 || weekday === 6) {
               doc.setTextColor(217, 74, 87);
             } else {
               doc.setTextColor(61, 55, 66);
             }
-            doc.text(String(day), x + 0.8, rowY + rowH * 0.73);
+            doc.text(String(day), x + 0.9, rowY + rowH * 0.73);
 
             doc.setTextColor(47, 42, 51);
             doc.setFont("helvetica", "normal");
-            doc.setFontSize(isA4 ? 5.8 : 4.5);
+            doc.setFontSize(6.8);
 
             const lines = wrapText(doc, value, textW);
-            drawTextLines(
-              doc,
-              lines,
-              x + dayColW + 0.3,
-              rowY + rowH * 0.73,
-              isA4 ? 1.85 : 1.55,
-              isA4 ? 2 : 2,
-              "left"
-            );
+            drawTextLines(doc, lines, x + dayColW + 0.35, rowY + rowH * 0.73, 2.15, 2, "left");
           }
         }
 
@@ -748,11 +823,52 @@
       }
     }
 
+    function drawYearPdf(doc, year, savedData, holidays) {
+      const scaleValue = Number(pdfScaleEl.value);
+      const monthsPerPage = getMonthsPerPage(scaleValue, "year");
+      const totalPages = Math.ceil(12 / monthsPerPage);
+
+      for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+        if (pageIndex > 0) doc.addPage();
+        drawYearMonthsPage(
+          doc,
+          year,
+          savedData,
+          holidays,
+          pageIndex * monthsPerPage,
+          monthsPerPage,
+          pageIndex,
+          totalPages
+        );
+      }
+    }
+
     function drawMonthPdf(doc, year, monthIndex, savedData, holidays) {
       const pageW = doc.internal.pageSize.getWidth();
       const pageH = doc.internal.pageSize.getHeight();
       const margin = 4;
-      const color = monthColours[monthIndex];
+      const color = currentThemeMonths()[monthIndex];
+      const scaleValue = Number(pdfScaleEl.value);
+
+      let monthFont = 18;
+      let weekdayFont = 12;
+      let dayNumberFont = 12;
+      let eventFont = 12;
+      let lineHeight = 4.6;
+
+      if (scaleValue >= 500) {
+        monthFont = 24;
+        weekdayFont = 14;
+        dayNumberFont = 16;
+        eventFont = 16;
+        lineHeight = 5.8;
+      } else if (scaleValue >= 150) {
+        monthFont = 21;
+        weekdayFont = 13;
+        dayNumberFont = 14;
+        eventFont = 14;
+        lineHeight = 5.0;
+      }
 
       const headerH = 24;
       const weekdayH = 10;
@@ -770,7 +886,7 @@
       doc.rect(margin, margin, calW, headerH, "F");
 
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
+      doc.setFontSize(monthFont);
       doc.setTextColor(47, 42, 51);
       doc.text(`${monthNames[monthIndex]} ${year}`, pageW / 2, margin + 8, { align: "center" });
 
@@ -784,7 +900,7 @@
         const x = margin + i * cellW;
         doc.rect(x, margin + headerH, cellW, weekdayH);
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
+        doc.setFontSize(weekdayFont);
         doc.setTextColor(47, 42, 51);
         doc.text(weekdayNamesShort[i], x + cellW / 2, margin + headerH + 6.5, { align: "center" });
       }
@@ -811,25 +927,25 @@
           const value = getDayValue(year, monthIndex, currentDay, savedData, holidays);
 
           doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
+          doc.setFontSize(dayNumberFont);
           if (weekday === 0 || weekday === 6) {
             doc.setTextColor(217, 74, 87);
           } else {
             doc.setTextColor(61, 55, 66);
           }
-          doc.text(String(currentDay), x + 2, y + 5);
+          doc.text(String(currentDay), x + 2, y + 6);
 
           doc.setFont("helvetica", "normal");
-          doc.setFontSize(12);
+          doc.setFontSize(eventFont);
           doc.setTextColor(47, 42, 51);
           const lines = wrapText(doc, value, cellW - 4);
           drawTextLines(
             doc,
             lines,
             x + 2,
-            y + 11,
-            4.6,
-            Math.max(1, Math.floor((cellH - 14) / 4.6)),
+            y + 12,
+            lineHeight,
+            Math.max(1, Math.floor((cellH - 15) / lineHeight)),
             "left"
           );
 
@@ -879,6 +995,7 @@
     document.getElementById("clearBtn").addEventListener("click", clearYear);
 
     yearInput.addEventListener("change", buildAllViews);
+    themeSelect.addEventListener("change", buildAllViews);
 
     printModeEl.addEventListener("change", () => {
       printMonthEl.disabled = printModeEl.value !== "month";
