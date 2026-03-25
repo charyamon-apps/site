@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pastel Rainbow Year-at-a-Glance Planner</title>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <style>
     :root {
       --bg: #faf7fb;
@@ -254,14 +255,6 @@
       padding: 12px 4px 0;
     }
 
-    .hidden-measure {
-      position: absolute;
-      left: -99999px;
-      top: -99999px;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
     @media (max-width: 1200px) {
       .controls {
         grid-template-columns: repeat(2, 1fr);
@@ -289,10 +282,10 @@
         </div>
 
         <div class="field">
-          <label for="paperSize">Print size</label>
+          <label for="paperSize">PDF size</label>
           <select id="paperSize">
-            <option value="A4">A4</option>
-            <option value="A3" selected>A3</option>
+            <option value="a4">A4</option>
+            <option value="a3" selected>A3</option>
           </select>
         </div>
 
@@ -305,7 +298,7 @@
         </div>
 
         <div class="field">
-          <label for="printMode">Print what</label>
+          <label for="printMode">Create PDF for</label>
           <select id="printMode">
             <option value="year" selected>Entire year</option>
             <option value="month">One month only</option>
@@ -319,7 +312,7 @@
 
         <button class="primary" id="generateBtn">Generate / Refresh</button>
         <button id="saveBtn">Save to browser</button>
-        <button id="printBtn">Print</button>
+        <button id="pdfBtn">Open PDF</button>
         <button id="csvBtn">Download CSV</button>
         <button class="danger" id="clearBtn">Clear this year</button>
       </div>
@@ -336,21 +329,20 @@
     </div>
   </div>
 
-  <iframe id="printFrame" style="position:absolute; width:0; height:0; border:0; left:-9999px; top:-9999px;"></iframe>
-  <div id="measureBox" class="hidden-measure"></div>
-
   <script>
+    const { jsPDF } = window.jspdf;
+
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
 
-    const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const weekdayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     const monthColours = [
-      "#ffd9e5", "#ffe7cf", "#fff4c7", "#e3f5d5",
-      "#d8f4df", "#d9f4f1", "#ddeeff", "#e5e2ff",
-      "#efe1ff", "#ffe2f4", "#eee7f7", "#ffdce7"
+      [255, 217, 229], [255, 231, 207], [255, 244, 199], [227, 245, 213],
+      [216, 244, 223], [217, 244, 241], [221, 238, 255], [229, 226, 255],
+      [239, 225, 255], [255, 226, 244], [238, 231, 247], [255, 220, 231]
     ];
 
     const yearInput = document.getElementById("yearInput");
@@ -360,8 +352,6 @@
     const orientationEl = document.getElementById("orientation");
     const printModeEl = document.getElementById("printMode");
     const printMonthEl = document.getElementById("printMonth");
-    const printFrame = document.getElementById("printFrame");
-    const measureBox = document.getElementById("measureBox");
 
     yearInput.value = new Date().getFullYear();
 
@@ -381,7 +371,7 @@
       clearTimeout(showStatus.timer);
       showStatus.timer = setTimeout(() => {
         statusEl.textContent = "";
-      }, 3000);
+      }, 3500);
     }
 
     function loadData(year) {
@@ -528,13 +518,6 @@
       return tips[monthIndex];
     }
 
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-
     function getDayValue(year, monthIndex, day, savedData, holidays) {
       const dateKey = formatDateKey(year, monthIndex, day);
       const holidayText = holidays[dateKey] || "";
@@ -544,6 +527,15 @@
     function autoResize(el) {
       el.style.height = "auto";
       el.style.height = Math.max(el.scrollHeight, 24) + "px";
+    }
+
+    function wrapText(doc, text, maxWidth) {
+      return doc.splitTextToSize(String(text || ""), maxWidth);
+    }
+
+    function drawTextLines(doc, lines, x, y, lineHeight, maxLines) {
+      const trimmed = lines.slice(0, maxLines);
+      trimmed.forEach((line, i) => doc.text(line, x, y + i * lineHeight));
     }
 
     function buildScreenYearGrid() {
@@ -657,199 +649,196 @@
       showStatus("CSV downloaded.");
     }
 
-    function buildYearGridMarkup(year, savedData, holidays) {
-      let monthsMarkup = "";
+    function makePdf() {
+      const size = paperSizeEl.value;
+      const orientation = orientationEl.value;
+      return new jsPDF({ orientation, unit: "mm", format: size, compress: true });
+    }
+
+    function drawYearPdf(doc, year, savedData, holidays) {
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      const margin = 4;
+      const headerH = 8;
+      const contentTop = margin + headerH + 2;
+      const contentH = pageH - contentTop - margin;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(47, 42, 51);
+      doc.text(`Year at a Glance ${year}`, margin, margin + 4);
+
+      const gap = 1;
+      const monthW = (pageW - margin * 2 - gap * 11) / 12;
+      const monthH = contentH;
+
+      const headerBoxH = 8;
+      const rowH = (monthH - headerBoxH) / 31;
+      const dayColW = 4.2;
+      const textW = monthW - dayColW - 1.2;
 
       for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-        let rows = "";
+        const x = margin + monthIndex * (monthW + gap);
+        const y = contentTop;
+        const color = monthColours[monthIndex];
+
+        doc.setDrawColor(231, 223, 234);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, monthW, monthH, 2, 2, "S");
+
+        doc.setFillColor(color[0], color[1], color[2]);
+        doc.rect(x, y, monthW, headerBoxH, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(5.5);
+        doc.setTextColor(47, 42, 51);
+        doc.text(monthNames[monthIndex], x + monthW / 2, y + 2.8, { align: "center" });
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(3.1);
+        const tipLines = wrapText(doc, getMonthSurvivalTip(monthIndex), monthW - 2);
+        drawTextLines(doc, tipLines, x + monthW / 2, y + 5.0, 1.5, 2);
+
         const daysInMonth = getDaysInMonth(year, monthIndex);
 
-        for (let day = 1; day <= daysInMonth; day++) {
-          const weekday = getDayOfWeek(year, monthIndex, day);
-          const value = escapeHtml(getDayValue(year, monthIndex, day, savedData, holidays));
+        for (let day = 1; day <= 31; day++) {
+          const rowY = y + headerBoxH + (day - 1) * rowH;
 
-          rows += '<tr>' +
-            '<td class="day-num ' + ((weekday === 0 || weekday === 6) ? 'weekend' : '') + '">' + day + '</td>' +
-            '<td class="event-cell"><div class="day-input">' + value + '</div></td>' +
-            '</tr>';
+          doc.setDrawColor(238, 230, 240);
+          doc.line(x, rowY, x + monthW, rowY);
+
+          if (day <= daysInMonth) {
+            const weekday = getDayOfWeek(year, monthIndex, day);
+            const value = getDayValue(year, monthIndex, day, savedData, holidays);
+
+            doc.setDrawColor(238, 230, 240);
+            doc.line(x + dayColW, rowY, x + dayColW, rowY + rowH);
+
+            doc.setFont("helvetica", weekday === 0 || weekday === 6 ? "bold" : "normal");
+            doc.setFontSize(3.8);
+            if (weekday === 0 || weekday === 6) {
+              doc.setTextColor(217, 74, 87);
+            } else {
+              doc.setTextColor(61, 55, 66);
+            }
+            doc.text(String(day), x + 0.9, rowY + rowH * 0.72);
+
+            doc.setTextColor(47, 42, 51);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(3.2);
+            const lines = wrapText(doc, value, textW);
+            drawTextLines(doc, lines, x + dayColW + 0.5, rowY + rowH * 0.72, 1.25, 2);
+          }
         }
 
-        monthsMarkup += '<div class="month-column">' +
-          '<div class="month-header" style="background:' + monthColours[monthIndex] + '">' +
-          '<div class="month-title">' + monthNames[monthIndex] + '</div>' +
-          '<div class="month-tip">' + escapeHtml(getMonthSurvivalTip(monthIndex)) + '</div>' +
-          '</div>' +
-          '<table><tbody>' + rows + '</tbody></table>' +
-          '</div>';
+        doc.line(x, y + monthH, x + monthW, y + monthH);
       }
-
-      return monthsMarkup;
     }
 
-    function buildMeasureStyles() {
-      return '' +
-        '.year-grid{display:grid;grid-template-columns:repeat(12,minmax(180px,1fr));gap:4px;}' +
-        '.month-column{border:1px solid #e7dfea;border-radius:12px;overflow:hidden;background:#fff;}' +
-        '.month-header{padding:4px 4px 3px;border-bottom:1px solid rgba(0,0,0,0.04);}' +
-        '.month-title{text-align:center;font-size:7pt;font-weight:bold;margin:0;}' +
-        '.month-tip{margin-top:3px;font-size:4.8pt;text-align:center;color:#524b58;line-height:1.1;}' +
-        'table{width:100%;border-collapse:collapse;table-layout:fixed;}' +
-        'td{border-bottom:1px solid #eee6f0;vertical-align:top;}' +
-        'tr:last-child td{border-bottom:none;}' +
-        '.day-num{width:18px;min-width:18px;text-align:center;font-size:6pt;padding:2px 1px;color:#3d3742;border-right:1px solid #eee6f0;background:rgba(255,255,255,0.55);}' +
-        '.day-num.weekend{color:#d94a57;font-weight:bold;}' +
-        '.day-input{min-height:14px;padding:3px 4px;font-size:6pt;line-height:1.05;white-space:pre-wrap;color:#2f2a33;}';
-    }
+    function drawMonthPdf(doc, year, monthIndex, savedData, holidays) {
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const margin = 4;
+      const color = monthColours[monthIndex];
 
-    function getPaperDimensionsMm(size, orientation) {
-      if (size === "A4" && orientation === "portrait") return { width: 210, height: 297 };
-      if (size === "A4" && orientation === "landscape") return { width: 297, height: 210 };
-      if (size === "A3" && orientation === "portrait") return { width: 297, height: 420 };
-      return { width: 420, height: 297 };
-    }
+      const headerH = 24;
+      const weekdayH = 10;
+      const calTop = margin + headerH + weekdayH;
+      const calH = pageH - calTop - margin;
+      const calW = pageW - margin * 2;
+      const cellW = calW / 7;
 
-    function measureYearScale(year, savedData, holidays, size, orientation) {
-      const paper = getPaperDimensionsMm(size, orientation);
-      const usableWidthPx = ((paper.width - 8) / 25.4) * 96;
-      const usableHeightPx = ((paper.height - 18) / 25.4) * 96;
-
-      measureBox.innerHTML = '<style>' + buildMeasureStyles() + '</style><div class="year-grid" id="measureGrid">' + buildYearGridMarkup(year, savedData, holidays) + '</div>';
-      const grid = measureBox.querySelector("#measureGrid");
-
-      const gridWidth = grid.scrollWidth;
-      const gridHeight = grid.scrollHeight;
-
-      const scaleX = usableWidthPx / gridWidth;
-      const scaleY = usableHeightPx / gridHeight;
-      const scale = Math.min(scaleX, scaleY, 0.96);
-
-      measureBox.innerHTML = "";
-      return scale;
-    }
-
-    function getYearPrintDocument(year, savedData, holidays, size, orientation) {
-      const gridMarkup = buildYearGridMarkup(year, savedData, holidays);
-      const scale = measureYearScale(year, savedData, holidays, size, orientation);
-
-      return [
-        '<!DOCTYPE html>',
-        '<html lang="en">',
-        '<head>',
-        '<meta charset="UTF-8">',
-        '<title>Year Print</title>',
-        '<style>',
-        '@page { size: ' + size + ' ' + orientation + '; margin: 4mm; }',
-        'html, body { margin:0; padding:0; width:100%; height:100%; background:#fff; font-family:Arial, Helvetica, sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; overflow:hidden; }',
-        '* { box-sizing:border-box; }',
-        '.page { width:100%; height:100%; padding:4mm; display:flex; flex-direction:column; }',
-        '.header { font-size:14pt; font-weight:700; color:#2f2a33; margin-bottom:4mm; text-align:left; flex:0 0 auto; }',
-        '.content { flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }',
-        '.scale-box { transform-origin:center center; transform:scale(' + scale + '); }',
-        buildMeasureStyles(),
-        '</style>',
-        '</head>',
-        '<body>',
-        '<div class="page">',
-        '<div class="header">Year at a Glance ' + year + '</div>',
-        '<div class="content"><div class="scale-box"><div class="year-grid">' + gridMarkup + '</div></div></div>',
-        '</div>',
-        '</body>',
-        '</html>'
-      ].join("");
-    }
-
-    function getMonthPrintDocument(year, monthIndex, savedData, holidays, size, orientation) {
       const firstDay = getFirstDayOfMonth(year, monthIndex);
       const daysInMonth = getDaysInMonth(year, monthIndex);
-      const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+      const rows = Math.ceil((firstDay + daysInMonth) / 7);
+      const cellH = calH / rows;
 
-      let weekdayMarkup = "";
-      weekdayNames.forEach(day => {
-        weekdayMarkup += '<div class="weekday">' + day + '</div>';
-      });
+      doc.setFillColor(color[0], color[1], color[2]);
+      doc.rect(margin, margin, calW, headerH, "F");
 
-      let cellsMarkup = "";
-      for (let i = 0; i < totalCells; i++) {
-        if (i < firstDay || i >= firstDay + daysInMonth) {
-          cellsMarkup += '<div class="day empty"></div>';
-          continue;
-        }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(47, 42, 51);
+      doc.text(`${monthNames[monthIndex]} ${year}`, pageW / 2, margin + 8, { align: "center" });
 
-        const day = i - firstDay + 1;
-        const weekday = getDayOfWeek(year, monthIndex, day);
-        const value = escapeHtml(getDayValue(year, monthIndex, day, savedData, holidays));
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(91, 83, 96);
+      doc.text(getMonthSurvivalTip(monthIndex), pageW / 2, margin + 15, { align: "center" });
 
-        cellsMarkup += '<div class="day">' +
-          '<div class="day-number ' + ((weekday === 0 || weekday === 6) ? 'weekend' : '') + '">' + day + '</div>' +
-          '<div class="day-events">' + value + '</div>' +
-          '</div>';
+      doc.setDrawColor(234, 223, 238);
+      for (let i = 0; i < 7; i++) {
+        const x = margin + i * cellW;
+        doc.rect(x, margin + headerH, cellW, weekdayH);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.5);
+        doc.setTextColor(47, 42, 51);
+        doc.text(weekdayNamesShort[i], x + cellW / 2, margin + headerH + 6.5, { align: "center" });
       }
 
-      return [
-        '<!DOCTYPE html>',
-        '<html lang="en">',
-        '<head>',
-        '<meta charset="UTF-8">',
-        '<title>Month Print</title>',
-        '<style>',
-        '@page { size: ' + size + ' ' + orientation + '; margin: 4mm; }',
-        'html, body { margin:0; padding:0; width:100%; height:100%; background:#fff; font-family:Arial, Helvetica, sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; overflow:hidden; }',
-        '* { box-sizing:border-box; }',
-        '.page { width:100%; height:100%; display:flex; flex-direction:column; }',
-        '.header { background:' + monthColours[monthIndex] + '; padding:10mm 8mm 6mm; border-bottom:1px solid rgba(0,0,0,0.08); flex:0 0 auto; }',
-        '.header h1 { margin:0; text-align:center; font-size:22pt; color:#2f2a33; }',
-        '.tip { margin-top:4mm; text-align:center; font-size:10pt; color:#5b5360; }',
-        '.weekday-row { display:grid; grid-template-columns:repeat(7, 1fr); flex:0 0 auto; }',
-        '.weekday { padding:3mm 2mm; text-align:center; font-weight:bold; font-size:10pt; border-right:1px solid #eadfee; border-bottom:1px solid #eadfee; background:rgba(255,255,255,0.7); }',
-        '.weekday:nth-child(7) { border-right:none; }',
-        '.calendar { flex:1 1 auto; min-height:0; display:grid; grid-template-columns:repeat(7, 1fr); grid-auto-rows:1fr; }',
-        '.day { border-right:1px solid #eadfee; border-bottom:1px solid #eadfee; padding:2.5mm; display:flex; flex-direction:column; gap:4px; min-height:0; }',
-        '.day:nth-child(7n) { border-right:none; }',
-        '.day.empty { background:#fbf9fc; }',
-        '.day-number { font-size:10pt; font-weight:bold; color:#3d3742; }',
-        '.day-number.weekend { color:#d94a57; }',
-        '.day-events { font-size:8.5pt; line-height:1.25; white-space:pre-wrap; color:#2f2a33; }',
-        '</style>',
-        '</head>',
-        '<body>',
-        '<div class="page">',
-        '<div class="header"><h1>' + monthNames[monthIndex] + ' ' + year + '</h1><div class="tip">' + escapeHtml(getMonthSurvivalTip(monthIndex)) + '</div></div>',
-        '<div class="weekday-row">' + weekdayMarkup + '</div>',
-        '<div class="calendar">' + cellsMarkup + '</div>',
-        '</div>',
-        '</body>',
-        '</html>'
-      ].join("");
+      let currentDay = 1;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < 7; col++) {
+          const index = row * 7 + col;
+          const x = margin + col * cellW;
+          const y = calTop + row * cellH;
+
+          doc.setDrawColor(234, 223, 238);
+          doc.rect(x, y, cellW, cellH);
+
+          if (index < firstDay || currentDay > daysInMonth) {
+            doc.setFillColor(251, 249, 252);
+            doc.rect(x, y, cellW, cellH, "F");
+            doc.setDrawColor(234, 223, 238);
+            doc.rect(x, y, cellW, cellH);
+            continue;
+          }
+
+          const weekday = getDayOfWeek(year, monthIndex, currentDay);
+          const value = getDayValue(year, monthIndex, day = currentDay, savedData, holidays);
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          if (weekday === 0 || weekday === 6) {
+            doc.setTextColor(217, 74, 87);
+          } else {
+            doc.setTextColor(61, 55, 66);
+          }
+          doc.text(String(currentDay), x + 2, y + 5);
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7.5);
+          doc.setTextColor(47, 42, 51);
+          const lines = wrapText(doc, value, cellW - 4);
+          drawTextLines(doc, lines, x + 2, y + 10, 3.2, Math.max(1, Math.floor((cellH - 12) / 3.2)));
+
+          currentDay++;
+        }
+      }
     }
 
-    function printHtmlInFrame(html) {
-      const frameDoc = printFrame.contentWindow.document;
-      frameDoc.open();
-      frameDoc.write(html);
-      frameDoc.close();
-
-      setTimeout(() => {
-        printFrame.contentWindow.focus();
-        printFrame.contentWindow.print();
-      }, 500);
+    function openPdf(doc, filenameBase) {
+      const blobUrl = doc.output("bloburl");
+      window.open(blobUrl, "_blank");
+      showStatus(`${filenameBase}.pdf opened. Use your browser or PDF viewer to print it.`);
     }
 
-    function printPlanner() {
+    function createPdf() {
       saveCurrentYear();
 
       const year = Number(yearInput.value);
       const savedData = loadData(year);
       const holidays = getNswPublicHolidays(year);
-      const size = paperSizeEl.value;
-      const orientation = orientationEl.value;
+      const doc = makePdf();
 
       if (printModeEl.value === "month") {
         const monthIndex = Number(printMonthEl.value || 0);
-        const html = getMonthPrintDocument(year, monthIndex, savedData, holidays, size, orientation);
-        printHtmlInFrame(html);
+        drawMonthPdf(doc, year, monthIndex, savedData, holidays);
+        openPdf(doc, `${monthNames[monthIndex].toLowerCase()}-${year}`);
       } else {
-        const html = getYearPrintDocument(year, savedData, holidays, size, orientation);
-        printHtmlInFrame(html);
+        drawYearPdf(doc, year, savedData, holidays);
+        openPdf(doc, `year-at-a-glance-${year}`);
       }
     }
 
@@ -865,7 +854,7 @@
       showStatus("Saved to this browser.");
     });
 
-    document.getElementById("printBtn").addEventListener("click", printPlanner);
+    document.getElementById("pdfBtn").addEventListener("click", createPdf);
     document.getElementById("csvBtn").addEventListener("click", exportCSV);
     document.getElementById("clearBtn").addEventListener("click", clearYear);
 
