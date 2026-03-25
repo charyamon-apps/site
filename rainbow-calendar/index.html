@@ -254,6 +254,14 @@
       padding: 12px 4px 0;
     }
 
+    .hidden-measure {
+      position: absolute;
+      left: -99999px;
+      top: -99999px;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
     @media (max-width: 1200px) {
       .controls {
         grid-template-columns: repeat(2, 1fr);
@@ -329,6 +337,7 @@
   </div>
 
   <iframe id="printFrame" style="position:absolute; width:0; height:0; border:0; left:-9999px; top:-9999px;"></iframe>
+  <div id="measureBox" class="hidden-measure"></div>
 
   <script>
     const monthNames = [
@@ -352,6 +361,7 @@
     const printModeEl = document.getElementById("printMode");
     const printMonthEl = document.getElementById("printMonth");
     const printFrame = document.getElementById("printFrame");
+    const measureBox = document.getElementById("measureBox");
 
     yearInput.value = new Date().getFullYear();
 
@@ -603,13 +613,11 @@
     function saveCurrentYear() {
       const year = Number(yearInput.value);
       const data = {};
-
       document.querySelectorAll("#yearGrid textarea.day-input").forEach(input => {
         if (input.value.trim() !== "") {
           data[input.dataset.date] = input.value.trim();
         }
       });
-
       saveData(year, data);
     }
 
@@ -649,7 +657,7 @@
       showStatus("CSV downloaded.");
     }
 
-    function getYearPrintDocument(year, savedData, holidays, size, orientation) {
+    function buildYearGridMarkup(year, savedData, holidays) {
       let monthsMarkup = "";
 
       for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
@@ -675,6 +683,54 @@
           '</div>';
       }
 
+      return monthsMarkup;
+    }
+
+    function buildMeasureStyles() {
+      return '' +
+        '.year-grid{display:grid;grid-template-columns:repeat(12,minmax(180px,1fr));gap:4px;}' +
+        '.month-column{border:1px solid #e7dfea;border-radius:12px;overflow:hidden;background:#fff;}' +
+        '.month-header{padding:4px 4px 3px;border-bottom:1px solid rgba(0,0,0,0.04);}' +
+        '.month-title{text-align:center;font-size:7pt;font-weight:bold;margin:0;}' +
+        '.month-tip{margin-top:3px;font-size:4.8pt;text-align:center;color:#524b58;line-height:1.1;}' +
+        'table{width:100%;border-collapse:collapse;table-layout:fixed;}' +
+        'td{border-bottom:1px solid #eee6f0;vertical-align:top;}' +
+        'tr:last-child td{border-bottom:none;}' +
+        '.day-num{width:18px;min-width:18px;text-align:center;font-size:6pt;padding:2px 1px;color:#3d3742;border-right:1px solid #eee6f0;background:rgba(255,255,255,0.55);}' +
+        '.day-num.weekend{color:#d94a57;font-weight:bold;}' +
+        '.day-input{min-height:14px;padding:3px 4px;font-size:6pt;line-height:1.05;white-space:pre-wrap;color:#2f2a33;}';
+    }
+
+    function getPaperDimensionsMm(size, orientation) {
+      if (size === "A4" && orientation === "portrait") return { width: 210, height: 297 };
+      if (size === "A4" && orientation === "landscape") return { width: 297, height: 210 };
+      if (size === "A3" && orientation === "portrait") return { width: 297, height: 420 };
+      return { width: 420, height: 297 };
+    }
+
+    function measureYearScale(year, savedData, holidays, size, orientation) {
+      const paper = getPaperDimensionsMm(size, orientation);
+      const usableWidthPx = ((paper.width - 8) / 25.4) * 96;
+      const usableHeightPx = ((paper.height - 18) / 25.4) * 96;
+
+      measureBox.innerHTML = '<style>' + buildMeasureStyles() + '</style><div class="year-grid" id="measureGrid">' + buildYearGridMarkup(year, savedData, holidays) + '</div>';
+      const grid = measureBox.querySelector("#measureGrid");
+
+      const gridWidth = grid.scrollWidth;
+      const gridHeight = grid.scrollHeight;
+
+      const scaleX = usableWidthPx / gridWidth;
+      const scaleY = usableHeightPx / gridHeight;
+      const scale = Math.min(scaleX, scaleY, 0.96);
+
+      measureBox.innerHTML = "";
+      return scale;
+    }
+
+    function getYearPrintDocument(year, savedData, holidays, size, orientation) {
+      const gridMarkup = buildYearGridMarkup(year, savedData, holidays);
+      const scale = measureYearScale(year, savedData, holidays, size, orientation);
+
       return [
         '<!DOCTYPE html>',
         '<html lang="en">',
@@ -688,40 +744,15 @@
         '.page { width:100%; height:100%; padding:4mm; display:flex; flex-direction:column; }',
         '.header { font-size:14pt; font-weight:700; color:#2f2a33; margin-bottom:4mm; text-align:left; flex:0 0 auto; }',
         '.content { flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }',
-        '.scale-box { transform-origin:center center; }',
-        '.year-grid { display:grid; grid-template-columns:repeat(12, minmax(180px, 1fr)); gap:4px; }',
-        '.month-column { border:1px solid #e7dfea; border-radius:12px; overflow:hidden; background:#fff; }',
-        '.month-header { padding:4px 4px 3px; border-bottom:1px solid rgba(0,0,0,0.04); }',
-        '.month-title { text-align:center; font-size:7pt; font-weight:bold; margin:0; }',
-        '.month-tip { margin-top:3px; font-size:4.8pt; text-align:center; color:#524b58; line-height:1.1; }',
-        'table { width:100%; border-collapse:collapse; table-layout:fixed; }',
-        'td { border-bottom:1px solid #eee6f0; vertical-align:top; }',
-        'tr:last-child td { border-bottom:none; }',
-        '.day-num { width:18px; min-width:18px; text-align:center; font-size:6pt; padding:2px 1px; color:#3d3742; border-right:1px solid #eee6f0; background:rgba(255,255,255,0.55); }',
-        '.day-num.weekend { color:#d94a57; font-weight:bold; }',
-        '.day-input { min-height:14px; padding:3px 4px; font-size:6pt; line-height:1.05; white-space:pre-wrap; color:#2f2a33; }',
+        '.scale-box { transform-origin:center center; transform:scale(' + scale + '); }',
+        buildMeasureStyles(),
         '</style>',
         '</head>',
         '<body>',
         '<div class="page">',
         '<div class="header">Year at a Glance ' + year + '</div>',
-        '<div class="content"><div class="scale-box" id="scaleBox"><div class="year-grid" id="yearGrid">' + monthsMarkup + '</div></div></div>',
+        '<div class="content"><div class="scale-box"><div class="year-grid">' + gridMarkup + '</div></div></div>',
         '</div>',
-        '<script>',
-        'window.onload = function () {',
-        '  var content = document.querySelector(".content");',
-        '  var box = document.getElementById("scaleBox");',
-        '  var grid = document.getElementById("yearGrid");',
-        '  var availableWidth = content.clientWidth;',
-        '  var availableHeight = content.clientHeight;',
-        '  var gridWidth = grid.scrollWidth;',
-        '  var gridHeight = grid.scrollHeight;',
-        '  var scaleX = availableWidth / gridWidth;',
-        '  var scaleY = availableHeight / gridHeight;',
-        '  var scale = Math.min(scaleX, scaleY, 0.96);',
-        '  box.style.transform = "scale(" + scale + ")";',
-        '};',
-        '<\/script>',
         '</body>',
         '</html>'
       ].join("");
@@ -797,19 +828,10 @@
       frameDoc.write(html);
       frameDoc.close();
 
-      printFrame.onload = function () {
-        setTimeout(() => {
-          printFrame.contentWindow.focus();
-          printFrame.contentWindow.print();
-        }, 300);
-      };
-
-      if (printFrame.contentDocument.readyState === "complete") {
-        setTimeout(() => {
-          printFrame.contentWindow.focus();
-          printFrame.contentWindow.print();
-        }, 300);
-      }
+      setTimeout(() => {
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+      }, 500);
     }
 
     function printPlanner() {
