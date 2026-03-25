@@ -271,8 +271,7 @@
     <section class="topbar">
       <h1>Pastel Rainbow Year-at-a-Glance Planner</h1>
       <p>
-        Fill your whole year, print it with colours, and export it to Excel. Still a spreadsheet at heart, obviously.
-        Just wearing a cardigan now.
+        Fill your whole year, export it to Excel, and generate a PDF that behaves like it has basic home training.
       </p>
 
       <div class="controls">
@@ -533,9 +532,17 @@
       return doc.splitTextToSize(String(text || ""), maxWidth);
     }
 
-    function drawTextLines(doc, lines, x, y, lineHeight, maxLines) {
+    function drawTextLines(doc, lines, x, y, lineHeight, maxLines, align = "left") {
       const trimmed = lines.slice(0, maxLines);
-      trimmed.forEach((line, i) => doc.text(line, x, y + i * lineHeight));
+      trimmed.forEach((line, i) => {
+        if (align === "center") {
+          doc.text(line, x, y + i * lineHeight, { align: "center" });
+        } else if (align === "right") {
+          doc.text(line, x, y + i * lineHeight, { align: "right" });
+        } else {
+          doc.text(line, x, y + i * lineHeight);
+        }
+      });
     }
 
     function buildScreenYearGrid() {
@@ -673,7 +680,7 @@
       const monthW = (pageW - margin * 2 - gap * 11) / 12;
       const monthH = contentH;
 
-      const headerBoxH = 8;
+      const headerBoxH = 8.5;
       const rowH = (monthH - headerBoxH) / 31;
       const dayColW = 4.2;
       const textW = monthW - dayColW - 1.2;
@@ -691,14 +698,14 @@
         doc.rect(x, y, monthW, headerBoxH, "F");
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(5.5);
+        doc.setFontSize(5.4);
         doc.setTextColor(47, 42, 51);
-        doc.text(monthNames[monthIndex], x + monthW / 2, y + 2.8, { align: "center" });
+        doc.text(monthNames[monthIndex], x + monthW / 2, y + 2.4, { align: "center" });
 
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(3.1);
+        doc.setFontSize(2.8);
         const tipLines = wrapText(doc, getMonthSurvivalTip(monthIndex), monthW - 2);
-        drawTextLines(doc, tipLines, x + monthW / 2, y + 5.0, 1.5, 2);
+        drawTextLines(doc, tipLines, x + monthW / 2, y + 4.7, 1.25, 2, "center");
 
         const daysInMonth = getDaysInMonth(year, monthIndex);
 
@@ -716,19 +723,20 @@
             doc.line(x + dayColW, rowY, x + dayColW, rowY + rowH);
 
             doc.setFont("helvetica", weekday === 0 || weekday === 6 ? "bold" : "normal");
-            doc.setFontSize(3.8);
+            doc.setFontSize(3.6);
             if (weekday === 0 || weekday === 6) {
               doc.setTextColor(217, 74, 87);
             } else {
               doc.setTextColor(61, 55, 66);
             }
-            doc.text(String(day), x + 0.9, rowY + rowH * 0.72);
+            doc.text(String(day), x + 0.9, rowY + rowH * 0.68);
 
             doc.setTextColor(47, 42, 51);
             doc.setFont("helvetica", "normal");
-            doc.setFontSize(3.2);
+            doc.setFontSize(3.0);
+
             const lines = wrapText(doc, value, textW);
-            drawTextLines(doc, lines, x + dayColW + 0.5, rowY + rowH * 0.72, 1.25, 2);
+            drawTextLines(doc, lines, x + dayColW + 0.45, rowY + rowH * 0.68, 1.15, 2, "left");
           }
         }
 
@@ -796,7 +804,7 @@
           }
 
           const weekday = getDayOfWeek(year, monthIndex, currentDay);
-          const value = getDayValue(year, monthIndex, day = currentDay, savedData, holidays);
+          const value = getDayValue(year, monthIndex, currentDay, savedData, holidays);
 
           doc.setFont("helvetica", "bold");
           doc.setFontSize(9);
@@ -808,10 +816,18 @@
           doc.text(String(currentDay), x + 2, y + 5);
 
           doc.setFont("helvetica", "normal");
-          doc.setFontSize(7.5);
+          doc.setFontSize(7.2);
           doc.setTextColor(47, 42, 51);
           const lines = wrapText(doc, value, cellW - 4);
-          drawTextLines(doc, lines, x + 2, y + 10, 3.2, Math.max(1, Math.floor((cellH - 12) / 3.2)));
+          drawTextLines(
+            doc,
+            lines,
+            x + 2,
+            y + 10,
+            3.0,
+            Math.max(1, Math.floor((cellH - 12) / 3.0)),
+            "left"
+          );
 
           currentDay++;
         }
@@ -821,7 +837,7 @@
     function openPdf(doc, filenameBase) {
       const blobUrl = doc.output("bloburl");
       window.open(blobUrl, "_blank");
-      showStatus(`${filenameBase}.pdf opened. Use your browser or PDF viewer to print it.`);
+      showStatus(`${filenameBase}.pdf opened. Print from the PDF viewer.`);
     }
 
     function createPdf() {
