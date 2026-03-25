@@ -780,7 +780,7 @@
         const x = margin + i * cellW;
         doc.rect(x, margin + headerH, cellW, weekdayH);
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(8.5);
+        doc.setFontSize(12);
         doc.setTextColor(47, 42, 51);
         doc.text(weekdayNamesShort[i], x + cellW / 2, margin + headerH + 6.5, { align: "center" });
       }
@@ -807,7 +807,7 @@
           const value = getDayValue(year, monthIndex, currentDay, savedData, holidays);
 
           doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
+          doc.setFontSize(12);
           if (weekday === 0 || weekday === 6) {
             doc.setTextColor(217, 74, 87);
           } else {
@@ -816,16 +816,16 @@
           doc.text(String(currentDay), x + 2, y + 5);
 
           doc.setFont("helvetica", "normal");
-          doc.setFontSize(7.2);
+          doc.setFontSize(12);
           doc.setTextColor(47, 42, 51);
           const lines = wrapText(doc, value, cellW - 4);
           drawTextLines(
             doc,
             lines,
             x + 2,
-            y + 10,
-            3.0,
-            Math.max(1, Math.floor((cellH - 12) / 3.0)),
+            y + 11,
+            4.6,
+            Math.max(1, Math.floor((cellH - 14) / 4.6)),
             "left"
           );
 
