@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turn My Life Into a Product</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg1: #fff7fb;
+      --bg2: #eef9ff;
+      --card: rgba(255, 255, 255, 0.88);
+      --text: #2d2a32;
+      --muted: #6d6775;
+      --border: rgba(255, 255, 255, 0.7);
+      --shadow: 0 18px 40px rgba(76, 97, 140, 0.15);
+      --primary: #7c5cff;
+      --primary-dark: #5a3de0;
+      --secondary: #ff7eb6;
+      --accent: #4cc9f0;
+      --accent2: #ffd166;
+      --success: #21b573;
+      --danger: #ff5d73;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #ffe0f0 0%, transparent 30%),
+        radial-gradient(circle at top right, #dff4ff 0%, transparent 28%),
+        radial-gradient(circle at bottom left, #fff0c7 0%, transparent 24%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero,
+    .panel,
+    .footer-box {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -60px;
+      top: -60px;
+      background: radial-gradient(circle, rgba(124, 92, 255, 0.22), transparent 70%);
+      border-radius: 50%;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 2.3rem;
+      line-height: 1.1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tag {
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.12), rgba(76, 201, 240, 0.12));
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: bold;
+    }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.25rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    textarea,
+    select,
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 2px solid transparent;
+      background: rgba(255,255,255,0.9);
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: 0.2s ease;
+      margin-bottom: 16px;
+      box-shadow: inset 0 0 0 1px rgba(124, 92, 255, 0.08);
+    }
+
+    textarea:focus,
+    select:focus,
+    input:focus {
+      border-color: rgba(124, 92, 255, 0.35);
+      box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.08);
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.98;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 10px 20px rgba(124, 92, 255, 0.22);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #ffffff, #f5f4ff);
+      color: var(--text);
+      border: 1px solid rgba(124, 92, 255, 0.12);
+    }
+
+    .btn-small {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      background: white;
+      border: 1px solid rgba(124, 92, 255, 0.12);
+    }
+
+    .results-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.12), rgba(255, 126, 182, 0.12));
+      border: 1px solid rgba(124, 92, 255, 0.08);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .empty-state {
+      padding: 24px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.75), rgba(245,244,255,0.9));
+      border: 2px dashed rgba(124, 92, 255, 0.15);
+      color: var(--muted);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .idea-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250, 248, 255, 0.94));
+      border-radius: 22px;
+      padding: 18px;
+      border: 1px solid rgba(124, 92, 255, 0.12);
+      box-shadow: 0 14px 30px rgba(124, 92, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .idea-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 7px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--accent2));
+    }
+
+    .idea-number {
+      display: inline-block;
+      font-size: 0.82rem;
+      font-weight: bold;
+      background: rgba(124, 92, 255, 0.1);
+      color: var(--primary-dark);
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+
+    .idea-title {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+      line-height: 1.25;
+    }
+
+    .score-box {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .score {
+      background: #fff;
+      border-radius: 14px;
+      padding: 8px 12px;
+      border: 1px solid rgba(124, 92, 255, 0.1);
+      font-size: 0.88rem;
+    }
+
+    .idea-section {
+      margin-bottom: 12px;
+    }
+
+    .idea-section strong {
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    .copy-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .copied-msg {
+      font-size: 0.9rem;
+      color: var(--success);
+      margin-top: 8px;
+      display: none;
+    }
+
+    .summary-box {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(76, 201, 240, 0.09), rgba(255, 209, 102, 0.14));
+      border: 1px solid rgba(76, 201, 240, 0.12);
+    }
+
+    .footer-box {
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 820px) {
+      .grid,
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      .container {
+        padding: 14px;
+      }
+
+      .hero,
+      .panel,
+      .footer-box {
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Turn My Life Into a Product</h1>
+      <p class="subtitle">
+        Type your real-life annoyance, ongoing chaos, or the thing you keep meaning to sort out.
+        This app turns it into product ideas for Etsy, KDP, templates, or mini apps. Because apparently
+        our coping mechanisms deserve a business model.
+      </p>
+
+      <div class="tag-row">
+        <span class="tag">Colourful upgrade</span>
+        <span class="tag">Copy buttons</span>
+        <span class="tag">Idea scores</span>
+        <span class="tag">Cleaner results</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Your messy reality</h2>
+      <p class="muted">No need to sound polished. Exhausted and oddly specific is perfect.</p>
+
+      <label for="lifeInput">What is going on in your life?</label>
+      <textarea id="lifeInput" placeholder="Example: I sell clipart on Etsy, I have too many listings, I keep making similar products, and I know I should bundle things but my brain politely leaves the building when I try."></textarea>
+
+      <div class="grid">
+        <div>
+          <label for="audience">Who is this mainly for?</label>
+          <select id="audience">
+            <option value="myself">Myself</option>
+            <option value="busy mums">Busy mums</option>
+            <option value="kids">Kids</option>
+            <option value="teachers">Teachers</option>
+            <option value="etsy sellers">Etsy sellers</option>
+            <option value="small business owners">Small business owners</option>
+            <option value="students">Students</option>
+            <option value="general adults">General adults</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="format">What kind of product do you want?</label>
+          <select id="format">
+            <option value="etsy printable">Etsy printable</option>
+            <option value="kdp book">KDP book</option>
+            <option value="digital template">Digital template</option>
+            <option value="mini web app">Mini web app</option>
+            <option value="not sure">Not sure</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="vibe">What vibe should it have?</label>
+          <select id="vibe">
+            <option value="practical">Practical</option>
+            <option value="cute">Cute</option>
+            <option value="funny">Funny</option>
+            <option value="calming">Calming</option>
+            <option value="slightly unhinged">Slightly unhinged</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="count">How many ideas?</label>
+          <select id="count">
+            <option value="3">3 ideas</option>
+            <option value="4" selected>4 ideas</option>
+            <option value="5">5 ideas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="btn-primary" id="generateBtn">Generate product ideas</button>
+        <button class="btn-secondary" id="exampleBtn">Load example</button>
+        <button class="btn-secondary" id="clearBtn">Clear</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="results-top">
+        <h2 style="margin:0;">Results</h2>
+        <div class="pill-row" id="resultPills"></div>
+      </div>
+
+      <div id="results">
+        <div class="empty-state">
+          Nothing here yet. This section is waiting patiently, unlike your to-do list.
+        </div>
+      </div>
+    </section>
+
+    <section class="footer-box">
+      This version is still rule-based, not AI. Which is honestly fine. It is cheaper, faster, and less likely to suddenly have opinions.
+    </section>
+  </div>
+
+  <script>
+    const lifeInput = document.getElementById("lifeInput");
+    const audienceSelect = document.getElementById("audience");
+    const formatSelect = document.getElementById("format");
+    const vibeSelect = document.getElementById("vibe");
+    const countSelect = document.getElementById("count");
+    const generateBtn = document.getElementById("generateBtn");
+    const exampleBtn = document.getElementById("exampleBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const results = document.getElementById("results");
+    const resultPills = document.getElementById("resultPills");
+
+    const keywordGroups = [
+      {
+        name: "organisation",
+        keywords: ["organise", "organize", "mess", "chaos", "clutter", "overwhelmed", "behind", "forget", "tracking", "routine", "schedule", "system", "plan"],
+        titles: ["Planner", "Tracker", "Checklist", "Reset Sheet", "Routine Builder"],
+        features: ["daily checklist", "weekly planning page", "brain dump page", "priority tracker", "simple routine guide"]
+      },
+      {
+        name: "etsy",
+        keywords: ["etsy", "listing", "listings", "clipart", "bundle", "tags", "seo", "thumbnail", "digital product", "shop"],
+        titles: ["Bundle Planner", "Listing Tracker", "Product Audit Sheet", "SEO Helper", "Shop Cleanup Kit"],
+        features: ["listing inventory sheet", "bundle idea page", "duplicate checker", "title planner", "pricing section"]
+      },
+      {
+        name: "kdp",
+        keywords: ["kdp", "book", "puzzle", "journal", "log book", "activity book", "interior", "cover", "amazon"],
+        titles: ["Book Planner", "Interior Builder", "Puzzle Theme Pack", "Publishing Tracker", "Series Planner"],
+        features: ["title planning page", "interior outline", "category ideas", "cover notes", "publishing checklist"]
+      },
+      {
+        name: "kids",
+        keywords: ["kids", "child", "children", "daughter", "son", "school", "homework", "learning", "writing", "reading", "screen time"],
+        titles: ["Activity Pack", "Prompt Journal", "Learning Kit", "Routine Chart", "Reward Tracker"],
+        features: ["simple activity pages", "prompt cards", "habit chart", "progress page", "easy instructions"]
+      },
+      {
+        name: "home",
+        keywords: ["home", "house", "clean", "laundry", "kitchen", "declutter", "meal", "family", "chores"],
+        titles: ["Home Reset Planner", "Meal System Pack", "Declutter Checklist", "Family Admin Hub", "Chore Tracker"],
+        features: ["room-by-room checklist", "weekly meal page", "family task sheet", "quick wins list", "household notes"]
+      },
+      {
+        name: "work",
+        keywords: ["work", "office", "meeting", "job", "boss", "corporate", "burnout", "email", "deadline", "finance"],
+        titles: ["Workload Planner", "Meeting Notes Pad", "Decision Tracker", "Burnout Reset Sheet", "Admin Survival Kit"],
+        features: ["meeting notes page", "deadline list", "follow-up tracker", "decision log", "calm reset page"]
+      }
+    ];
+
+    const audienceWords = {
+      "myself": "for people like you",
+      "busy mums": "for busy mums",
+      "kids": "for kids",
+      "teachers": "for teachers",
+      "etsy sellers": "for Etsy sellers",
+      "small business owners": "for small business owners",
+      "students": "for students",
+      "general adults": "for tired but functioning adults"
+    };
+
+    const vibePrefixes = {
+      "practical": ["Simple", "Easy", "Smart", "Useful", "Everyday"],
+      "cute": ["Sweet", "Charming", "Playful", "Lovely", "Whimsical"],
+      "funny": ["Barely Coping", "No Big Deal", "Mildly Chaotic", "Trying Here", "Honestly Fine"],
+      "calming": ["Gentle", "Calm", "Soft", "Peaceful", "Quiet"],
+      "slightly unhinged": ["Held Together Somehow", "Tiny Panic", "Spicy Brain", "Unreasonably Helpful", "Caffeinated Chaos"]
+    };
+
+    const formatNames = {
+      "etsy printable": "Etsy printable",
+      "kdp book": "KDP book",
+      "digital template": "Digital template",
+      "mini web app": "Mini web app",
+      "not sure": "Digital product"
+    };
+
+    function getRandomItem(arr, indexSeed = 0) {
+      return arr[indexSeed % arr.length];
+    }
+
+    function capitaliseWords(text) {
+      return text
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
+
+    function detectThemes(text) {
+      const lowerText = text.toLowerCase();
+      const matches = [];
+
+      keywordGroups.forEach(group => {
+        const found = group.keywords.some(keyword => lowerText.includes(keyword));
+        if (found) matches.push(group);
+      });
+
+      if (matches.length === 0) {
+        matches.push({
+          name: "general",
+          titles: ["Idea Planner", "Problem Solver", "Life Admin Kit", "Starter Pack", "Action Guide"],
+          features: ["simple planning page", "brain dump space", "action steps", "tracking section", "quick guide"]
+        });
+      }
+
+      return matches;
+    }
+
+    function extractProblemLine(text) {
+      const cleanText = text.trim();
+      if (!cleanText) return "a recurring real-life problem";
+      const shortText = cleanText.length > 120 ? cleanText.slice(0, 120).trim() + "..." : cleanText;
+      return shortText.charAt(0).toLowerCase() + shortText.slice(1);
+    }
+
+    function calculateScores(themeName, format, vibe, originalText, seed) {
+      const text = originalText.toLowerCase();
+
+      let sellability = 7;
+      let originality = 6;
+      let ease = 7;
+
+      if (themeName === "etsy" || themeName === "organisation" || themeName === "kids") sellability += 1;
+      if (themeName === "general") originality -= 1;
+      if (format === "mini web app") originality += 2;
+      if (format === "kdp book") ease += 1;
+      if (format === "etsy printable") ease += 1;
+      if (vibe === "funny" || vibe === "slightly unhinged") originality += 1;
+
+      if (text.includes("too many") || text.includes("overwhelmed") || text.includes("forget")) sellability += 1;
+      if (text.includes("bundle") || text.includes("tracker") || text.includes("planner")) ease += 1;
+
+      sellability = Math.min(10, sellability + (seed % 2));
+      originality = Math.min(10, originality + (seed % 3 === 0 ? 1 : 0));
+      ease = Math.min(10, ease + (seed % 2 === 0 ? 1 : 0));
+
+      return { sellability, originality, ease };
+    }
+
+    function buildIdea(theme, audience, format, vibe, seed, originalText) {
+      const prefix = getRandomItem(vibePrefixes[vibe], seed);
+      const coreTitle = getRandomItem(theme.titles, seed + 1);
+      const audienceLabel = audience === "myself" ? "Life" : capitaliseWords(audience);
+      const productName = `${prefix} ${audienceLabel} ${coreTitle}`;
+
+      const formatLabel = formatNames[format];
+      const targetLine = audienceWords[audience];
+      const problemLine = extractProblemLine(originalText);
+
+      const allFeatures = [];
+      for (let i = 0; i < 4; i++) {
+        allFeatures.push(getRandomItem(theme.features, seed + i));
+      }
+
+      const uniqueFeatures = [...new Set(allFeatures)].slice(0, 4);
+
+      let listingAngle = "";
+      if (format === "etsy printable") {
+        listingAngle = `A printable ${targetLine} who need help with ${problemLine}`;
+      } else if (format === "kdp book") {
+        listingAngle = `A low-content or guided book ${targetLine} built around ${problemLine}`;
+      } else if (format === "digital template") {
+        listingAngle = `A reusable template ${targetLine} can use to manage ${problemLine}`;
+      } else if (format === "mini web app") {
+        listingAngle = `A tiny browser-based tool ${targetLine} can use for ${problemLine}`;
+      } else {
+        listingAngle = `A digital product ${targetLine} centred on ${problemLine}`;
+      }
+
+      const description = `This ${formatLabel.toLowerCase()} turns a common frustration into something clear, useful, and much less annoying. It is designed ${targetLine} and focuses on solving ${problemLine}.`;
+
+      const titleLine = `${productName} | ${formatLabel} | ${capitaliseWords(audience)}`;
+      const scores = calculateScores(theme.name, format, vibe, originalText, seed);
+
+      return {
+        name: productName,
+        format: formatLabel,
+        description,
+        angle: listingAngle,
+        include: uniqueFeatures,
+        titleLine,
+        scores
+      };
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function copyText(text, msgId) {
+      navigator.clipboard.writeText(text).then(() => {
+        const msg = document.getElementById(msgId);
+        if (msg) {
+          msg.style.display = "block";
+          setTimeout(() => {
+            msg.style.display = "none";
+          }, 1600);
+        }
+      });
+    }
+
+    function buildCopyBlock(idea) {
+      return `PRODUCT NAME
+${idea.name}
+
+BEST FORMAT
+${idea.format}
+
+WHAT IT IS
+${idea.description}
+
+LISTING ANGLE
+${idea.angle}
+
+WHAT TO INCLUDE
+- ${idea.include.join("\n- ")}`;
+    }
+
+    function renderIdeas(ideas, originalText, audience, format, vibe) {
+      resultPills.innerHTML = `
+        <span class="pill">Audience: ${capitaliseWords(audience)}</span>
+        <span class="pill">Format: ${capitaliseWords(format)}</span>
+        <span class="pill">Vibe: ${capitaliseWords(vibe)}</span>
+      `;
+
+      let cards = `<div class="results-grid">`;
+
+      ideas.forEach((idea, index) => {
+        const copyFullId = `copy-full-${index}`;
+        const copyTitleId = `copy-title-${index}`;
+
+        cards += `
+          <div class="idea-card">
+            <div class="idea-number">Idea ${index + 1}</div>
+            <h3 class="idea-title">${idea.name}</h3>
+
+            <div class="score-box">
+              <div class="score">Sellability: <strong>${idea.scores.sellability}/10</strong></div>
+              <div class="score">Originality: <strong>${idea.scores.originality}/10</strong></div>
+              <div class="score">Easy to make: <strong>${idea.scores.ease}/10</strong></div>
+            </div>
+
+            <div class="idea-section">
+              <strong>What it is</strong>
+              <div>${idea.description}</div>
+            </div>
+
+            <div class="idea-section">
+              <strong>Best format</strong>
+              <div>${idea.format}</div>
+            </div>
+
+            <div class="idea-section">
+              <strong>Listing angle</strong>
+              <div>${idea.angle}</div>
+            </div>
+
+            <div class="idea-section">
+              <strong>What to include</strong>
+              <ul>
+                ${idea.include.map(item => `<li>${capitaliseWords(item)}</li>`).join("")}
+              </ul>
+            </div>
+
+            <div class="idea-section">
+              <strong>Quick title version</strong>
+              <div>${idea.titleLine}</div>
+            </div>
+
+            <div class="copy-row">
+              <button class="btn-small" onclick="copyText(${JSON.stringify(buildCopyBlock(idea))}, '${copyFullId}')">Copy full idea</button>
+              <button class="btn-small" onclick="copyText(${JSON.stringify(idea.titleLine)}, '${copyTitleId}')">Copy title</button>
+            </div>
+
+            <div class="copied-msg" id="${copyFullId}">Copied full idea.</div>
+            <div class="copied-msg" id="${copyTitleId}">Copied title.</div>
+          </div>
+        `;
+      });
+
+      cards += `</div>`;
+
+      cards += `
+        <div class="summary-box">
+          <strong>Your original life mess:</strong>
+          <div style="margin-top:8px;">${escapeHtml(originalText)}</div>
+          <div style="margin-top:12px; color: var(--muted);">
+            Tiny strategy note: pick the idea with the highest “easy to make” score and actually ship that one first.
+            Your future self does not need five unfinished masterpieces.
+          </div>
+        </div>
+      `;
+
+      results.innerHTML = cards;
+    }
+
+    function generateIdeas() {
+      const text = lifeInput.value.trim();
+      const audience = audienceSelect.value;
+      const format = formatSelect.value;
+      const vibe = vibeSelect.value;
+      const count = parseInt(countSelect.value, 10);
+
+      if (!text) {
+        resultPills.innerHTML = "";
+        results.innerHTML = `
+          <div class="empty-state">
+            Please type something first. The app cannot monetise a blank stare. Yet.
+          </div>
+        `;
+        return;
+      }
+
+      const themes = detectThemes(text);
+      const ideas = [];
+
+      for (let i = 0; i < count; i++) {
+        const theme = themes[i % themes.length];
+        ideas.push(buildIdea(theme, audience, format, vibe, i * 2, text));
+      }
+
+      renderIdeas(ideas, text, audience, format, vibe);
+    }
+
+    function loadExample() {
+      lifeInput.value = "I sell clipart on Etsy, I have too many listings, I keep making similar products, and I know I should bundle things better but I never seem to get organised enough to do it properly.";
+      audienceSelect.value = "etsy sellers";
+      formatSelect.value = "digital template";
+      vibeSelect.value = "practical";
+      countSelect.value = "4";
+      resultPills.innerHTML = "";
+      results.innerHTML = `
+        <div class="empty-state">
+          Example loaded. Now press <strong>Generate product ideas</strong> like the capable legend you are.
+        </div>
+      `;
+    }
+
+    function clearAll() {
+      lifeInput.value = "";
+      audienceSelect.value = "myself";
+      formatSelect.value = "etsy printable";
+      vibeSelect.value = "practical";
+      countSelect.value = "4";
+      resultPills.innerHTML = "";
+      results.innerHTML = `
+        <div class="empty-state">
+          Cleared. Fresh start. Same life, cleaner form.
+        </div>
+      `;
+    }
+
+    generateBtn.addEventListener("click", generateIdeas);
+    exampleBtn.addEventListener("click", loadExample);
+    clearBtn.addEventListener("click", clearAll);
+
+    window.copyText = copyText;
+  </script>
+</body>
+</html>
