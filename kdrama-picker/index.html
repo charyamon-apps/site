@@ -14,6 +14,7 @@
       --primary-2: #8b5cf6;
       --border: rgba(139, 92, 246, 0.15);
       --shadow: 0 10px 30px rgba(91, 61, 139, 0.12);
+      --overlay: rgba(46, 35, 64, 0.6);
     }
 
     * { box-sizing: border-box; }
@@ -76,7 +77,8 @@
     }
 
     .panel,
-    .results {
+    .results,
+    .modal-card {
       background: var(--card);
       backdrop-filter: blur(10px);
       border: 1px solid var(--border);
@@ -148,7 +150,8 @@
       flex: 1;
     }
 
-    .secondary-btn {
+    .secondary-btn,
+    .ghost-btn {
       background: #f3eefc;
       color: var(--text);
     }
@@ -181,6 +184,12 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      transition: transform 0.15s ease;
     }
 
     .poster {
@@ -227,6 +236,58 @@
       color: var(--muted);
     }
 
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 999;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(920px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .modal-top {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .modal-poster {
+      width: 100%;
+      border-radius: 16px;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      background: #f4efff;
+    }
+
+    .modal-close-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .detail-block {
+      margin-top: 14px;
+    }
+
+    .detail-block h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
     footer {
       color: var(--muted);
       font-size: 13px;
@@ -241,6 +302,10 @@
 
       .panel {
         position: static;
+      }
+
+      .modal-top {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -257,7 +322,7 @@
     <div class="grid">
       <aside class="panel">
         <h2 class="section-title">Find your next obsession</h2>
-        <p class="small">This version loads about 500 K-dramas from TMDB. Which is much more reasonable for a person casually trying to lose an entire weekend.</p>
+        <p class="small">This version loads about 500 K-dramas from TMDB, supports clickable details, and uses a proper TMDB person search for actor filtering.</p>
 
         <label for="mood">Mood</label>
         <select id="mood">
@@ -275,7 +340,7 @@
         </select>
 
         <label for="actor">Actor / Actress</label>
-        <input id="actor" type="text" placeholder="e.g. Kim Soo-hyun, IU, Park Seo-joon" />
+        <input id="actor" type="text" placeholder="e.g. Byeon Woo-seok, IU, Park Seo-joon" />
 
         <label for="genre">Genre</label>
         <select id="genre">
@@ -316,11 +381,21 @@
     </div>
   </div>
 
+  <div class="modal" id="detailModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-close-row">
+        <button class="ghost-btn" id="closeModalBtn">Close</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
   <script>
-    // Replace this with your real TMDB API key.
     const TMDB_API_KEY = "cd0693946377aaeaeb26e1f551da0b0e";
 
     let allDramas = [];
+    let personCreditsCache = new Map();
+    let detailsCache = new Map();
 
     const moodInput = document.getElementById("mood");
     const actorInput = document.getElementById("actor");
@@ -330,13 +405,16 @@
     const resultCount = document.getElementById("resultCount");
     const suggestBtn = document.getElementById("suggestBtn");
     const resetBtn = document.getElementById("resetBtn");
+    const detailModal = document.getElementById("detailModal");
+    const modalContent = document.getElementById("modalContent");
+    const closeModalBtn = document.getElementById("closeModalBtn");
 
     function normalise(value) {
       return String(value || "").trim().toLowerCase();
     }
 
     function escapeHtml(value) {
-      return String(value)
+      return String(value || "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -390,21 +468,16 @@
       return [...moods];
     }
 
-    function scoreDrama(drama, filters) {
+    function scoreDrama(drama, filters, actorIdSet) {
       let score = 0;
 
       if (filters.mood && drama.moods.includes(filters.mood)) score += 4;
       if (filters.genre && drama.genre.includes(filters.genre)) score += 3;
       if (filters.search && drama.title.toLowerCase().includes(filters.search)) score += 3;
-
-      if (filters.actor && drama.cast.length) {
-        const castJoined = drama.cast.join(" ").toLowerCase();
-        if (castJoined.includes(filters.actor)) score += 5;
-      }
+      if (filters.actor && actorIdSet && actorIdSet.has(drama.id)) score += 5;
 
       score += drama.moods.length * 0.05;
       score += drama.genre.length * 0.05;
-
       return score;
     }
 
@@ -444,12 +517,6 @@
       return data.results || [];
     }
 
-    async function fetchCast(tvId) {
-      const url = `https://api.themoviedb.org/3/tv/${tvId}/credits?api_key=${TMDB_API_KEY}`;
-      const data = await fetchJSON(url);
-      return (data.cast || []).slice(0, 5).map((person) => person.name);
-    }
-
     async function fetchManyKDramaPages(totalPages = 25) {
       const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
       const results = [];
@@ -461,6 +528,50 @@
       }
 
       return results;
+    }
+
+    async function fetchCast(tvId) {
+      const url = `https://api.themoviedb.org/3/tv/${tvId}/aggregate_credits?api_key=${TMDB_API_KEY}`;
+      const data = await fetchJSON(url);
+      return (data.cast || []).slice(0, 6).map((person) => person.name);
+    }
+
+    async function searchPerson(name) {
+      const key = normalise(name);
+      if (!key) return [];
+      const url = `https://api.themoviedb.org/3/search/person?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(name)}`;
+      const data = await fetchJSON(url);
+      return data.results || [];
+    }
+
+    async function fetchPersonTvCredits(personId) {
+      if (personCreditsCache.has(personId)) {
+        return personCreditsCache.get(personId);
+      }
+      const url = `https://api.themoviedb.org/3/person/${personId}/tv_credits?api_key=${TMDB_API_KEY}`;
+      const data = await fetchJSON(url);
+      const castIds = new Set((data.cast || []).map((item) => item.id));
+      personCreditsCache.set(personId, castIds);
+      return castIds;
+    }
+
+    async function resolveActorFilterIds(actorName) {
+      const people = await searchPerson(actorName);
+      if (!people.length) return new Set();
+
+      const exact = people.find((person) => normalise(person.name) === normalise(actorName)) || people[0];
+      return fetchPersonTvCredits(exact.id);
+    }
+
+    async function fetchDramaDetails(tvId) {
+      if (detailsCache.has(tvId)) {
+        return detailsCache.get(tvId);
+      }
+
+      const url = `https://api.themoviedb.org/3/tv/${tvId}?api_key=${TMDB_API_KEY}&language=en-US`;
+      const data = await fetchJSON(url);
+      detailsCache.set(tvId, data);
+      return data;
     }
 
     async function loadDramas() {
@@ -498,7 +609,9 @@
             cast: [],
             castLoaded: false,
             summary: show.overview || "No summary available. Mysterious and slightly rude.",
-            poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : ""
+            poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : "",
+            voteAverage: show.vote_average || 0,
+            popularity: show.popularity || 0
           };
 
           drama.moods = guessMoods(drama);
@@ -513,11 +626,22 @@
       }
     }
 
-    function filteredDramas() {
+    async function filteredDramas() {
       const filters = getFilters();
+      let actorIdSet = null;
+
+      if (filters.actor) {
+        try {
+          resultCount.textContent = "Finding actor credits...";
+          actorIdSet = await resolveActorFilterIds(filters.actor);
+        } catch (error) {
+          console.error("Actor filter error:", error);
+          actorIdSet = new Set();
+        }
+      }
 
       return allDramas
-        .map((drama) => ({ ...drama, score: scoreDrama(drama, filters) }))
+        .map((drama) => ({ ...drama, score: scoreDrama(drama, filters, actorIdSet) }))
         .filter((drama) => {
           const noFilters = !filters.mood && !filters.actor && !filters.genre && !filters.search;
           if (noFilters) return true;
@@ -525,17 +649,11 @@
           const moodMatch = !filters.mood || drama.moods.includes(filters.mood);
           const genreMatch = !filters.genre || drama.genre.includes(filters.genre);
           const titleMatch = !filters.search || drama.title.toLowerCase().includes(filters.search);
-
-          let actorMatch = true;
-          if (filters.actor) {
-            actorMatch = drama.cast.length
-              ? drama.cast.join(" ").toLowerCase().includes(filters.actor)
-              : true;
-          }
+          const actorMatch = !filters.actor || (actorIdSet && actorIdSet.has(drama.id));
 
           return moodMatch && genreMatch && titleMatch && actorMatch;
         })
-        .sort((a, b) => b.score - a.score || (b.year || 0) - (a.year || 0));
+        .sort((a, b) => b.score - a.score || (b.voteAverage - a.voteAverage) || (b.popularity - a.popularity));
     }
 
     async function enrichVisibleCardsWithCast(list) {
@@ -563,11 +681,12 @@
       }
 
       cardsEl.innerHTML = list.map((drama) => `
-        <article class="card">
+        <article class="card" data-drama-id="${drama.id}">
           ${drama.poster ? `<img class="poster" src="${escapeHtml(drama.poster)}" alt="${escapeHtml(drama.title)} poster">` : ""}
           <h3>${escapeHtml(drama.title)}</h3>
           <div class="meta">
             <span class="pill">${escapeHtml(drama.year)}</span>
+            <span class="pill">⭐ ${Number(drama.voteAverage || 0).toFixed(1)}</span>
           </div>
           <p>${escapeHtml(drama.summary)}</p>
           <div class="chips">
@@ -582,8 +701,94 @@
       `).join("");
     }
 
+    async function openDramaDetails(dramaId) {
+      const drama = allDramas.find((item) => item.id === Number(dramaId));
+      if (!drama) return;
+
+      detailModal.classList.add("open");
+      detailModal.setAttribute("aria-hidden", "false");
+      modalContent.innerHTML = `<div class="empty">Loading drama details...</div>`;
+
+      try {
+        const [details, cast] = await Promise.all([
+          fetchDramaDetails(drama.id),
+          drama.castLoaded ? Promise.resolve(drama.cast) : fetchCast(drama.id).catch(() => [])
+        ]);
+
+        drama.cast = cast;
+        drama.castLoaded = true;
+
+        const genres = (details.genres || []).map((g) => g.name);
+        const networks = (details.networks || []).map((n) => n.name);
+        const seasons = details.number_of_seasons || "—";
+        const episodes = details.number_of_episodes || "—";
+        const status = details.status || "Unknown";
+        const originalName = details.original_name || drama.title;
+        const firstAir = details.first_air_date || "Unknown";
+        const lastAir = details.last_air_date || "Unknown";
+        const homepage = details.homepage || "";
+
+        modalContent.innerHTML = `
+          <div class="modal-top">
+            <div>
+              ${drama.poster ? `<img class="modal-poster" src="${escapeHtml(drama.poster)}" alt="${escapeHtml(drama.title)} poster">` : `<div class="empty">No poster</div>`}
+            </div>
+            <div>
+              <h2 style="margin:0 0 10px; font-size:32px;">${escapeHtml(drama.title)}</h2>
+              <div class="meta">
+                <span class="pill">⭐ ${Number(details.vote_average || 0).toFixed(1)}</span>
+                <span class="pill">${escapeHtml(status)}</span>
+                <span class="pill">${escapeHtml(firstAir)}</span>
+              </div>
+
+              <div class="detail-block">
+                <h4>Overview</h4>
+                <p class="small" style="margin:0; color: var(--text);">${escapeHtml(details.overview || drama.summary)}</p>
+              </div>
+
+              <div class="detail-block">
+                <h4>Genres</h4>
+                <div class="chips">${genres.length ? genres.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("") : `<span class="pill">Unknown</span>`}</div>
+              </div>
+
+              <div class="detail-block">
+                <h4>Main Cast</h4>
+                <div class="chips">${cast.length ? cast.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("") : `<span class="pill">Not available</span>`}</div>
+              </div>
+
+              <div class="detail-block">
+                <h4>Details</h4>
+                <div class="chips">
+                  <span class="pill">Original title: ${escapeHtml(originalName)}</span>
+                  <span class="pill">Seasons: ${escapeHtml(seasons)}</span>
+                  <span class="pill">Episodes: ${escapeHtml(episodes)}</span>
+                  <span class="pill">Last air date: ${escapeHtml(lastAir)}</span>
+                </div>
+              </div>
+
+              <div class="detail-block">
+                <h4>Networks</h4>
+                <div class="chips">${networks.length ? networks.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("") : `<span class="pill">Unknown</span>`}</div>
+              </div>
+
+              ${homepage ? `<div class="detail-block"><a href="${escapeHtml(homepage)}" target="_blank" rel="noopener noreferrer">Official page</a></div>` : ""}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error("Detail modal error:", error);
+        modalContent.innerHTML = `<div class="empty">Could not load drama details. The app had a moment.</div>`;
+      }
+    }
+
+    function closeModal() {
+      detailModal.classList.remove("open");
+      detailModal.setAttribute("aria-hidden", "true");
+      modalContent.innerHTML = "";
+    }
+
     async function updateUI() {
-      const list = filteredDramas();
+      const list = await filteredDramas();
       renderCards(list);
       await enrichVisibleCardsWithCast(list);
       renderCards(list);
@@ -600,8 +805,26 @@
     });
 
     [moodInput, actorInput, genreInput, searchInput].forEach((input) => {
-      input.addEventListener("input", updateUI);
       input.addEventListener("change", updateUI);
+      if (input.tagName === "INPUT") {
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") updateUI();
+        });
+      }
+    });
+
+    cardsEl.addEventListener("click", async (event) => {
+      const card = event.target.closest(".card");
+      if (!card) return;
+      await openDramaDetails(card.dataset.dramaId);
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+    detailModal.addEventListener("click", (event) => {
+      if (event.target === detailModal) closeModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeModal();
     });
 
     loadDramas();
