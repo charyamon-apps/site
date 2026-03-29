@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yerin Ha Update Tracker</title>
+  <style>
+    :root {
+      --bg: #fff8fc;
+      --card: #ffffff;
+      --text: #2d2430;
+      --muted: #7a6d7d;
+      --accent: #d96bb3;
+      --accent-2: #7f7cff;
+      --border: #f0d8e8;
+      --shadow: 0 10px 30px rgba(100, 50, 90, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #fff8fc 0%, #f9f8ff 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #ffe4f3, #ebe8ff);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #f8eff7;
+      border: 1px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+    }
+
+    button.secondary {
+      background: #f3eff7;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      min-height: 20px;
+    }
+
+    .articles {
+      display: grid;
+      gap: 14px;
+    }
+
+    .article {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .article.read {
+      opacity: 0.78;
+      background: #fcf9fc;
+    }
+
+    .article-layout {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .article-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .thumb-wrap {
+      width: 100%;
+    }
+
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #f9e8f3, #ece8ff);
+      display: block;
+    }
+
+    .thumb-placeholder {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #f9e8f3, #ece8ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .article h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .article p {
+      margin: 0 0 12px;
+      color: #534859;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .article-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .article-actions a,
+    .chip {
+      display: inline-block;
+      padding: 8px 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+    }
+
+    .article-actions a.primary {
+      background: var(--accent-2);
+      color: white;
+      border-color: transparent;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .source-card,
+    .saved-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .source-card h3,
+    .saved-card h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .source-card p,
+    .saved-card p {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .empty {
+      padding: 16px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Yerin Ha Update Tracker</h1>
+      <p>
+        A public fan dashboard for news and updates. Admiration is healthy. Building
+        a satellite network is not.
+      </p>
+      <div class="pill-row">
+        <span class="pill">Public articles only</span>
+        <span class="pill">Thumbnail cards</span>
+        <span class="pill">Save favourites</span>
+        <span class="pill">GitHub Pages friendly</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Latest News Feed</h2>
+        <div class="controls">
+          <input id="searchInput" type="text" value="Yerin Ha" placeholder="Search term" />
+          <button id="loadBtn">Load Updates</button>
+          <button id="clearReadBtn" class="secondary">Clear Read Marks</button>
+        </div>
+        <div id="status" class="status">Ready to fetch public updates.</div>
+        <div id="articles" class="articles"></div>
+      </section>
+
+      <aside class="panel">
+        <h2>Public Sources</h2>
+        <div class="list">
+          <div class="source-card">
+            <h3>Official Instagram</h3>
+            <p>Good for public posts and official updates.</p>
+            <a class="chip" href="https://www.instagram.com/yerinha_/" target="_blank" rel="noopener noreferrer">Open source</a>
+          </div>
+
+          <div class="source-card">
+            <h3>IMDb</h3>
+            <p>Useful for project credits and entertainment coverage.</p>
+            <a class="chip" href="https://www.imdb.com/name/nm8485169/" target="_blank" rel="noopener noreferrer">Open source</a>
+          </div>
+
+          <div class="source-card">
+            <h3>Google News</h3>
+            <p>Main feed source for this app.</p>
+            <a class="chip" href="https://news.google.com/search?q=Yerin%20Ha" target="_blank" rel="noopener noreferrer">Open source</a>
+          </div>
+        </div>
+
+        <h2 style="margin-top:18px;">Saved Favourites</h2>
+        <div id="savedList" class="list"></div>
+
+        <div class="footer-note">
+          Public info only. No private data, no location tracking, no digital trench coat behaviour.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const SAVED_KEY = "yerinTrackerSaved";
+    const READ_KEY = "yerinTrackerRead";
+
+    const searchInput = document.getElementById("searchInput");
+    const loadBtn = document.getElementById("loadBtn");
+    const clearReadBtn = document.getElementById("clearReadBtn");
+    const statusEl = document.getElementById("status");
+    const articlesEl = document.getElementById("articles");
+    const savedListEl = document.getElementById("savedList");
+
+    let currentArticles = [];
+    let savedItems = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
+    let readItems = JSON.parse(localStorage.getItem(READ_KEY) || "[]");
+
+    function saveToStorage() {
+      localStorage.setItem(SAVED_KEY, JSON.stringify(savedItems));
+      localStorage.setItem(READ_KEY, JSON.stringify(readItems));
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function getItemId(item) {
+      return item.link || item.guid || item.title;
+    }
+
+    function isRead(item) {
+      return readItems.includes(getItemId(item));
+    }
+
+    function isSaved(item) {
+      return savedItems.some(saved => getItemId(saved) === getItemId(item));
+    }
+
+    function markRead(item) {
+      const id = getItemId(item);
+      if (!readItems.includes(id)) {
+        readItems.push(id);
+        saveToStorage();
+        renderArticles(currentArticles);
+      }
+    }
+
+    function toggleSave(item) {
+      const id = getItemId(item);
+      const exists = savedItems.some(saved => getItemId(saved) === id);
+
+      if (exists) {
+        savedItems = savedItems.filter(saved => getItemId(saved) !== id);
+      } else {
+        savedItems.unshift(item);
+      }
+
+      saveToStorage();
+      renderArticles(currentArticles);
+      renderSaved();
+    }
+
+    function clearRead() {
+      readItems = [];
+      saveToStorage();
+      renderArticles(currentArticles);
+      setStatus("Read marks cleared. A fresh start for your extremely normal fandom.");
+    }
+
+    function stripHtml(html = "") {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return (div.textContent || div.innerText || "").trim();
+    }
+
+    function shorten(text, max = 180) {
+      if (!text) return "No summary available.";
+      return text.length > max ? text.slice(0, max).trim() + "..." : text;
+    }
+
+    function sourceFromLink(link = "") {
+      try {
+        const url = new URL(link);
+        return url.hostname.replace("www.", "");
+      } catch {
+        return "Unknown source";
+      }
+    }
+
+    function escapeHtml(text = "") {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getThumbnail(item) {
+      // rss2json sometimes gives thumbnail directly
+      if (item.thumbnail) return item.thumbnail;
+
+      // sometimes image is inside description/content html
+      const html = item.description || item.content || "";
+      const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (match && match[1]) return match[1];
+
+      return "";
+    }
+
+    function renderThumbnail(item) {
+      const thumbnail = getThumbnail(item);
+
+      if (thumbnail) {
+        return `
+          <img
+            class="thumb"
+            src="${thumbnail}"
+            alt="Article thumbnail"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            onerror="this.outerHTML='<div class=&quot;thumb-placeholder&quot;>No thumbnail available</div>'"
+          />
+        `;
+      }
+
+      return `<div class="thumb-placeholder">No thumbnail available</div>`;
+    }
+
+    function renderArticles(items) {
+      articlesEl.innerHTML = "";
+
+      if (!items.length) {
+        articlesEl.innerHTML = `<div class="empty">No articles yet. Click <strong>Load Updates</strong>.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const article = document.createElement("div");
+        article.className = "article" + (isRead(item) ? " read" : "");
+
+        const summary = shorten(stripHtml(item.description || item.content || item.summary || ""));
+        const published = item.pubDate ? new Date(item.pubDate).toLocaleString() : "Unknown date";
+        const source = sourceFromLink(item.link);
+        const safeTitle = escapeHtml(item.title || "Untitled update");
+
+        article.innerHTML = `
+          <div class="article-layout">
+            <div class="thumb-wrap">
+              ${renderThumbnail(item)}
+            </div>
+
+            <div class="article-body">
+              <h3>${safeTitle}</h3>
+              <div class="meta">${source} • ${published}</div>
+              <p>${escapeHtml(summary)}</p>
+              <div class="article-actions">
+                <a class="primary" href="${item.link}" target="_blank" rel="noopener noreferrer">Open article</a>
+                <button class="secondary save-btn">${isSaved(item) ? "Remove favourite" : "Save favourite"}</button>
+                <button class="secondary read-btn">${isRead(item) ? "Read" : "Mark read"}</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        article.querySelector(".save-btn").addEventListener("click", () => toggleSave(item));
+        article.querySelector(".read-btn").addEventListener("click", () => markRead(item));
+
+        articlesEl.appendChild(article);
+      });
+    }
+
+    function renderSaved() {
+      savedListEl.innerHTML = "";
+
+      if (!savedItems.length) {
+        savedListEl.innerHTML = `<div class="empty">No favourites saved yet.</div>`;
+        return;
+      }
+
+      savedItems.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "saved-card";
+
+        card.innerHTML = `
+          <h3>${escapeHtml(item.title || "Untitled update")}</h3>
+          <p>${escapeHtml(sourceFromLink(item.link))}</p>
+          <div class="article-actions">
+            <a class="primary" href="${item.link}" target="_blank" rel="noopener noreferrer">Open</a>
+            <button class="secondary remove-btn">Remove</button>
+          </div>
+        `;
+
+        card.querySelector(".remove-btn").addEventListener("click", () => toggleSave(item));
+        savedListEl.appendChild(card);
+      });
+    }
+
+    async function loadNews() {
+      const query = searchInput.value.trim() || "Yerin Ha";
+      setStatus("Loading public updates...");
+      articlesEl.innerHTML = `<div class="empty">Fetching articles...</div>`;
+
+      try {
+        const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}`;
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (!data.items || !data.items.length) {
+          currentArticles = [];
+          renderArticles(currentArticles);
+          setStatus("No updates found. Try a different search term.");
+          return;
+        }
+
+        currentArticles = data.items.slice(0, 20);
+        renderArticles(currentArticles);
+        setStatus(`Loaded ${currentArticles.length} public updates for "${query}".`);
+      } catch (error) {
+        console.error(error);
+        currentArticles = [];
+        renderArticles(currentArticles);
+        setStatus("Could not fetch the feed right now. Free internet tools are sometimes emotionally unavailable.");
+      }
+    }
+
+    loadBtn.addEventListener("click", loadNews);
+    clearReadBtn.addEventListener("click", clearRead);
+
+    renderArticles(currentArticles);
+    renderSaved();
+  </script>
+</body>
+</html>
