@@ -7,12 +7,11 @@
   <style>
     :root {
       --bg: #fff8fc;
-      --card: rgba(255, 255, 255, 0.9);
+      --card: rgba(255, 255, 255, 0.94);
       --text: #2e2340;
       --muted: #6d6480;
       --primary: #ff5fa2;
       --primary-2: #8b5cf6;
-      --accent: #ffd166;
       --border: rgba(139, 92, 246, 0.15);
       --shadow: 0 10px 30px rgba(91, 61, 139, 0.12);
     }
@@ -31,7 +30,7 @@
     }
 
     .container {
-      width: min(1100px, calc(100% - 24px));
+      width: min(1280px, calc(100% - 24px));
       margin: 0 auto;
       padding: 24px 0 48px;
     }
@@ -64,7 +63,7 @@
 
     .subtitle {
       margin: 0;
-      max-width: 700px;
+      max-width: 760px;
       line-height: 1.5;
       opacity: 0.95;
     }
@@ -77,8 +76,7 @@
     }
 
     .panel,
-    .results,
-    .recommendation {
+    .results {
       background: var(--card);
       backdrop-filter: blur(10px);
       border: 1px solid var(--border);
@@ -155,71 +153,6 @@
       color: var(--text);
     }
 
-    .recommendation {
-      padding: 20px;
-      margin-bottom: 18px;
-    }
-
-    .rec-badge {
-      display: inline-block;
-      background: #fff0b8;
-      color: #7a5500;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 999px;
-      margin-bottom: 10px;
-    }
-
-    .rec-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: start;
-      flex-wrap: wrap;
-    }
-
-    .rec-title h2 {
-      margin: 0;
-      font-size: 28px;
-    }
-
-    .score {
-      background: #f4efff;
-      color: var(--primary-2);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .meta,
-    .chips {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .meta { margin: 14px 0; }
-
-    .pill {
-      background: #f7f3ff;
-      color: var(--text);
-      border: 1px solid #ece4ff;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-    }
-
-    .why {
-      background: #fff7fb;
-      border: 1px dashed #ffc4dc;
-      border-radius: 16px;
-      padding: 14px;
-      margin-top: 14px;
-      line-height: 1.5;
-    }
-
     .results {
       padding: 18px;
     }
@@ -250,6 +183,14 @@
       gap: 10px;
     }
 
+    .poster {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border-radius: 14px;
+      background: #f4efff;
+    }
+
     .card h3 {
       margin: 0;
       font-size: 18px;
@@ -260,6 +201,22 @@
       color: var(--muted);
       font-size: 14px;
       line-height: 1.45;
+    }
+
+    .meta,
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: #f7f3ff;
+      color: var(--text);
+      border: 1px solid #ece4ff;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
     }
 
     .empty {
@@ -293,15 +250,14 @@
     <section class="hero">
       <h1>K-Drama Mood Picker</h1>
       <p class="subtitle">
-        Your tiny drama database for those extremely serious emergencies like “I need yearning, a red flag male lead,
-        and at least one beautiful coat scene tonight.” Pick a mood, actor, or actress and get a recommendation.
+        Pick a mood, actor, actress, genre, or title and filter a giant pile of K-dramas instead of being bossed around by one smug top pick.
       </p>
     </section>
 
     <div class="grid">
       <aside class="panel">
         <h2 class="section-title">Find your next obsession</h2>
-        <p class="small">Use one filter or all of them. The app scores each drama and pushes the best match to the top.</p>
+        <p class="small">This version loads about 500 K-dramas from TMDB. Which is much more reasonable for a person casually trying to lose an entire weekend.</p>
 
         <label for="mood">Mood</label>
         <select id="mood">
@@ -340,13 +296,12 @@
         <input id="search" type="text" placeholder="Search by title..." />
 
         <div class="button-row">
-          <button class="primary-btn" id="suggestBtn">Suggest drama</button>
+          <button class="primary-btn" id="suggestBtn">Apply filters</button>
           <button class="secondary-btn" id="resetBtn">Reset</button>
         </div>
       </aside>
 
       <main>
-        <button class="primary-btn" id="suggestBtn">Apply filters</button>
         <section class="results">
           <div class="results-head">
             <h2 class="section-title" style="margin:0;">Drama database</h2>
@@ -355,72 +310,52 @@
           <div class="cards" id="cards"></div>
         </section>
         <footer>
-          Built as a starter database. Add more dramas in the <code>dramas</code> array and suddenly you are the Netflix algorithm, but with taste.
+          TMDB supplies the data. Your filters do the judging.
         </footer>
       </main>
     </div>
   </div>
 
   <script>
-    // Paste your TMDB API key here.
-    const TMDB_API_KEY = "cd0693946377aaeaeb26e1f551da0b0e"; // replace with your real TMDB key
+    // Replace this with your real TMDB API key.
+    const TMDB_API_KEY = "cd0693946377aaeaeb26e1f551da0b0e";
 
-    // Main app state.
     let allDramas = [];
-    let currentDramas = [];
 
-    const moodInput = document.getElementById('mood');
-    const actorInput = document.getElementById('actor');
-    const genreInput = document.getElementById('genre');
-    const searchInput = document.getElementById('search');
-    const cardsEl = document.getElementById('cards');
-    const recommendationBox = document.getElementById('recommendationBox');
-    const resultCount = document.getElementById('resultCount');
-    const suggestBtn = document.getElementById('suggestBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    const moodInput = document.getElementById("mood");
+    const actorInput = document.getElementById("actor");
+    const genreInput = document.getElementById("genre");
+    const searchInput = document.getElementById("search");
+    const cardsEl = document.getElementById("cards");
+    const resultCount = document.getElementById("resultCount");
+    const suggestBtn = document.getElementById("suggestBtn");
+    const resetBtn = document.getElementById("resetBtn");
 
-    // Mood rules.
-    // This is the secret sauce because APIs do not understand
-    // "I want yearning but not emotional collapse".
-    function guessMoods(drama) {
-      const text = `${drama.name} ${drama.summary} ${drama.genres.join(' ')}`.toLowerCase();
-      const moods = new Set();
+    function normalise(value) {
+      return String(value || "").trim().toLowerCase();
+    }
 
-      const rules = [
-        { mood: 'romantic', words: ['romance', 'love', 'lover', 'relationship', 'marriage', 'couple'] },
-        { mood: 'heart-fluttering', words: ['romance', 'love', 'youth', 'first love', 'crush', 'dating'] },
-        { mood: 'comfort', words: ['comedy', 'friendship', 'family', 'warm', 'village', 'healing'] },
-        { mood: 'funny', words: ['comedy', 'funny', 'humor', 'chaos', 'hilarious'] },
-        { mood: 'cry', words: ['melodrama', 'tragedy', 'loss', 'grief', 'death', 'heartbreaking'] },
-        { mood: 'thriller', words: ['thriller', 'crime', 'murder', 'serial', 'investigation', 'detective'] },
-        { mood: 'healing', words: ['healing', 'slice of life', 'friendship', 'family', 'growth', 'comfort'] },
-        { mood: 'dark', words: ['dark', 'revenge', 'crime', 'murder', 'violence', 'psychological'] },
-        { mood: 'revenge', words: ['revenge', 'bully', 'payback', 'vengeance'] },
-        { mood: 'fantasy', words: ['fantasy', 'supernatural', 'magic', 'time travel', 'immortal'] }
-      ];
-
-      rules.forEach(rule => {
-        if (rule.words.some(word => text.includes(word))) {
-          moods.add(rule.mood);
-        }
-      });
-
-      if (moods.size === 0) moods.add('comfort');
-      return [...moods];
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
     }
 
     function normaliseGenreNames(tmdbGenres) {
       const map = {
-        'soap': 'melodrama',
-        'war & politics': 'historical',
-        'sci-fi & fantasy': 'fantasy',
-        'action & adventure': 'action',
-        'mystery': 'thriller',
-        'drama': 'melodrama',
-        'family': 'slice of life'
+        "soap": "melodrama",
+        "war & politics": "historical",
+        "sci-fi & fantasy": "fantasy",
+        "action & adventure": "action",
+        "mystery": "thriller",
+        "drama": "melodrama",
+        "family": "slice of life"
       };
 
-      const normalised = tmdbGenres.map(name => {
+      const normalised = tmdbGenres.map((name) => {
         const lower = name.toLowerCase();
         return map[lower] || lower;
       });
@@ -428,103 +363,31 @@
       return [...new Set(normalised)];
     }
 
-    async function fetchJSON(url) {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status} ${response.statusText}`);
-      }
-      return response.json();
-    }
+    function guessMoods(drama) {
+      const text = `${drama.name} ${drama.summary} ${drama.genres.join(" ")}`.toLowerCase();
+      const moods = new Set();
 
-    async function fetchKDramaPage(page) {
-      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&with_origin_country=KR&with_original_language=ko&sort_by=popularity.desc&page=${page}`;
-      const data = await fetchJSON(url);
-      return data.results || [];
-    }
+      const rules = [
+        { mood: "romantic", words: ["romance", "love", "lover", "relationship", "marriage", "couple"] },
+        { mood: "heart-fluttering", words: ["romance", "love", "youth", "first love", "crush", "dating"] },
+        { mood: "comfort", words: ["comedy", "friendship", "family", "warm", "village", "healing"] },
+        { mood: "funny", words: ["comedy", "funny", "humor", "chaos", "hilarious"] },
+        { mood: "cry", words: ["melodrama", "tragedy", "loss", "grief", "death", "heartbreaking"] },
+        { mood: "thriller", words: ["thriller", "crime", "murder", "serial", "investigation", "detective"] },
+        { mood: "healing", words: ["healing", "slice of life", "friendship", "family", "growth", "comfort"] },
+        { mood: "dark", words: ["dark", "revenge", "crime", "murder", "violence", "psychological"] },
+        { mood: "revenge", words: ["revenge", "bully", "payback", "vengeance"] },
+        { mood: "fantasy", words: ["fantasy", "supernatural", "magic", "time travel", "immortal"] }
+      ];
 
-    async function fetchCast(tvId) {
-      const url = `https://api.themoviedb.org/3/tv/${tvId}/credits?api_key=${TMDB_API_KEY}`;
-      const data = await fetchJSON(url);
-      return (data.cast || []).slice(0, 5).map(person => person.name);
-    }
+      rules.forEach((rule) => {
+        if (rule.words.some((word) => text.includes(word))) {
+          moods.add(rule.mood);
+        }
+      });
 
-    async function fetchGenres() {
-      const url = `https://api.themoviedb.org/3/genre/tv/list?api_key=${TMDB_API_KEY}&language=en-US`;
-      const data = await fetchJSON(url);
-      return data.genres || [];
-    }
-
-    async function loadDramas() {
-      if (!TMDB_API_KEY || TMDB_API_KEY === 'PASTE_YOUR_TMDB_API_KEY_HERE') {
-        recommendationBox.innerHTML = `
-          <div class="rec-badge">Setup needed</div>
-          <div class="rec-title"><h2>Add your TMDB API key first</h2></div>
-          <p class="small" style="margin:10px 0 0;">In the code, replace <strong>PASTE_YOUR_TMDB_API_KEY_HERE</strong> with your real API key. Tiny detail. Mildly important.</p>
-        `;
-        cardsEl.innerHTML = `<div class="empty">No API key yet, so the database is currently surviving on vibes alone.</div>`;
-        resultCount.textContent = '0 dramas';
-        return;
-      }
-
-      recommendationBox.innerHTML = `
-        <div class="rec-badge">Loading</div>
-        <div class="rec-title"><h2>Fetching K-dramas from TMDB...</h2></div>
-        <p class="small" style="margin:10px 0 0;">Please hold while the app goes out to collect emotionally devastating television.</p>
-      `;
-      cardsEl.innerHTML = `<div class="empty">Loading database...</div>`;
-      resultCount.textContent = 'Loading...';
-
-      try {
-        const [genres, page1, page2] = await Promise.all([
-          fetchGenres(),
-          fetchKDramaPage(1),
-          fetchKDramaPage(2)
-        ]);
-
-        const genreMap = Object.fromEntries(genres.map(item => [item.id, item.name]));
-        const baseShows = [...page1, ...page2];
-
-        const dramasWithCast = await Promise.all(
-          baseShows.map(async show => {
-            const cast = await fetchCast(show.id).catch(() => []);
-            const genreNames = normaliseGenreNames((show.genre_ids || []).map(id => genreMap[id]).filter(Boolean));
-
-            const drama = {
-              id: show.id,
-              title: show.name,
-              name: show.name,
-              year: show.first_air_date ? Number(show.first_air_date.slice(0, 4)) : '—',
-              genre: genreNames.length ? genreNames : ['melodrama'],
-              genres: genreNames.length ? genreNames : ['melodrama'],
-              moods: [],
-              cast,
-              episodes: show.number_of_episodes || 'Unknown',
-              summary: show.overview || 'No summary available. A mysterious drama. How on-brand.',
-              why: '',
-              poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : ''
-            };
-
-            drama.moods = guessMoods(drama);
-            drama.why = `A strong pick if you're after ${drama.moods.slice(0, 3).join(', ')} vibes with ${drama.genre.slice(0, 2).join(' and ')} energy.`;
-            return drama;
-          })
-        );
-
-        allDramas = dramasWithCast;
-        updateUI();
-      } catch (error) {
-        recommendationBox.innerHTML = `
-          <div class="rec-badge">Something broke</div>
-          <div class="rec-title"><h2>Could not load TMDB data</h2></div>
-          <p class="small" style="margin:10px 0 0;">Check your API key, then open your browser console for details. Error: ${error.message}</p>
-        `;
-        cardsEl.innerHTML = `<div class="empty">The database did not load. Technology remains humble.</div>`;
-        resultCount.textContent = '0 dramas';
-      }
-    }
-
-    function normalise(value) {
-      return value.trim().toLowerCase();
+      if (moods.size === 0) moods.add("comfort");
+      return [...moods];
     }
 
     function scoreDrama(drama, filters) {
@@ -532,16 +395,16 @@
 
       if (filters.mood && drama.moods.includes(filters.mood)) score += 4;
       if (filters.genre && drama.genre.includes(filters.genre)) score += 3;
+      if (filters.search && drama.title.toLowerCase().includes(filters.search)) score += 3;
 
-      if (filters.actor) {
-        const castJoined = drama.cast.join(' ').toLowerCase();
+      if (filters.actor && drama.cast.length) {
+        const castJoined = drama.cast.join(" ").toLowerCase();
         if (castJoined.includes(filters.actor)) score += 5;
       }
 
-      if (filters.search && drama.title.toLowerCase().includes(filters.search)) score += 3;
-
       score += drama.moods.length * 0.05;
       score += drama.genre.length * 0.05;
+
       return score;
     }
 
@@ -554,105 +417,191 @@
       };
     }
 
+    async function fetchJSON(url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    }
+
+    async function fetchGenres() {
+      const url = `https://api.themoviedb.org/3/genre/tv/list?api_key=${TMDB_API_KEY}&language=en-US`;
+      const data = await fetchJSON(url);
+      return data.genres || [];
+    }
+
+    async function fetchKDramaPage(page) {
+      const url =
+        `https://api.themoviedb.org/3/discover/tv` +
+        `?api_key=${TMDB_API_KEY}` +
+        `&with_origin_country=KR` +
+        `&with_original_language=ko` +
+        `&sort_by=popularity.desc` +
+        `&page=${page}`;
+
+      const data = await fetchJSON(url);
+      return data.results || [];
+    }
+
+    async function fetchCast(tvId) {
+      const url = `https://api.themoviedb.org/3/tv/${tvId}/credits?api_key=${TMDB_API_KEY}`;
+      const data = await fetchJSON(url);
+      return (data.cast || []).slice(0, 5).map((person) => person.name);
+    }
+
+    async function fetchManyKDramaPages(totalPages = 25) {
+      const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+      const results = [];
+
+      for (let i = 0; i < pageNumbers.length; i += 5) {
+        const batch = pageNumbers.slice(i, i + 5);
+        const pages = await Promise.all(batch.map((page) => fetchKDramaPage(page)));
+        results.push(...pages.flat());
+      }
+
+      return results;
+    }
+
+    async function loadDramas() {
+      if (!TMDB_API_KEY || TMDB_API_KEY === "PASTE_YOUR_TMDB_API_KEY_HERE") {
+        cardsEl.innerHTML = `<div class="empty">Add your TMDB API key first. Right now this app is just pink wallpaper with ambition.</div>`;
+        resultCount.textContent = "0 dramas";
+        return;
+      }
+
+      cardsEl.innerHTML = `<div class="empty">Loading about 500 K-dramas... because apparently 40 was personally offensive.</div>`;
+      resultCount.textContent = "Loading...";
+
+      try {
+        const [genres, baseShows] = await Promise.all([
+          fetchGenres(),
+          fetchManyKDramaPages(25)
+        ]);
+
+        const genreMap = Object.fromEntries(genres.map((item) => [item.id, item.name]));
+        const dedupedShows = Array.from(new Map(baseShows.map((show) => [show.id, show])).values());
+
+        allDramas = dedupedShows.map((show) => {
+          const genreNames = normaliseGenreNames(
+            (show.genre_ids || []).map((id) => genreMap[id]).filter(Boolean)
+          );
+
+          const drama = {
+            id: show.id,
+            title: show.name || "Untitled",
+            name: show.name || "Untitled",
+            year: show.first_air_date ? Number(show.first_air_date.slice(0, 4)) : "—",
+            genre: genreNames.length ? genreNames : ["melodrama"],
+            genres: genreNames.length ? genreNames : ["melodrama"],
+            moods: [],
+            cast: [],
+            castLoaded: false,
+            summary: show.overview || "No summary available. Mysterious and slightly rude.",
+            poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : ""
+          };
+
+          drama.moods = guessMoods(drama);
+          return drama;
+        });
+
+        await updateUI();
+      } catch (error) {
+        console.error("TMDB load error:", error);
+        cardsEl.innerHTML = `<div class="empty">Could not load TMDB data. Open Console and it will confess what went wrong.</div>`;
+        resultCount.textContent = "0 dramas";
+      }
+    }
+
     function filteredDramas() {
       const filters = getFilters();
 
-      const matches = allDramas
-        .map(drama => ({ ...drama, score: scoreDrama(drama, filters) }))
-        .filter(drama => {
+      return allDramas
+        .map((drama) => ({ ...drama, score: scoreDrama(drama, filters) }))
+        .filter((drama) => {
           const noFilters = !filters.mood && !filters.actor && !filters.genre && !filters.search;
           if (noFilters) return true;
 
           const moodMatch = !filters.mood || drama.moods.includes(filters.mood);
           const genreMatch = !filters.genre || drama.genre.includes(filters.genre);
-          const actorMatch = !filters.actor || drama.cast.join(' ').toLowerCase().includes(filters.actor);
-          const searchMatch = !filters.search || drama.title.toLowerCase().includes(filters.search);
+          const titleMatch = !filters.search || drama.title.toLowerCase().includes(filters.search);
 
-          return moodMatch && genreMatch && actorMatch && searchMatch;
+          let actorMatch = true;
+          if (filters.actor) {
+            actorMatch = drama.cast.length
+              ? drama.cast.join(" ").toLowerCase().includes(filters.actor)
+              : true;
+          }
+
+          return moodMatch && genreMatch && titleMatch && actorMatch;
         })
         .sort((a, b) => b.score - a.score || (b.year || 0) - (a.year || 0));
-
-      currentDramas = matches;
-      return matches;
     }
 
-    function renderRecommendation(list) {
-      if (!list.length) {
-        recommendationBox.innerHTML = `
-          <div class="rec-badge">No match found</div>
-          <div class="rec-title"><h2>Nothing fits those filters</h2></div>
-          <p class="small" style="margin:10px 0 0;">Try fewer filters. Right now you're shopping for a unicorn in a trench coat.</p>
-        `;
-        return;
-      }
+    async function enrichVisibleCardsWithCast(list) {
+      const visible = list.slice(0, 24);
+      const needsCast = visible.filter((drama) => !drama.castLoaded);
 
-      const top = list[0];
-      recommendationBox.innerHTML = `
-        <div class="rec-badge">Top pick for tonight</div>
-        <div class="rec-title">
-          <h2>${top.title}</h2>
-          <div class="score">Match score: ${top.score.toFixed(1)}</div>
-        </div>
-        <div class="meta">
-          <span class="pill">${top.year}</span>
-          <span class="pill">${top.cast.length ? top.cast.join(' • ') : 'Cast loading failed'}</span>
-        </div>
-        <div class="chips">
-          ${top.genre.map(item => `<span class="pill">${item}</span>`).join('')}
-          ${top.moods.map(item => `<span class="pill">${item}</span>`).join('')}
-        </div>
-        <div class="why">
-          <strong>Why this one?</strong><br>
-          ${top.why}
-        </div>
-      `;
+      await Promise.all(
+        needsCast.map(async (drama) => {
+          try {
+            drama.cast = await fetchCast(drama.id);
+          } catch {
+            drama.cast = [];
+          }
+          drama.castLoaded = true;
+        })
+      );
     }
 
     function renderCards(list) {
-      resultCount.textContent = `${list.length} drama${list.length === 1 ? '' : 's'}`;
+      resultCount.textContent = `${list.length} drama${list.length === 1 ? "" : "s"}`;
 
       if (!list.length) {
-        cardsEl.innerHTML = `<div class="empty">No dramas found. Your filters are alarmingly specific.</div>`;
+        cardsEl.innerHTML = `<div class="empty">No dramas found. Your filters are wildly specific.</div>`;
         return;
       }
 
-      cardsEl.innerHTML = list.map(drama => `
+      cardsEl.innerHTML = list.map((drama) => `
         <article class="card">
-          ${drama.poster ? `<img src="${drama.poster}" alt="${drama.title} poster" style="width:100%; aspect-ratio: 2 / 3; object-fit:cover; border-radius:14px;">` : ''}
-          <h3>${drama.title}</h3>
+          ${drama.poster ? `<img class="poster" src="${escapeHtml(drama.poster)}" alt="${escapeHtml(drama.title)} poster">` : ""}
+          <h3>${escapeHtml(drama.title)}</h3>
           <div class="meta">
-            <span class="pill">${drama.year}</span>
+            <span class="pill">${escapeHtml(drama.year)}</span>
           </div>
-          <p>${drama.summary}</p>
+          <p>${escapeHtml(drama.summary)}</p>
           <div class="chips">
-            ${drama.genre.map(item => `<span class="pill">${item}</span>`).join('')}
+            ${drama.genre.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")}
           </div>
           <div class="chips">
-            ${drama.cast.slice(0, 4).map(item => `<span class="pill">${item}</span>`).join('')}
+            ${drama.cast.length
+              ? drama.cast.slice(0, 4).map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")
+              : `<span class="pill">Cast loading...</span>`}
           </div>
         </article>
-      `).join('');
+      `).join("");
     }
 
-    function updateUI() {
+    async function updateUI() {
       const list = filteredDramas();
-      renderRecommendation(list);
+      renderCards(list);
+      await enrichVisibleCardsWithCast(list);
       renderCards(list);
     }
 
-    suggestBtn.addEventListener('click', updateUI);
+    suggestBtn.addEventListener("click", updateUI);
 
-    resetBtn.addEventListener('click', () => {
-      moodInput.value = '';
-      actorInput.value = '';
-      genreInput.value = '';
-      searchInput.value = '';
-      updateUI();
+    resetBtn.addEventListener("click", async () => {
+      moodInput.value = "";
+      actorInput.value = "";
+      genreInput.value = "";
+      searchInput.value = "";
+      await updateUI();
     });
 
-    [moodInput, actorInput, genreInput, searchInput].forEach(input => {
-      input.addEventListener('input', updateUI);
-      input.addEventListener('change', updateUI);
+    [moodInput, actorInput, genreInput, searchInput].forEach((input) => {
+      input.addEventListener("input", updateUI);
+      input.addEventListener("change", updateUI);
     });
 
     loadDramas();
