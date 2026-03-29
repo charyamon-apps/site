@@ -3,438 +3,430 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yerin Ha Update Tracker</title>
+  <title>Yerin Ha Newsboard</title>
   <style>
-    :root {
-      --bg: #fff8fc;
-      --card: #ffffff;
-      --text: #2d2430;
-      --muted: #7a6d7d;
-      --accent: #d96bb3;
-      --accent-2: #7f7cff;
-      --border: #f0d8e8;
-      --shadow: 0 10px 30px rgba(100, 50, 90, 0.08);
+    :root{
+      --bg:#f1f3f4;
+      --card:#ffffff;
+      --text:#202124;
+      --muted:#5f6368;
+      --line:#dadce0;
+      --pill:#e8f0fe;
+      --accent:#1a73e8;
+      --hover:#f8f9fa;
     }
 
-    * {
-      box-sizing: border-box;
+    *{
+      box-sizing:border-box;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #fff8fc 0%, #f9f8ff 100%);
-      color: var(--text);
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
 
-    .wrap {
-      max-width: 1150px;
-      margin: 0 auto;
-      padding: 20px;
+    a{
+      color:inherit;
+      text-decoration:none;
     }
 
-    .hero {
-      background: linear-gradient(135deg, #ffe4f3, #ebe8ff);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
+    .topbar{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      position:sticky;
+      top:0;
+      z-index:20;
     }
 
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: 2rem;
-      line-height: 1.1;
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 20px 10px;
     }
 
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      max-width: 700px;
-      line-height: 1.5;
+    .search-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
     }
 
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
+    .search-wrap{
+      width:min(720px, 100%);
+      background:var(--bg);
+      border:1px solid transparent;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:0 18px;
+      min-height:56px;
     }
 
-    .pill {
-      font-size: 12px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #f8eff7;
-      border: 1px solid var(--border);
+    .search-wrap:focus-within{
+      background:#fff;
+      border-color:var(--line);
+      box-shadow:0 1px 3px rgba(0,0,0,.08);
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap: 20px;
+    .search-icon,
+    .search-x{
+      color:var(--muted);
+      font-size:18px;
+      flex-shrink:0;
     }
 
-    @media (max-width: 920px) {
-      .grid {
-        grid-template-columns: 1fr;
+    .search-input{
+      border:none;
+      outline:none;
+      background:transparent;
+      flex:1;
+      font-size:28px;
+      color:var(--text);
+    }
+
+    .nav{
+      display:flex;
+      gap:28px;
+      overflow:auto;
+      padding:16px 4px 2px;
+      white-space:nowrap;
+      scrollbar-width:none;
+    }
+
+    .nav::-webkit-scrollbar{
+      display:none;
+    }
+
+    .nav a{
+      color:var(--muted);
+      font-size:15px;
+      padding-bottom:10px;
+      border-bottom:2px solid transparent;
+    }
+
+    .nav a.active{
+      color:var(--accent);
+      border-bottom-color:var(--accent);
+      font-weight:600;
+    }
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:28px 20px 40px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 300px;
+      gap:24px;
+      align-items:start;
+    }
+
+    .results-card,
+    .side-card{
+      background:var(--card);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 1px 2px rgba(60,64,67,.15), 0 1px 3px 1px rgba(60,64,67,.1);
+    }
+
+    .result-item{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 220px;
+      gap:20px;
+      padding:18px 18px;
+      border-bottom:1px solid var(--line);
+      transition:background .15s ease;
+    }
+
+    .result-item:last-child{
+      border-bottom:none;
+    }
+
+    .result-item:hover{
+      background:var(--hover);
+    }
+
+    .result-source{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .source-dot{
+      width:16px;
+      height:16px;
+      border-radius:4px;
+      background:#dfe1e5;
+      display:inline-block;
+      flex-shrink:0;
+    }
+
+    .result-title{
+      font-size:20px;
+      line-height:1.35;
+      font-weight:500;
+      margin:0 0 10px;
+    }
+
+    .result-summary{
+      font-size:14px;
+      line-height:1.55;
+      color:var(--muted);
+      margin:0 0 14px;
+    }
+
+    .result-meta{
+      font-size:14px;
+      color:var(--muted);
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .thumb{
+      width:100%;
+      height:140px;
+      object-fit:cover;
+      border-radius:16px;
+      background:#e9eaee;
+      display:block;
+    }
+
+    .thumb-fallback{
+      width:100%;
+      height:140px;
+      border-radius:16px;
+      background:linear-gradient(135deg, #eceff3, #dfe6ee);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:12px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .side-card{
+      padding:18px;
+      position:sticky;
+      top:110px;
+    }
+
+    .topic-top{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .topic-avatar{
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      object-fit:cover;
+      background:#ddd;
+      flex-shrink:0;
+    }
+
+    .topic-name{
+      font-size:30px;
+      line-height:1.1;
+      margin:0 0 4px;
+      font-weight:500;
+    }
+
+    .topic-label{
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .topic-actions{
+      display:flex;
+      gap:10px;
+      margin:16px 0 18px;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 18px;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .btn.primary{
+      background:var(--pill);
+      border-color:#d2e3fc;
+      color:var(--accent);
+      font-weight:600;
+    }
+
+    .topic-box{
+      border-top:1px solid var(--line);
+      padding-top:16px;
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .topic-box strong{
+      color:var(--text);
+    }
+
+    .status,
+    .empty{
+      padding:20px;
+      font-size:15px;
+      color:var(--muted);
+    }
+
+    .empty{
+      text-align:center;
+    }
+
+    .small-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .mini-btn{
+      border:none;
+      background:transparent;
+      color:var(--accent);
+      cursor:pointer;
+      padding:0;
+      font-size:14px;
+    }
+
+    @media (max-width: 980px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+
+      .side-card{
+        position:static;
       }
     }
 
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .panel h2 {
-      margin-top: 0;
-      font-size: 1.2rem;
-    }
-
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    @media (max-width: 640px) {
-      .controls {
-        grid-template-columns: 1fr;
+    @media (max-width: 720px){
+      .search-input{
+        font-size:22px;
       }
-    }
 
-    input[type="text"] {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    button {
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      background: var(--accent);
-      color: white;
-    }
-
-    button.secondary {
-      background: #f3eff7;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .status {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 10px;
-      min-height: 20px;
-    }
-
-    .articles {
-      display: grid;
-      gap: 14px;
-    }
-
-    .article {
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 14px;
-      background: #fff;
-    }
-
-    .article.read {
-      opacity: 0.78;
-      background: #fcf9fc;
-    }
-
-    .article-layout {
-      display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    @media (max-width: 640px) {
-      .article-layout {
-        grid-template-columns: 1fr;
+      .result-item{
+        grid-template-columns:1fr;
       }
-    }
 
-    .thumb-wrap {
-      width: 100%;
-    }
+      .thumb,
+      .thumb-fallback{
+        height:190px;
+      }
 
-    .thumb {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: linear-gradient(135deg, #f9e8f3, #ece8ff);
-      display: block;
-    }
-
-    .thumb-placeholder {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: linear-gradient(135deg, #f9e8f3, #ece8ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 10px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .article h3 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-      line-height: 1.35;
-    }
-
-    .meta {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .article p {
-      margin: 0 0 12px;
-      color: #534859;
-      line-height: 1.45;
-      font-size: 14px;
-    }
-
-    .article-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .article-actions a,
-    .chip {
-      display: inline-block;
-      padding: 8px 10px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-size: 13px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-    }
-
-    .article-actions a.primary {
-      background: var(--accent-2);
-      color: white;
-      border-color: transparent;
-    }
-
-    .list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .source-card,
-    .saved-card {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
-      background: #fff;
-    }
-
-    .source-card h3,
-    .saved-card h3 {
-      margin: 0 0 6px;
-      font-size: 15px;
-    }
-
-    .source-card p,
-    .saved-card p {
-      margin: 0 0 10px;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .empty {
-      padding: 16px;
-      border: 1px dashed var(--border);
-      border-radius: 14px;
-      color: var(--muted);
-      font-size: 14px;
-      text-align: center;
-      background: #fff;
-    }
-
-    .footer-note {
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-      text-align: center;
+      .topic-name{
+        font-size:24px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
-      <h1>Yerin Ha Update Tracker</h1>
-      <p>
-        A public fan dashboard for news and updates. Admiration is healthy. Building
-        a satellite network is not.
-      </p>
-      <div class="pill-row">
-        <span class="pill">Public articles only</span>
-        <span class="pill">Thumbnail cards</span>
-        <span class="pill">Save favourites</span>
-        <span class="pill">GitHub Pages friendly</span>
-      </div>
-    </section>
-
-    <div class="grid">
-      <section class="panel">
-        <h2>Latest News Feed</h2>
-        <div class="controls">
-          <input id="searchInput" type="text" value="Yerin Ha" placeholder="Search term" />
-          <button id="loadBtn">Load Updates</button>
-          <button id="clearReadBtn" class="secondary">Clear Read Marks</button>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="search-row">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input id="searchInput" class="search-input" type="text" value="Yerin Ha" />
+          <span id="clearSearch" class="search-x" title="Clear">✕</span>
         </div>
-        <div id="status" class="status">Ready to fetch public updates.</div>
-        <div id="articles" class="articles"></div>
+      </div>
+
+      <nav class="nav">
+        <a href="#" class="active">Home</a>
+        <a href="#">For you</a>
+        <a href="#">Following</a>
+        <a href="#">News Showcase</a>
+        <a href="#">Australia</a>
+        <a href="#">World</a>
+        <a href="#">Local</a>
+        <a href="#">Business</a>
+        <a href="#">Technology</a>
+        <a href="#">Entertainment</a>
+        <a href="#">Sports</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="layout">
+      <section class="results-card">
+        <div id="status" class="status">Loading public updates...</div>
+        <div id="results"></div>
       </section>
 
-      <aside class="panel">
-        <h2>Public Sources</h2>
-        <div class="list">
-          <div class="source-card">
-            <h3>Official Instagram</h3>
-            <p>Good for public posts and official updates.</p>
-            <a class="chip" href="https://www.instagram.com/yerinha_/" target="_blank" rel="noopener noreferrer">Open source</a>
-          </div>
-
-          <div class="source-card">
-            <h3>IMDb</h3>
-            <p>Useful for project credits and entertainment coverage.</p>
-            <a class="chip" href="https://www.imdb.com/name/nm8485169/" target="_blank" rel="noopener noreferrer">Open source</a>
-          </div>
-
-          <div class="source-card">
-            <h3>Google News</h3>
-            <p>Main feed source for this app.</p>
-            <a class="chip" href="https://news.google.com/search?q=Yerin%20Ha" target="_blank" rel="noopener noreferrer">Open source</a>
+      <aside class="side-card">
+        <div class="topic-top">
+          <img
+            class="topic-avatar"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/HD_transparent_picture.png/240px-HD_transparent_picture.png"
+            alt="Topic avatar"
+            id="topicAvatar"
+          />
+          <div>
+            <h2 class="topic-name">Yerin Ha</h2>
+            <div class="topic-label">Topic</div>
           </div>
         </div>
 
-        <h2 style="margin-top:18px;">Saved Favourites</h2>
-        <div id="savedList" class="list"></div>
+        <div class="topic-actions">
+          <button class="btn primary" id="reloadBtn">Follow</button>
+          <button class="btn" id="shareBtn">Share</button>
+        </div>
 
-        <div class="footer-note">
-          Public info only. No private data, no location tracking, no digital trench coat behaviour.
+        <div class="topic-box">
+          <strong>About this page</strong><br />
+          This shows public articles from Google News RSS for your search term.
+          No secret tracking. No weirdness. Just a neat fan dashboard with boundaries, which is frankly refreshing.
+          <div class="small-actions">
+            <button class="mini-btn" id="refreshFeedBtn">Refresh feed</button>
+            <button class="mini-btn" id="saveQueryBtn">Save query</button>
+          </div>
         </div>
       </aside>
     </div>
-  </div>
+  </main>
 
   <script>
-    const SAVED_KEY = "yerinTrackerSaved";
-    const READ_KEY = "yerinTrackerRead";
-
     const searchInput = document.getElementById("searchInput");
-    const loadBtn = document.getElementById("loadBtn");
-    const clearReadBtn = document.getElementById("clearReadBtn");
+    const clearSearch = document.getElementById("clearSearch");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const refreshFeedBtn = document.getElementById("refreshFeedBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const saveQueryBtn = document.getElementById("saveQueryBtn");
     const statusEl = document.getElementById("status");
-    const articlesEl = document.getElementById("articles");
-    const savedListEl = document.getElementById("savedList");
+    const resultsEl = document.getElementById("results");
 
-    let currentArticles = [];
-    let savedItems = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
-    let readItems = JSON.parse(localStorage.getItem(READ_KEY) || "[]");
+    const SAVED_QUERY_KEY = "yerin-newsboard-query";
 
-    function saveToStorage() {
-      localStorage.setItem(SAVED_KEY, JSON.stringify(savedItems));
-      localStorage.setItem(READ_KEY, JSON.stringify(readItems));
-    }
-
-    function setStatus(message) {
-      statusEl.textContent = message;
-    }
-
-    function getItemId(item) {
-      return item.link || item.guid || item.title;
-    }
-
-    function isRead(item) {
-      return readItems.includes(getItemId(item));
-    }
-
-    function isSaved(item) {
-      return savedItems.some(saved => getItemId(saved) === getItemId(item));
-    }
-
-    function markRead(item) {
-      const id = getItemId(item);
-      if (!readItems.includes(id)) {
-        readItems.push(id);
-        saveToStorage();
-        renderArticles(currentArticles);
-      }
-    }
-
-    function toggleSave(item) {
-      const id = getItemId(item);
-      const exists = savedItems.some(saved => getItemId(saved) === id);
-
-      if (exists) {
-        savedItems = savedItems.filter(saved => getItemId(saved) !== id);
-      } else {
-        savedItems.unshift(item);
-      }
-
-      saveToStorage();
-      renderArticles(currentArticles);
-      renderSaved();
-    }
-
-    function clearRead() {
-      readItems = [];
-      saveToStorage();
-      renderArticles(currentArticles);
-      setStatus("Read marks cleared. A fresh start for your extremely normal fandom.");
+    function setStatus(text) {
+      statusEl.textContent = text;
     }
 
     function stripHtml(html = "") {
       const div = document.createElement("div");
       div.innerHTML = html;
       return (div.textContent || div.innerText || "").trim();
-    }
-
-    function shorten(text, max = 180) {
-      if (!text) return "No summary available.";
-      return text.length > max ? text.slice(0, max).trim() + "..." : text;
-    }
-
-    function sourceFromLink(link = "") {
-      try {
-        const url = new URL(link);
-        return url.hostname.replace("www.", "");
-      } catch {
-        return "Unknown source";
-      }
     }
 
     function escapeHtml(text = "") {
@@ -446,11 +438,22 @@
         .replace(/'/g, "&#039;");
     }
 
+    function shorten(text = "", max = 180) {
+      if (!text) return "No summary available.";
+      return text.length > max ? text.slice(0, max).trim() + "..." : text;
+    }
+
+    function getHostname(url = "") {
+      try {
+        return new URL(url).hostname.replace("www.", "");
+      } catch {
+        return "Unknown source";
+      }
+    }
+
     function getThumbnail(item) {
-      // rss2json sometimes gives thumbnail directly
       if (item.thumbnail) return item.thumbnail;
 
-      // sometimes image is inside description/content html
       const html = item.description || item.content || "";
       const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
       if (match && match[1]) return match[1];
@@ -458,98 +461,90 @@
       return "";
     }
 
+    function formatDate(dateStr) {
+      if (!dateStr) return "Unknown date";
+      const date = new Date(dateStr);
+      if (isNaN(date)) return "Unknown date";
+
+      const now = new Date();
+      const diffMs = now - date;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 0) return "Today";
+      if (diffDays === 1) return "1 day ago";
+      if (diffDays < 30) return `${diffDays} days ago`;
+
+      return date.toLocaleDateString();
+    }
+
     function renderThumbnail(item) {
       const thumbnail = getThumbnail(item);
 
-      if (thumbnail) {
-        return `
-          <img
-            class="thumb"
-            src="${thumbnail}"
-            alt="Article thumbnail"
-            loading="lazy"
-            referrerpolicy="no-referrer"
-            onerror="this.outerHTML='<div class=&quot;thumb-placeholder&quot;>No thumbnail available</div>'"
-          />
-        `;
+      if (!thumbnail) {
+        return `<div class="thumb-fallback">No thumbnail available</div>`;
       }
 
-      return `<div class="thumb-placeholder">No thumbnail available</div>`;
+      return `
+        <img
+          class="thumb"
+          src="${thumbnail}"
+          alt="Article thumbnail"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>No thumbnail available</div>'"
+        />
+      `;
     }
 
     function renderArticles(items) {
-      articlesEl.innerHTML = "";
+      resultsEl.innerHTML = "";
 
       if (!items.length) {
-        articlesEl.innerHTML = `<div class="empty">No articles yet. Click <strong>Load Updates</strong>.</div>`;
+        resultsEl.innerHTML = `<div class="empty">No results found. Try another search.</div>`;
         return;
       }
 
       items.forEach(item => {
-        const article = document.createElement("div");
-        article.className = "article" + (isRead(item) ? " read" : "");
+        const article = document.createElement("article");
+        article.className = "result-item";
 
-        const summary = shorten(stripHtml(item.description || item.content || item.summary || ""));
-        const published = item.pubDate ? new Date(item.pubDate).toLocaleString() : "Unknown date";
-        const source = sourceFromLink(item.link);
-        const safeTitle = escapeHtml(item.title || "Untitled update");
+        const source = getHostname(item.link);
+        const title = escapeHtml(item.title || "Untitled article");
+        const summary = escapeHtml(shorten(stripHtml(item.description || item.content || item.summary || ""), 190));
+        const published = formatDate(item.pubDate);
 
         article.innerHTML = `
-          <div class="article-layout">
-            <div class="thumb-wrap">
-              ${renderThumbnail(item)}
+          <div>
+            <div class="result-source">
+              <span class="source-dot"></span>
+              <span>${escapeHtml(source)}</span>
             </div>
 
-            <div class="article-body">
-              <h3>${safeTitle}</h3>
-              <div class="meta">${source} • ${published}</div>
-              <p>${escapeHtml(summary)}</p>
-              <div class="article-actions">
-                <a class="primary" href="${item.link}" target="_blank" rel="noopener noreferrer">Open article</a>
-                <button class="secondary save-btn">${isSaved(item) ? "Remove favourite" : "Save favourite"}</button>
-                <button class="secondary read-btn">${isRead(item) ? "Read" : "Mark read"}</button>
-              </div>
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer">
+              <h3 class="result-title">${title}</h3>
+            </a>
+
+            <p class="result-summary">${summary}</p>
+
+            <div class="result-meta">
+              <span>${published}</span>
             </div>
           </div>
+
+          <a href="${item.link}" target="_blank" rel="noopener noreferrer">
+            ${renderThumbnail(item)}
+          </a>
         `;
 
-        article.querySelector(".save-btn").addEventListener("click", () => toggleSave(item));
-        article.querySelector(".read-btn").addEventListener("click", () => markRead(item));
-
-        articlesEl.appendChild(article);
-      });
-    }
-
-    function renderSaved() {
-      savedListEl.innerHTML = "";
-
-      if (!savedItems.length) {
-        savedListEl.innerHTML = `<div class="empty">No favourites saved yet.</div>`;
-        return;
-      }
-
-      savedItems.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "saved-card";
-
-        card.innerHTML = `
-          <h3>${escapeHtml(item.title || "Untitled update")}</h3>
-          <p>${escapeHtml(sourceFromLink(item.link))}</p>
-          <div class="article-actions">
-            <a class="primary" href="${item.link}" target="_blank" rel="noopener noreferrer">Open</a>
-            <button class="secondary remove-btn">Remove</button>
-          </div>
-        `;
-
-        card.querySelector(".remove-btn").addEventListener("click", () => toggleSave(item));
-        savedListEl.appendChild(card);
+        resultsEl.appendChild(article);
       });
     }
 
     async function loadNews() {
       const query = searchInput.value.trim() || "Yerin Ha";
       setStatus("Loading public updates...");
-      articlesEl.innerHTML = `<div class="empty">Fetching articles...</div>`;
+
+      resultsEl.innerHTML = "";
 
       try {
         const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}`;
@@ -559,28 +554,73 @@
         const data = await response.json();
 
         if (!data.items || !data.items.length) {
-          currentArticles = [];
-          renderArticles(currentArticles);
-          setStatus("No updates found. Try a different search term.");
+          setStatus("No public updates found.");
+          renderArticles([]);
           return;
         }
 
-        currentArticles = data.items.slice(0, 20);
-        renderArticles(currentArticles);
-        setStatus(`Loaded ${currentArticles.length} public updates for "${query}".`);
+        setStatus("");
+        renderArticles(data.items.slice(0, 25));
       } catch (error) {
         console.error(error);
-        currentArticles = [];
-        renderArticles(currentArticles);
-        setStatus("Could not fetch the feed right now. Free internet tools are sometimes emotionally unavailable.");
+        setStatus("Could not load the feed right now. The internet has chosen drama.");
+        renderArticles([]);
       }
     }
 
-    loadBtn.addEventListener("click", loadNews);
-    clearReadBtn.addEventListener("click", clearRead);
+    function saveQuery() {
+      localStorage.setItem(SAVED_QUERY_KEY, searchInput.value.trim());
+      alert("Search saved.");
+    }
 
-    renderArticles(currentArticles);
-    renderSaved();
+    function loadSavedQuery() {
+      const saved = localStorage.getItem(SAVED_QUERY_KEY);
+      if (saved) {
+        searchInput.value = saved;
+      }
+    }
+
+    clearSearch.addEventListener("click", () => {
+      searchInput.value = "";
+      searchInput.focus();
+    });
+
+    reloadBtn.addEventListener("click", loadNews);
+    refreshFeedBtn.addEventListener("click", loadNews);
+
+    shareBtn.addEventListener("click", async () => {
+      const shareText = `Check this Yerin Ha newsboard: ${window.location.href}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "Yerin Ha Newsboard",
+            text: shareText,
+            url: window.location.href
+          });
+        } catch (err) {
+          // user cancelled, which is fine
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          alert("Page link copied.");
+        } catch (err) {
+          alert("Could not copy the link.");
+        }
+      }
+    });
+
+    saveQueryBtn.addEventListener("click", saveQuery);
+
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        loadNews();
+      }
+    });
+
+    loadSavedQuery();
+    loadNews();
   </script>
 </body>
 </html>
