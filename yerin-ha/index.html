@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yerin Ha Newsboard</title>
+  <title>Yerin Ha Google-News-Style Tracker</title>
   <style>
     :root{
       --bg:#f1f3f4;
@@ -11,14 +11,11 @@
       --text:#202124;
       --muted:#5f6368;
       --line:#dadce0;
-      --pill:#e8f0fe;
       --accent:#1a73e8;
       --hover:#f8f9fa;
     }
 
-    *{
-      box-sizing:border-box;
-    }
+    *{ box-sizing:border-box; }
 
     body{
       margin:0;
@@ -48,21 +45,20 @@
 
     .search-row{
       display:flex;
-      align-items:center;
       justify-content:center;
-      gap:12px;
+      align-items:center;
     }
 
     .search-wrap{
       width:min(720px, 100%);
       background:var(--bg);
-      border:1px solid transparent;
       border-radius:999px;
+      min-height:56px;
       display:flex;
       align-items:center;
       gap:12px;
       padding:0 18px;
-      min-height:56px;
+      border:1px solid transparent;
     }
 
     .search-wrap:focus-within{
@@ -76,13 +72,14 @@
       color:var(--muted);
       font-size:18px;
       flex-shrink:0;
+      cursor:pointer;
     }
 
     .search-input{
+      flex:1;
       border:none;
       outline:none;
       background:transparent;
-      flex:1;
       font-size:28px;
       color:var(--text);
     }
@@ -91,14 +88,12 @@
       display:flex;
       gap:28px;
       overflow:auto;
-      padding:16px 4px 2px;
       white-space:nowrap;
+      padding:16px 4px 2px;
       scrollbar-width:none;
     }
 
-    .nav::-webkit-scrollbar{
-      display:none;
-    }
+    .nav::-webkit-scrollbar{ display:none; }
 
     .nav a{
       color:var(--muted);
@@ -128,27 +123,38 @@
 
     .results-card,
     .side-card{
-      background:var(--card);
+      background:#fff;
       border-radius:24px;
       overflow:hidden;
       box-shadow:0 1px 2px rgba(60,64,67,.15), 0 1px 3px 1px rgba(60,64,67,.1);
+    }
+
+    .status,
+    .empty{
+      padding:20px;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .empty{
+      text-align:center;
     }
 
     .result-item{
       display:grid;
       grid-template-columns:minmax(0, 1fr) 220px;
       gap:20px;
-      padding:18px 18px;
+      padding:18px;
       border-bottom:1px solid var(--line);
       transition:background .15s ease;
     }
 
-    .result-item:last-child{
-      border-bottom:none;
-    }
-
     .result-item:hover{
       background:var(--hover);
+    }
+
+    .result-item:last-child{
+      border-bottom:none;
     }
 
     .result-source{
@@ -170,26 +176,26 @@
     }
 
     .result-title{
+      margin:0 0 10px;
       font-size:20px;
       line-height:1.35;
       font-weight:500;
-      margin:0 0 10px;
     }
 
     .result-summary{
+      margin:0 0 14px;
       font-size:14px;
       line-height:1.55;
       color:var(--muted);
-      margin:0 0 14px;
     }
 
     .result-meta{
-      font-size:14px;
-      color:var(--muted);
       display:flex;
       flex-wrap:wrap;
       gap:8px;
       align-items:center;
+      font-size:14px;
+      color:var(--muted);
     }
 
     .thumb{
@@ -238,9 +244,9 @@
     }
 
     .topic-name{
+      margin:0 0 4px;
       font-size:30px;
       line-height:1.1;
-      margin:0 0 4px;
       font-weight:500;
     }
 
@@ -253,6 +259,7 @@
       display:flex;
       gap:10px;
       margin:16px 0 18px;
+      flex-wrap:wrap;
     }
 
     .btn{
@@ -266,7 +273,7 @@
     }
 
     .btn.primary{
-      background:var(--pill);
+      background:#e8f0fe;
       border-color:#d2e3fc;
       color:var(--accent);
       font-weight:600;
@@ -284,30 +291,45 @@
       color:var(--text);
     }
 
-    .status,
-    .empty{
-      padding:20px;
-      font-size:15px;
-      color:var(--muted);
+    .small-note{
+      margin-top:10px;
+      font-size:13px;
     }
 
-    .empty{
-      text-align:center;
+    .filters{
+      margin-top:12px;
+      display:grid;
+      gap:10px;
     }
 
-    .small-actions{
+    .filter-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:14px;
+      background:#fff;
+    }
+
+    .utility-row{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       margin-top:12px;
     }
 
-    .mini-btn{
+    .link-btn{
+      background:none;
       border:none;
-      background:transparent;
+      padding:0;
       color:var(--accent);
       cursor:pointer;
-      padding:0;
       font-size:14px;
     }
 
@@ -338,6 +360,10 @@
       .topic-name{
         font-size:24px;
       }
+
+      .filter-row{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
@@ -347,7 +373,7 @@
       <div class="search-row">
         <div class="search-wrap">
           <span class="search-icon">🔍</span>
-          <input id="searchInput" class="search-input" type="text" value="Yerin Ha" />
+          <input id="searchInput" class="search-input" type="text" value='"Yerin Ha"' />
           <span id="clearSearch" class="search-x" title="Clear">✕</span>
         </div>
       </div>
@@ -378,10 +404,10 @@
       <aside class="side-card">
         <div class="topic-top">
           <img
+            id="topicAvatar"
             class="topic-avatar"
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/HD_transparent_picture.png/240px-HD_transparent_picture.png"
             alt="Topic avatar"
-            id="topicAvatar"
           />
           <div>
             <h2 class="topic-name">Yerin Ha</h2>
@@ -390,17 +416,36 @@
         </div>
 
         <div class="topic-actions">
-          <button class="btn primary" id="reloadBtn">Follow</button>
-          <button class="btn" id="shareBtn">Share</button>
+          <button class="btn primary" id="searchBtn">Refresh</button>
+          <button class="btn" id="openGoogleNewsBtn">Open Google News</button>
         </div>
 
         <div class="topic-box">
-          <strong>About this page</strong><br />
-          This shows public articles from Google News RSS for your search term.
-          No secret tracking. No weirdness. Just a neat fan dashboard with boundaries, which is frankly refreshing.
-          <div class="small-actions">
-            <button class="mini-btn" id="refreshFeedBtn">Refresh feed</button>
-            <button class="mini-btn" id="saveQueryBtn">Save query</button>
+          <strong>Closer to Google News</strong><br>
+          This version uses the Australia edition and an exact-match query, so the feed is much less random and more like what you see on the real Google News page.
+          
+          <div class="filters">
+            <div class="filter-row">
+              <select id="editionSelect">
+                <option value="AU">Australia</option>
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+              </select>
+
+              <select id="matchSelect">
+                <option value="exact">Exact name match</option>
+                <option value="broad">Broad search</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="utility-row">
+            <button class="link-btn" id="copyFeedBtn">Copy feed URL</button>
+            <button class="link-btn" id="savePrefsBtn">Save preferences</button>
+          </div>
+
+          <div class="small-note">
+            It still won’t be 100% identical to the signed-in Google News website, but it should be a lot closer and less chaotic.
           </div>
         </div>
       </aside>
@@ -410,14 +455,17 @@
   <script>
     const searchInput = document.getElementById("searchInput");
     const clearSearch = document.getElementById("clearSearch");
-    const reloadBtn = document.getElementById("reloadBtn");
-    const refreshFeedBtn = document.getElementById("refreshFeedBtn");
-    const shareBtn = document.getElementById("shareBtn");
-    const saveQueryBtn = document.getElementById("saveQueryBtn");
+    const searchBtn = document.getElementById("searchBtn");
+    const openGoogleNewsBtn = document.getElementById("openGoogleNewsBtn");
+    const copyFeedBtn = document.getElementById("copyFeedBtn");
+    const savePrefsBtn = document.getElementById("savePrefsBtn");
+    const editionSelect = document.getElementById("editionSelect");
+    const matchSelect = document.getElementById("matchSelect");
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
 
-    const SAVED_QUERY_KEY = "yerin-newsboard-query";
+    const PREFS_KEY = "yerin-news-prefs-v2";
+    let lastFeedUrl = "";
 
     function setStatus(text) {
       statusEl.textContent = text;
@@ -439,7 +487,7 @@
     }
 
     function shorten(text = "", max = 180) {
-      if (!text) return "No summary available.";
+      if (!text) return "";
       return text.length > max ? text.slice(0, max).trim() + "..." : text;
     }
 
@@ -451,6 +499,45 @@
       }
     }
 
+    function getEditionSettings() {
+      const edition = editionSelect.value;
+
+      if (edition === "US") {
+        return { hl: "en-US", gl: "US", ceid: "US:en" };
+      }
+
+      if (edition === "GB") {
+        return { hl: "en-GB", gl: "GB", ceid: "GB:en" };
+      }
+
+      return { hl: "en-AU", gl: "AU", ceid: "AU:en" };
+    }
+
+    function buildQuery() {
+      let value = searchInput.value.trim();
+
+      if (!value) value = "Yerin Ha";
+
+      if (matchSelect.value === "exact") {
+        value = value.replace(/^"+|"+$/g, "").trim();
+        return `"${value}"`;
+      }
+
+      return value.replace(/^"+|"+$/g, "").trim();
+    }
+
+    function buildGoogleNewsSearchUrl() {
+      const query = buildQuery();
+      const { hl, gl, ceid } = getEditionSettings();
+      return `https://news.google.com/search?q=${encodeURIComponent(query)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
+    }
+
+    function buildRssUrl() {
+      const query = buildQuery();
+      const { hl, gl, ceid } = getEditionSettings();
+      return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
+    }
+
     function getThumbnail(item) {
       if (item.thumbnail) return item.thumbnail;
 
@@ -459,22 +546,6 @@
       if (match && match[1]) return match[1];
 
       return "";
-    }
-
-    function formatDate(dateStr) {
-      if (!dateStr) return "Unknown date";
-      const date = new Date(dateStr);
-      if (isNaN(date)) return "Unknown date";
-
-      const now = new Date();
-      const diffMs = now - date;
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-      if (diffDays <= 0) return "Today";
-      if (diffDays === 1) return "1 day ago";
-      if (diffDays < 30) return `${diffDays} days ago`;
-
-      return date.toLocaleDateString();
     }
 
     function renderThumbnail(item) {
@@ -496,11 +567,44 @@
       `;
     }
 
+    function formatDate(dateStr) {
+      if (!dateStr) return "Unknown date";
+
+      const date = new Date(dateStr);
+      if (isNaN(date)) return "Unknown date";
+
+      const now = new Date();
+      const diffMs = now - date;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 0) return "Today";
+      if (diffDays === 1) return "1 day ago";
+      if (diffDays < 30) return `${diffDays} days ago`;
+
+      return date.toLocaleDateString();
+    }
+
+    function looksRelevant(item) {
+      const text = `${item.title || ""} ${stripHtml(item.description || "")}`.toLowerCase();
+      const broadNeedle = "yerin ha";
+      return text.includes(broadNeedle);
+    }
+
+    function dedupeItems(items) {
+      const seen = new Set();
+      return items.filter(item => {
+        const key = (item.link || item.title || "").trim();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
     function renderArticles(items) {
       resultsEl.innerHTML = "";
 
       if (!items.length) {
-        resultsEl.innerHTML = `<div class="empty">No results found. Try another search.</div>`;
+        resultsEl.innerHTML = `<div class="empty">No results found. Try broad search or switch edition.</div>`;
         return;
       }
 
@@ -510,7 +614,7 @@
 
         const source = getHostname(item.link);
         const title = escapeHtml(item.title || "Untitled article");
-        const summary = escapeHtml(shorten(stripHtml(item.description || item.content || item.summary || ""), 190));
+        const summary = escapeHtml(shorten(stripHtml(item.description || item.content || ""), 190));
         const published = formatDate(item.pubDate);
 
         article.innerHTML = `
@@ -524,7 +628,7 @@
               <h3 class="result-title">${title}</h3>
             </a>
 
-            <p class="result-summary">${summary}</p>
+            ${summary ? `<p class="result-summary">${summary}</p>` : ""}
 
             <div class="result-meta">
               <span>${published}</span>
@@ -541,15 +645,14 @@
     }
 
     async function loadNews() {
-      const query = searchInput.value.trim() || "Yerin Ha";
       setStatus("Loading public updates...");
-
       resultsEl.innerHTML = "";
 
       try {
-        const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}`;
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+        const rssUrl = buildRssUrl();
+        lastFeedUrl = rssUrl;
 
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
         const response = await fetch(apiUrl);
         const data = await response.json();
 
@@ -559,25 +662,60 @@
           return;
         }
 
+        let items = dedupeItems(data.items);
+
+        if (matchSelect.value === "exact") {
+          items = items.filter(looksRelevant);
+        }
+
+        items = items.slice(0, 30);
+
         setStatus("");
-        renderArticles(data.items.slice(0, 25));
+        renderArticles(items);
       } catch (error) {
         console.error(error);
-        setStatus("Could not load the feed right now. The internet has chosen drama.");
+        setStatus("Could not load the feed right now. Free internet tools are being dramatic.");
         renderArticles([]);
       }
     }
 
-    function saveQuery() {
-      localStorage.setItem(SAVED_QUERY_KEY, searchInput.value.trim());
-      alert("Search saved.");
+    function savePrefs() {
+      const prefs = {
+        search: searchInput.value.trim(),
+        edition: editionSelect.value,
+        match: matchSelect.value
+      };
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+      alert("Preferences saved.");
     }
 
-    function loadSavedQuery() {
-      const saved = localStorage.getItem(SAVED_QUERY_KEY);
-      if (saved) {
-        searchInput.value = saved;
+    function loadPrefs() {
+      const raw = localStorage.getItem(PREFS_KEY);
+      if (!raw) return;
+
+      try {
+        const prefs = JSON.parse(raw);
+        if (prefs.search) searchInput.value = prefs.search;
+        if (prefs.edition) editionSelect.value = prefs.edition;
+        if (prefs.match) matchSelect.value = prefs.match;
+      } catch (error) {
+        console.error("Could not load saved preferences.", error);
       }
+    }
+
+    async function copyFeedUrl() {
+      if (!lastFeedUrl) lastFeedUrl = buildRssUrl();
+
+      try {
+        await navigator.clipboard.writeText(lastFeedUrl);
+        alert("Feed URL copied.");
+      } catch (error) {
+        alert("Could not copy the feed URL.");
+      }
+    }
+
+    function openGoogleNews() {
+      window.open(buildGoogleNewsSearchUrl(), "_blank", "noopener,noreferrer");
     }
 
     clearSearch.addEventListener("click", () => {
@@ -585,33 +723,13 @@
       searchInput.focus();
     });
 
-    reloadBtn.addEventListener("click", loadNews);
-    refreshFeedBtn.addEventListener("click", loadNews);
+    searchBtn.addEventListener("click", loadNews);
+    openGoogleNewsBtn.addEventListener("click", openGoogleNews);
+    copyFeedBtn.addEventListener("click", copyFeedUrl);
+    savePrefsBtn.addEventListener("click", savePrefs);
 
-    shareBtn.addEventListener("click", async () => {
-      const shareText = `Check this Yerin Ha newsboard: ${window.location.href}`;
-
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: "Yerin Ha Newsboard",
-            text: shareText,
-            url: window.location.href
-          });
-        } catch (err) {
-          // user cancelled, which is fine
-        }
-      } else {
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          alert("Page link copied.");
-        } catch (err) {
-          alert("Could not copy the link.");
-        }
-      }
-    });
-
-    saveQueryBtn.addEventListener("click", saveQuery);
+    editionSelect.addEventListener("change", loadNews);
+    matchSelect.addEventListener("change", loadNews);
 
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -619,7 +737,7 @@
       }
     });
 
-    loadSavedQuery();
+    loadPrefs();
     loadNews();
   </script>
 </body>
