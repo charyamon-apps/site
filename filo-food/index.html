@@ -86,7 +86,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      isolation:
+      isolation: isolate;
+    }
 
     .food-ring {
       position: absolute;
@@ -248,6 +249,11 @@
 
     @media (max-width: 640px) {
       .scene { width: 98vw; }
+      .lazy-susan { width: 84%; }
+      .guide-ring { width: 90%; height: 90%; }
+      .food { width: 72px; height: 72px; }
+      .card img { width: 130px; height: 130px; }
+    }
       .lazy-susan { width: 84%; }
       .guide-ring { width: 68%; height: 68%; }
       .food { width: 72px; height: 72px; }
@@ -424,21 +430,21 @@
     function renderFoods(list) {
       foodRing.innerHTML = '';
 
-      const count = list.length;
-      const isMobile = window.innerWidth < 640;
-      const radius = isMobile ? 150 : 205;
-      const centerX = 50;
-      const centerY = 50;
+      const ringWidth = foodRing.clientWidth || 760;
+      const ringHeight = foodRing.clientHeight || 760;
+      const centerX = ringWidth / 2;
+      const centerY = ringHeight / 2;
+      const radius = Math.min(ringWidth, ringHeight) * 0.29;
 
       list.forEach((food, index) => {
-        const angle = ((Math.PI * 2) / count) * index - Math.PI / 2;
-        const x = centerX + (Math.cos(angle) * radius / foodRing.offsetWidth) * 100;
-        const y = centerY + (Math.sin(angle) * radius / foodRing.offsetHeight) * 100;
+        const angle = ((Math.PI * 2) / list.length) * index - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
 
         const btn = document.createElement('button');
         btn.className = 'food';
-        btn.style.left = `${x}%`;
-        btn.style.top = `${y}%`;
+        btn.style.left = `${x}px`;
+        btn.style.top = `${y}px`;
         btn.setAttribute('aria-label', food.name);
         btn.title = food.name;
 
@@ -523,9 +529,18 @@
       if (event.target === modal) closePopup();
     });
 
-    window.addEventListener('resize', () => renderFoods(foods));
+    window.addEventListener('resize', () => {
+      renderFoods(foods);
+    });
 
+    spinner.classList.remove('paused');
+    isPaused = false;
     toggleSpinBtn.textContent = 'Pause Spin';
+
+    window.addEventListener('load', () => {
+      renderFoods(foods);
+    });
+
     renderFoods(foods);
   </script>
 </body>
