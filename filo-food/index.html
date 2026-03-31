@@ -64,7 +64,7 @@
 
     .scene {
       position: relative;
-      width: min(88vw, 760px);
+      width: min(92vw, 760px);
       aspect-ratio: 1 / 1;
       display: flex;
       align-items: center;
@@ -73,6 +73,39 @@
     }
 
     /* This layer spins. The whole point of the app, really. */
+    .spinner {
+      position: absolute;
+      inset: 0;
+      animation: spin 24s linear infinite;
+      transform-origin: center;
+    }
+
+    .spinner-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .food-ring {
+      position: absolute;
+      inset: 0;
+    }
+
+    .guide-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 72%;
+      height: 72%;
+      border-radius: 50%;
+      border: 3px dashed rgba(162, 94, 32, 0.35);
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .spinner {
       position: absolute;
       inset: 0;
@@ -91,12 +124,15 @@
 
     .lazy-susan {
       position: absolute;
-      width: 72%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 78%;
       aspect-ratio: 1 / 1;
       object-fit: contain;
       pointer-events: none;
       filter: drop-shadow(0 20px 25px rgba(0,0,0,0.18));
-      z-index: 1;
+      z-index: 0;
     }
 
     .food {
@@ -211,7 +247,12 @@
     }
 
     @media (max-width: 640px) {
-      .scene { width: 96vw; }
+      .scene { width: 98vw; }
+      .lazy-susan { width: 84%; }
+      .guide-ring { width: 74%; height: 74%; }
+      .food { width: 72px; height: 72px; }
+      .card img { width: 130px; height: 130px; }
+    }
       .lazy-susan { width: 80%; }
       .food { width: 72px; height: 72px; }
       .card img { width: 130px; height: 130px; }
@@ -233,8 +274,11 @@
 
     <div class="scene">
       <div class="spinner" id="spinner">
-        <img class="lazy-susan" src="lazy-susan.png" alt="Lazy Susan tray" />
-        <!-- Food buttons are added by JavaScript -->
+        <div class="spinner-inner">
+          <img class="lazy-susan" src="lazy-susan.png" alt="Lazy Susan tray" />
+          <div class="guide-ring"></div>
+          <div class="food-ring" id="foodRing"></div>
+        </div>
       </div>
     </div>
 
@@ -361,6 +405,7 @@
     ];
 
     const spinner = document.getElementById('spinner');
+    const foodRing = document.getElementById('foodRing');
     const modal = document.getElementById('modal');
     const modalImage = document.getElementById('modalImage');
     const modalTitle = document.getElementById('modalTitle');
@@ -375,7 +420,8 @@
       document.querySelectorAll('.food').forEach(el => el.remove());
 
       const count = list.length;
-      const radius = window.innerWidth < 640 ? 150 : 220;
+      const isMobile = window.innerWidth < 640;
+      const radius = isMobile ? 135 : 185;
 
       list.forEach((food, index) => {
         const angle = (360 / count) * index;
@@ -391,19 +437,18 @@
         img.src = food.file;
         img.alt = food.name;
 
-        // If an image is missing, hide the broken image icon and show text instead.
         img.onerror = () => {
-          btn.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#fff1e3;border:2px dashed #c98a54;border-radius:50%;padding:8px;font-size:12px;font-weight:bold;color:#7c4418;">${food.name}</span>`;
+          btn.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#fff1e3;border:2px dashed #c98a54;border-radius:50%;padding:8px;font-size:12px;font-weight:bold;color:#7c4418;text-align:center;">${food.name}</span>`;
         };
 
-        if (!btn.innerHTML) btn.appendChild(img);
+        btn.appendChild(img);
 
         btn.addEventListener('click', () => {
           openModal(food);
           playExcitedSound();
         });
 
-        spinner.appendChild(btn);
+        foodRing.appendChild(btn);
       });
     }
 
@@ -470,6 +515,7 @@
 
     window.addEventListener('resize', () => renderFoods(foods));
 
+    toggleSpinBtn.textContent = 'Pause Spin';
     renderFoods(foods);
   </script>
 </body>
