@@ -1,1 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Is This Normal or Just Australia?</title>
 
+  <style>
+    :root{
+      --ink:#17211b;
+      --paper:#fff9e8;
+      --green:#0b6b45;
+      --gold:#ffbf2f;
+      --blue:#74c7ec;
+      --white:#ffffff;
+      --shadow:0 10px 0 rgba(23,33,27,.12);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,191,47,.28) 0 110px, transparent 111px),
+        radial-gradient(circle at 85% 15%, rgba(116,199,236,.23) 0 130px, transparent 131px),
+        var(--paper);
+    }
+
+    .wrap{
+      width:min(920px,92%);
+      margin:auto;
+      padding:28px 0 48px;
+    }
+
+    header{
+      text-align:center;
+      padding:28px 16px 18px;
+    }
+
+    .eyebrow{
+      display:inline-block;
+      background:var(--gold);
+      border:2px solid var(--ink);
+      border-radius:999px;
+      padding:7px 12px;
+      font-size:.8rem;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    h1{
+      font-size:clamp(2.4rem,7vw,5.5rem);
+      line-height:.92;
+      margin:18px auto 12px;
+      letter-spacing:-.05em;
+    }
+
+    .sub{
+      max-width:680px;
+      margin:auto;
+      line-height:1.55;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin:26px 0 18px;
+      flex-wrap:wrap;
+    }
+
+    button{font:inherit}
+
+    .tab,.choice,.action{
+      border:2px solid var(--ink);
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .tab{
+      background:white;
+      padding:11px 16px;
+    }
+
+    .tab.active{
+      background:var(--ink);
+      color:white;
+    }
+
+    .card{
+      background:rgba(255,255,255,.85);
+      border:2px solid var(--ink);
+      border-radius:24px;
+      padding:clamp(20px,5vw,40px);
+      box-shadow:var(--shadow);
+    }
+
+    .hidden{display:none !important}
+
+    .progress-row{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:20px;
+      font-weight:bold;
+    }
+
+    .bar{
+      flex:1;
+      height:12px;
+      background:#ece6d3;
+      border:2px solid var(--ink);
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar span{
+      display:block;
+      height:100%;
+      width:0;
+      background:var(--green);
+    }
+
+    .scenario{
+      min-height:150px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      font-size:clamp(1.45rem,4vw,2.3rem);
+      font-weight:900;
+      line-height:1.2;
+    }
+
+    .choices{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .choice{
+      padding:18px;
+      background:white;
+    }
+
+    .choice.normal:hover{background:#d8f2e6}
+    .choice.australia:hover{background:#fff0b8}
+
+    .feedback{
+      margin-top:18px;
+      border:2px dashed var(--ink);
+      border-radius:16px;
+      padding:15px;
+      background:#fffdf5;
+    }
+
+    .action{
+      padding:13px 17px;
+      background:var(--ink);
+      color:white;
+    }
+
+    .action.secondary{
+      background:white;
+      color:var(--ink);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    textarea{
+      width:100%;
+      min-height:145px;
+      border:2px solid var(--ink);
+      border-radius:16px;
+      padding:16px;
+      font:inherit;
+    }
+
+    .verdict{
+      margin-top:22px;
+      padding:22px;
+      border:2px solid var(--ink);
+      border-radius:18px;
+      background:var(--gold);
+    }
+
+    .verdict strong{
+      display:block;
+      font-size:2rem;
+      margin-bottom:8px;
+    }
+
+    .score{
+      font-size:5rem;
+      font-weight:900;
+    }
+
+    footer{
+      text-align:center;
+      font-size:.85rem;
+      opacity:.7;
+      margin-top:26px;
+    }
+
+    @media(max-width:620px){
+      .choices{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="wrap">
+
+  <header>
+    <span class="eyebrow">Peer-reviewed by absolutely nobody</span>
+
+    <h1>Is This Normal<br>or Just Australia?</h1>
+
+    <p class="sub">
+      A tiny diagnostic tool for moments involving aggressive birds,
+      suspicious weather and groceries priced like boutique jewellery.
+    </p>
+  </header>
+
+
+  <div class="tabs">
+    <button class="tab active" data-tab="quiz">
+      🇦🇺 Take the Quiz
+    </button>
+
+    <button class="tab" data-tab="detector">
+      🔎 Diagnose My Situation
+    </button>
+  </div>
+
+
+  <!-- QUIZ -->
+
+  <section id="quiz" class="card">
+
+    <div id="quizGame">
+
+      <div class="progress-row">
+        <span id="questionNo">1 / 10</span>
+
+        <div class="bar">
+          <span id="progress"></span>
+        </div>
+
+        <span id="scoreMini">0 pts</span>
+      </div>
+
+      <div id="scenario" class="scenario"></div>
+
+      <div class="choices">
+
+        <button class="choice normal" data-answer="normal">
+          🙂 Completely Normal
+        </button>
+
+        <button class="choice australia" data-answer="australia">
+          🦘 Just Australia
+        </button>
+
+      </div>
+
+      <div id="feedback" class="feedback hidden"></div>
+
+      <div class="row">
+        <button id="nextBtn" class="action hidden">
+          Next questionable event →
+        </button>
+      </div>
+
+    </div>
+
+
+    <div id="quizResult" class="hidden">
+
+      <span class="eyebrow">
+        Official Australianity Assessment
+      </span>
+
+      <div id="finalScore" class="score">0/10</div>
+
+      <h2 id="resultTitle"></h2>
+
+      <p id="resultText"></p>
+
+      <div class="row">
+
+        <button id="restartBtn" class="action">
+          Try again
+        </button>
+
+        <button id="copyScoreBtn" class="action secondary">
+          Copy result
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- DETECTOR -->
+
+  <section id="detector" class="card hidden">
+
+    <h2>Tell me what happened.</h2>
+
+    <p>
+      Example: “A magpie chased me while it was sunny and raining
+      and then I paid $7.80 for coffee.”
+    </p>
+
+    <textarea
+      id="situation"
+      placeholder="Describe the deeply ordinary Australian event here..."
+    ></textarea>
+
+    <div class="row">
+
+      <button id="diagnoseBtn" class="action">
+        Diagnose this nonsense
+      </button>
+
+      <button id="randomBtn" class="action secondary">
+        Give me a random one
+      </button>
+
+    </div>
+
+    <div id="verdict" class="verdict hidden">
+
+      <strong id="verdictTitle"></strong>
+
+      <div id="verdictText"></div>
+
+    </div>
+
+  </section>
+
+
+  <footer>
+    Made for Australians, visitors, and anyone who has ever lost lunch to a seagull.
+  </footer>
+
+</main>
+
+
+<script>
+
+/* -------------------------
+   QUIZ QUESTIONS
+------------------------- */
+
+const questions = [
+
+{
+text:"You leave home in a jumper, remove it by 10am, need it again at lunch, and are sunburnt by 3pm.",
+answer:"australia",
+note:"Four seasons in one day. Melbourne calls this Tuesday."
+},
+
+{
+text:"A bird attacks your head because you walked near its favourite tree.",
+answer:"australia",
+note:"Magpie season: when the sky develops opinions."
+},
+
+{
+text:"You complain that 18°C is absolutely freezing.",
+answer:"australia",
+note:"Correct. Someone fetch the puffer jacket."
+},
+
+{
+text:"Your local supermarket has a whole aisle devoted to cereal.",
+answer:"normal",
+note:"Surprisingly, ordinary human civilisation."
+},
+
+{
+text:"You check your shoes for spiders even though they were indoors.",
+answer:"australia",
+note:"Healthy vigilance. Possibly character-building."
+},
+
+{
+text:"A sausage in bread outside a hardware store is considered a legitimate lunch plan.",
+answer:"australia",
+note:"Bunnings has entered the chat."
+},
+
+{
+text:"You say 'yeah nah' and everyone understands perfectly.",
+answer:"australia",
+note:"Linguistically efficient. Emotionally mysterious."
+},
+
+{
+text:"You wait politely in a queue without forming an angry mob.",
+answer:"normal",
+note:"Apparently this also happens overseas."
+},
+
+{
+text:"A café charges extra for oat milk, almond milk, soy milk and possibly eye contact.",
+answer:"australia",
+note:"The surcharge economy remains undefeated."
+},
+
+{
+text:"You call a 25-minute drive 'just around the corner'.",
+answer:"australia",
+note:"Australian distance measurement remains theoretical."
+},
+
+{
+text:"You see a kangaroo and are still excited about it.",
+answer:"normal",
+note:"Correct response. Kangaroos remain excellent."
+},
+
+{
+text:"The weather app says 'feels like 42°C' and you still hang the washing outside.",
+answer:"australia",
+note:"It will be dry before you finish hanging it."
+}
+
+];
+
+
+let quizSet=[];
+let current=0;
+let score=0;
+let answered=false;
+
+
+const scenario=document.getElementById("scenario");
+const feedback=document.getElementById("feedback");
+const nextBtn=document.getElementById("nextBtn");
+const progress=document.getElementById("progress");
+const questionNo=document.getElementById("questionNo");
+const scoreMini=document.getElementById("scoreMini");
+
+
+function startQuiz(){
+
+  quizSet=[...questions]
+    .sort(()=>Math.random()-.5)
+    .slice(0,10);
+
+  current=0;
+  score=0;
+
+  document.getElementById("quizGame").classList.remove("hidden");
+  document.getElementById("quizResult").classList.add("hidden");
+
+  showQuestion();
+}
+
+
+function showQuestion(){
+
+  answered=false;
+
+  feedback.classList.add("hidden");
+  nextBtn.classList.add("hidden");
+
+  scenario.textContent=quizSet[current].text;
+
+  questionNo.textContent=
+    `${current+1} / ${quizSet.length}`;
+
+  scoreMini.textContent=
+    `${score} pts`;
+
+  progress.style.width=
+    `${(current/quizSet.length)*100}%`;
+}
+
+
+document.querySelectorAll(".choice")
+.forEach(button=>{
+
+  button.addEventListener("click",()=>{
+
+    if(answered) return;
+
+    answered=true;
+
+    const picked=button.dataset.answer;
+    const q=quizSet[current];
+
+    const correct=
+      picked===q.answer;
+
+    if(correct) score++;
+
+    feedback.innerHTML=`
+      <strong>
+      ${correct ? "✅ Correct." : "❌ Not quite."}
+      </strong>
+      <br>
+      ${q.note}
+    `;
+
+    feedback.classList.remove("hidden");
+    nextBtn.classList.remove("hidden");
+
+    scoreMini.textContent=
+      `${score} pts`;
+
+    progress.style.width=
+      `${((current+1)/quizSet.length)*100}%`;
+
+  });
+
+});
+
+
+nextBtn.addEventListener("click",()=>{
+
+  current++;
+
+  if(current>=quizSet.length){
+    finishQuiz();
+  }
+  else{
+    showQuestion();
+  }
+
+});
+
+
+function finishQuiz(){
+
+  document
+  .getElementById("quizGame")
+  .classList.add("hidden");
+
+  document
+  .getElementById("quizResult")
+  .classList.remove("hidden");
+
+  document
+  .getElementById("finalScore")
+  .textContent=`${score}/10`;
+
+
+  let title="";
+  let text="";
+
+
+  if(score===10){
+
+    title=
+    "You are basically a Bureau of Meteorology warning.";
+
+    text=
+    "Flawless. You can identify Australian nonsense at twenty paces.";
+
+  }
+
+  else if(score>=8){
+
+    title=
+    "Very Australian-adjacent.";
+
+    text=
+    "You understand swooping, surcharges and suspiciously casual danger.";
+
+  }
+
+  else if(score>=5){
+
+    title=
+    "Moderately acclimatised.";
+
+    text=
+    "You know enough to survive, but a bin chicken could still emotionally outmanoeuvre you.";
+
+  }
+
+  else{
+
+    title=
+    "We need to talk.";
+
+    text=
+    "Please remain indoors until someone explains magpies, Bunnings sausages and 'yeah nah'.";
+
+  }
+
+
+  document
+  .getElementById("resultTitle")
+  .textContent=title;
+
+  document
+  .getElementById("resultText")
+  .textContent=text;
+
+}
+
+
+document
+.getElementById("restartBtn")
+.addEventListener("click",startQuiz);
+
+
+
+/* -------------------------
+   AUSTRALIA DETECTOR
+------------------------- */
+
+const signals=[
+
+"magpie",
+"kangaroo",
+"koala",
+"wombat",
+"spider",
+"snake",
+"bin chicken",
+"ibis",
+"bunnings",
+"sausage",
+"vegemite",
+"servo",
+"arvo",
+"brekkie",
+"yeah nah",
+"thongs",
+"swoop",
+"sunburn",
+"heatwave",
+"bushfire",
+"hail",
+"flood",
+"coffee",
+"surcharge",
+"coles",
+"woolworths",
+"aldi",
+"tradie",
+"ute",
+"footy"
+
+];
+
+
+const randomSituations=[
+
+"A magpie chased me for 200 metres and a stranger casually told me which street to avoid next time.",
+
+"It was 31 degrees, then hailed, then became sunny again before I finished hanging the washing.",
+
+"I paid nearly eight dollars for an iced latte and thanked them.",
+
+"Someone said 'yeah nah, she'll be right' and somehow I understood everything.",
+
+"I went to Bunnings for one screw and came home with a sausage, three plants and no screw.",
+
+"A cockatoo started screaming outside at 5:48am like it had been personally betrayed."
+
+];
+
+
+const input=
+document.getElementById("situation");
+
+const verdict=
+document.getElementById("verdict");
+
+
+function diagnose(text){
+
+  const cleaned=
+  text.toLowerCase().trim();
+
+
+  if(!cleaned){
+
+    verdict.classList.remove("hidden");
+
+    document
+    .getElementById("verdictTitle")
+    .textContent=
+    "I need evidence, detective.";
+
+    document
+    .getElementById("verdictText")
+    .textContent=
+    "Type what happened first.";
+
+    return;
+  }
+
+
+  let hits=
+  signals.filter(
+    word=>cleaned.includes(word)
+  ).length;
+
+
+  if(cleaned.includes("$")) hits++;
+
+  if(cleaned.includes("weather")) hits++;
+
+  if(cleaned.includes("bird")) hits++;
+
+  if(
+    cleaned.includes("chase") ||
+    cleaned.includes("attack")
+  ) hits++;
+
+
+  let title;
+  let message;
+
+
+  if(hits>=4){
+
+    title="🇦🇺 JUST AUSTRALIA.";
+
+    message=
+    "This contains a statistically irresponsible amount of Australian energy.";
+
+  }
+
+  else if(hits>=2){
+
+    title="🦘 Probably Australia.";
+
+    message=
+    "There are enough warning signs here that a magpie may be involved off-screen.";
+
+  }
+
+  else if(hits===1){
+
+    title="🤨 Mildly Australian.";
+
+    message=
+    "Could happen elsewhere, but Australia has added its own little flourish.";
+
+  }
+
+  else{
+
+    title="🌍 Disturbingly normal.";
+
+    message=
+    "Please add a swooping bird, weather event or unnecessary surcharge and resubmit.";
+
+  }
+
+
+  document
+  .getElementById("verdictTitle")
+  .textContent=title;
+
+  document
+  .getElementById("verdictText")
+  .textContent=message;
+
+  verdict.classList.remove("hidden");
+
+}
+
+
+document
+.getElementById("diagnoseBtn")
+.addEventListener("click",()=>{
+
+  diagnose(input.value);
+
+});
+
+
+document
+.getElementById("randomBtn")
+.addEventListener("click",()=>{
+
+  const example=
+  randomSituations[
+    Math.floor(
+      Math.random()*randomSituations.length
+    )
+  ];
+
+  input.value=example;
+
+  diagnose(example);
+
+});
+
+
+
+/* -------------------------
+   TABS
+------------------------- */
+
+document.querySelectorAll(".tab")
+.forEach(tab=>{
+
+  tab.addEventListener("click",()=>{
+
+    document.querySelectorAll(".tab")
+    .forEach(t=>t.classList.remove("active"));
+
+    tab.classList.add("active");
+
+
+    document
+    .getElementById("quiz")
+    .classList.toggle(
+      "hidden",
+      tab.dataset.tab!=="quiz"
+    );
+
+
+    document
+    .getElementById("detector")
+    .classList.toggle(
+      "hidden",
+      tab.dataset.tab!=="detector"
+    );
+
+  });
+
+});
+
+
+startQuiz();
+
+</script>
+
+</body>
+</html>
