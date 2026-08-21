@@ -1,1 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <title>Mondrian Maker</title>
+
+  <style>
+    /* =========================
+       BASIC PAGE STYLING
+    ========================== */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f1ea;
+      color: #111;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: min(950px, 94%);
+      margin: 0 auto;
+      padding: 30px 0 50px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 4rem);
+      margin: 0;
+      letter-spacing: -3px;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    /* =========================
+       TOOLBAR
+    ========================== */
+
+    .toolbar {
+      background: white;
+      border: 4px solid #111;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .toolbar-section {
+      margin-bottom: 18px;
+    }
+
+    .toolbar-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .colours,
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Colour palette buttons */
+    .colour {
+      width: 44px;
+      height: 44px;
+      border: 3px solid #111;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .colour:hover {
+      transform: translateY(-2px);
+    }
+
+    .colour.active {
+      outline: 4px solid #777;
+      outline-offset: 2px;
+    }
+
+    .white {
+      background: #f9f7ef;
+    }
+
+    .red {
+      background: #d92929;
+    }
+
+    .blue {
+      background: #1756a9;
+    }
+
+    .yellow {
+      background: #f4c928;
+    }
+
+    .black {
+      background: #111;
+    }
+
+    /* Normal buttons */
+    button.action {
+      padding: 11px 16px;
+      border: 3px solid #111;
+      background: white;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    button.action:hover {
+      background: #111;
+      color: white;
+    }
+
+    /* Selected split tool */
+    button.action.active {
+      background: #111;
+      color: white;
+    }
+
+    /* =========================
+       CANVAS
+    ========================== */
+
+    .canvas-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    #canvas {
+      position: relative;
+      width: min(100%, 700px);
+      aspect-ratio: 1 / 1;
+      background: #111;
+      border: 7px solid #111;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    /*
+      Every Mondrian section is an absolutely
+      positioned rectangle.
+    */
+    .cell {
+      position: absolute;
+      background: #f9f7ef;
+      border: 5px solid #111;
+      cursor: pointer;
+      transition: filter 0.1s;
+    }
+
+    .cell:hover {
+      filter: brightness(0.92);
+    }
+
+    .instruction {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 14px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 35px;
+      color: #777;
+      font-size: 0.75rem;
+    }
+
+    /* Mobile-friendly button sizes */
+    @media (max-width: 600px) {
+      .app {
+        width: 96%;
+        padding-top: 18px;
+      }
+
+      .toolbar {
+        padding: 14px;
+      }
+
+      .colour {
+        width: 40px;
+        height: 40px;
+      }
+
+      button.action {
+        flex: 1;
+        min-width: 120px;
+      }
+
+      #canvas {
+        border-width: 4px;
+      }
+
+      .cell {
+        border-width: 3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <header>
+      <h1>Mondrian Maker</h1>
+
+      <p class="subtitle">
+        Make expensive-looking rectangles from the comfort of your browser.
+      </p>
+    </header>
+
+
+    <!-- =========================
+         TOOLBAR
+    ========================== -->
+
+    <div class="toolbar">
+
+      <div class="toolbar-section">
+        <span class="label">1. Pick a colour</span>
+
+        <div class="colours">
+          <button
+            class="colour white active"
+            data-colour="#f9f7ef"
+            aria-label="White">
+          </button>
+
+          <button
+            class="colour red"
+            data-colour="#d92929"
+            aria-label="Red">
+          </button>
+
+          <button
+            class="colour blue"
+            data-colour="#1756a9"
+            aria-label="Blue">
+          </button>
+
+          <button
+            class="colour yellow"
+            data-colour="#f4c928"
+            aria-label="Yellow">
+          </button>
+
+          <button
+            class="colour black"
+            data-colour="#111111"
+            aria-label="Black">
+          </button>
+        </div>
+      </div>
+
+
+      <div class="toolbar-section">
+        <span class="label">2. Choose what clicking does</span>
+
+        <div class="buttons">
+          <button id="paintButton" class="action active">
+            🎨 Paint
+          </button>
+
+          <button id="verticalButton" class="action">
+            ↕ Split Vertical
+          </button>
+
+          <button id="horizontalButton" class="action">
+            ↔ Split Horizontal
+          </button>
+        </div>
+      </div>
+
+
+      <div class="toolbar-section">
+        <span class="label">Or avoid artistic responsibility</span>
+
+        <div class="buttons">
+          <button id="randomButton" class="action">
+            ✨ Surprise Me
+          </button>
+
+          <button id="resetButton" class="action">
+            Reset
+          </button>
+
+          <button id="downloadButton" class="action">
+            ↓ Save Painting
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         MONDRIAN CANVAS
+    ========================== -->
+
+    <div class="canvas-wrapper">
+      <div id="canvas"></div>
+    </div>
+
+    <p id="instruction" class="instruction">
+      Pick a colour, then click a rectangle to paint it.
+    </p>
+
+    <footer>
+      No gallery curator required.
+    </footer>
+
+  </div>
+
+
+  <script>
+
+    /* ========================================
+       MONDRIAN MAKER
+       Simple vanilla JavaScript.
+       No frameworks. No artistic qualifications.
+    ======================================== */
+
+    const canvas = document.getElementById("canvas");
+
+    const colourButtons =
+      document.querySelectorAll(".colour");
+
+    const paintButton =
+      document.getElementById("paintButton");
+
+    const verticalButton =
+      document.getElementById("verticalButton");
+
+    const horizontalButton =
+      document.getElementById("horizontalButton");
+
+    const randomButton =
+      document.getElementById("randomButton");
+
+    const resetButton =
+      document.getElementById("resetButton");
+
+    const downloadButton =
+      document.getElementById("downloadButton");
+
+    const instruction =
+      document.getElementById("instruction");
+
+
+    /* Current colour */
+    let selectedColour = "#f9f7ef";
+
+    /*
+      Modes:
+      paint
+      vertical
+      horizontal
+    */
+    let currentMode = "paint";
+
+
+    /* ========================================
+       CREATE STARTING CANVAS
+    ======================================== */
+
+    function resetCanvas() {
+
+      canvas.innerHTML = "";
+
+      createCell(
+        0,
+        0,
+        100,
+        100,
+        "#f9f7ef"
+      );
+
+      setMode("paint");
+    }
+
+
+    /*
+      Creates one rectangle.
+
+      x and y = position %
+      width and height = size %
+    */
+
+    function createCell(
+      x,
+      y,
+      width,
+      height,
+      colour
+    ) {
+
+      const cell =
+        document.createElement("div");
+
+      cell.className = "cell";
+
+      cell.style.left = x + "%";
+      cell.style.top = y + "%";
+      cell.style.width = width + "%";
+      cell.style.height = height + "%";
+
+      cell.style.background = colour;
+
+      /*
+        Store rectangle information.
+        This makes splitting much easier.
+      */
+
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+      cell.dataset.width = width;
+      cell.dataset.height = height;
+
+
+      cell.addEventListener(
+        "click",
+        function(event) {
+
+          event.stopPropagation();
+
+          handleCellClick(cell);
+
+        }
+      );
+
+      canvas.appendChild(cell);
+    }
+
+
+    /* ========================================
+       CLICKING A RECTANGLE
+    ======================================== */
+
+    function handleCellClick(cell) {
+
+      if (currentMode === "paint") {
+
+        cell.style.background =
+          selectedColour;
+
+        return;
+      }
+
+
+      if (currentMode === "vertical") {
+
+        splitVertical(cell);
+
+      }
+
+
+      if (currentMode === "horizontal") {
+
+        splitHorizontal(cell);
+
+      }
+    }
+
+
+    /* ========================================
+       SPLIT VERTICALLY
+    ======================================== */
+
+    function splitVertical(cell) {
+
+      const x =
+        parseFloat(cell.dataset.x);
+
+      const y =
+        parseFloat(cell.dataset.y);
+
+      const width =
+        parseFloat(cell.dataset.width);
+
+      const height =
+        parseFloat(cell.dataset.height);
+
+      /*
+        Don't split rectangles that
+        are already extremely small.
+      */
+
+      if (width < 12) {
+        return;
+      }
+
+
+      /*
+        Slight randomness makes each
+        composition less perfectly symmetrical.
+      */
+
+      const ratio =
+        0.35 + Math.random() * 0.3;
+
+      const leftWidth =
+        width * ratio;
+
+      const rightWidth =
+        width - leftWidth;
+
+      const oldColour =
+        cell.style.background;
+
+
+      cell.remove();
+
+
+      createCell(
+        x,
+        y,
+        leftWidth,
+        height,
+        oldColour
+      );
+
+
+      createCell(
+        x + leftWidth,
+        y,
+        rightWidth,
+        height,
+        oldColour
+      );
+    }
+
+
+    /* ========================================
+       SPLIT HORIZONTALLY
+    ======================================== */
+
+    function splitHorizontal(cell) {
+
+      const x =
+        parseFloat(cell.dataset.x);
+
+      const y =
+        parseFloat(cell.dataset.y);
+
+      const width =
+        parseFloat(cell.dataset.width);
+
+      const height =
+        parseFloat(cell.dataset.height);
+
+
+      if (height < 12) {
+        return;
+      }
+
+
+      const ratio =
+        0.35 + Math.random() * 0.3;
+
+      const topHeight =
+        height * ratio;
+
+      const bottomHeight =
+        height - topHeight;
+
+      const oldColour =
+        cell.style.background;
+
+
+      cell.remove();
+
+
+      createCell(
+        x,
+        y,
+        width,
+        topHeight,
+        oldColour
+      );
+
+
+      createCell(
+        x,
+        y + topHeight,
+        width,
+        bottomHeight,
+        oldColour
+      );
+    }
+
+
+    /* ========================================
+       COLOUR PICKER
+    ======================================== */
+
+    colourButtons.forEach(button => {
+
+      button.addEventListener(
+        "click",
+        function() {
+
+          selectedColour =
+            button.dataset.colour;
+
+          colourButtons.forEach(
+            item =>
+              item.classList.remove("active")
+          );
+
+          button.classList.add("active");
+
+          setMode("paint");
+
+        }
+      );
+
+    });
+
+
+    /* ========================================
+       MODE BUTTONS
+    ======================================== */
+
+    paintButton.addEventListener(
+      "click",
+      () => setMode("paint")
+    );
+
+
+    verticalButton.addEventListener(
+      "click",
+      () => setMode("vertical")
+    );
+
+
+    horizontalButton.addEventListener(
+      "click",
+      () => setMode("horizontal")
+    );
+
+
+    function setMode(mode) {
+
+      currentMode = mode;
+
+      paintButton.classList.remove("active");
+      verticalButton.classList.remove("active");
+      horizontalButton.classList.remove("active");
+
+
+      if (mode === "paint") {
+
+        paintButton.classList.add("active");
+
+        instruction.textContent =
+          "Pick a colour, then click a rectangle to paint it.";
+
+      }
+
+
+      if (mode === "vertical") {
+
+        verticalButton.classList.add("active");
+
+        instruction.textContent =
+          "Click a rectangle to split it vertically.";
+
+      }
+
+
+      if (mode === "horizontal") {
+
+        horizontalButton.classList.add("active");
+
+        instruction.textContent =
+          "Click a rectangle to split it horizontally.";
+
+      }
+    }
+
+
+    /* ========================================
+       RANDOM MONDRIAN
+    ======================================== */
+
+    randomButton.addEventListener(
+      "click",
+      generateRandomMondrian
+    );
+
+
+    function generateRandomMondrian() {
+
+      resetCanvas();
+
+
+      /*
+        Randomly split rectangles
+        around 8–14 times.
+      */
+
+      const numberOfSplits =
+        8 + Math.floor(Math.random() * 7);
+
+
+      for (
+        let i = 0;
+        i < numberOfSplits;
+        i++
+      ) {
+
+        const cells =
+          [...document.querySelectorAll(".cell")];
+
+
+        const cell =
+          cells[
+            Math.floor(
+              Math.random() * cells.length
+            )
+          ];
+
+
+        if (Math.random() > 0.5) {
+
+          splitVertical(cell);
+
+        } else {
+
+          splitHorizontal(cell);
+
+        }
+      }
+
+
+      /*
+        Mondrian-inspired palette.
+        White appears more often than
+        the primary colours.
+      */
+
+      const palette = [
+        "#f9f7ef",
+        "#f9f7ef",
+        "#f9f7ef",
+        "#f9f7ef",
+        "#d92929",
+        "#1756a9",
+        "#f4c928"
+      ];
+
+
+      const cells =
+        document.querySelectorAll(".cell");
+
+
+      cells.forEach(cell => {
+
+        const colour =
+          palette[
+            Math.floor(
+              Math.random() *
+              palette.length
+            )
+          ];
+
+        cell.style.background =
+          colour;
+
+      });
+
+
+      setMode("paint");
+    }
+
+
+    /* ========================================
+       RESET BUTTON
+    ======================================== */
+
+    resetButton.addEventListener(
+      "click",
+      resetCanvas
+    );
+
+
+    /* ========================================
+       DOWNLOAD AS PNG
+    ======================================== */
+
+    downloadButton.addEventListener(
+      "click",
+      savePainting
+    );
+
+
+    function savePainting() {
+
+      /*
+        We rebuild the artwork on a real
+        HTML canvas so it can be downloaded
+        as an image.
+      */
+
+      const exportCanvas =
+        document.createElement("canvas");
+
+      const size = 1200;
+
+      exportCanvas.width = size;
+      exportCanvas.height = size;
+
+      const ctx =
+        exportCanvas.getContext("2d");
+
+
+      /* Black background / borders */
+
+      ctx.fillStyle = "#111";
+      ctx.fillRect(
+        0,
+        0,
+        size,
+        size
+      );
+
+
+      const cells =
+        document.querySelectorAll(".cell");
+
+
+      cells.forEach(cell => {
+
+        const x =
+          parseFloat(cell.dataset.x) / 100 * size;
+
+        const y =
+          parseFloat(cell.dataset.y) / 100 * size;
+
+        const width =
+          parseFloat(cell.dataset.width) / 100 * size;
+
+        const height =
+          parseFloat(cell.dataset.height) / 100 * size;
+
+
+        /*
+          Draw the colour slightly inside
+          the rectangle so black lines remain.
+        */
+
+        const border = 8;
+
+        ctx.fillStyle =
+          cell.style.background;
+
+        ctx.fillRect(
+          x + border,
+          y + border,
+          width - border * 2,
+          height - border * 2
+        );
+
+      });
+
+
+      /* Download the PNG */
+
+      const link =
+        document.createElement("a");
+
+      link.download =
+        "my-mondrian.png";
+
+      link.href =
+        exportCanvas.toDataURL("image/png");
+
+      link.click();
+    }
+
+
+    /* Start the app */
+    resetCanvas();
+
+  </script>
+
+</body>
+</html>
