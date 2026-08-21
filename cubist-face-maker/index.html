@@ -1,1 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <title>Cubist Face Maker</title>
+
+  <style>
+    /* ------------------------------
+       BASIC PAGE STYLING
+    ------------------------------ */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3ead8;
+      color: #171717;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    /* Top navigation */
+    .topbar {
+      width: 100%;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 2px solid #171717;
+      background: #fffaf0;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main page */
+    .page {
+      max-width: 1250px;
+      margin: auto;
+      padding: 36px 20px 60px;
+    }
+
+    .intro {
+      max-width: 720px;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(34px, 6vw, 68px);
+      line-height: 0.95;
+      letter-spacing: -3px;
+    }
+
+    .intro p {
+      font-size: 17px;
+      line-height: 1.5;
+      margin: 15px 0 0;
+    }
+
+    /* App layout */
+    .app {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Control panel */
+    .controls {
+      background: #fffaf0;
+      border: 2px solid #171717;
+      padding: 18px;
+      box-shadow: 6px 6px 0 #171717;
+    }
+
+    .control-group {
+      margin-bottom: 24px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-group h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 0 0 10px;
+    }
+
+    .selected-label {
+      background: #171717;
+      color: white;
+      padding: 10px 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button,
+    select {
+      width: 100%;
+      border: 2px solid #171717;
+      background: #fff;
+      color: #171717;
+      padding: 10px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0 #171717;
+    }
+
+    button:active {
+      transform: translate(0, 0);
+      box-shadow: none;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .feature-button {
+      text-align: left;
+    }
+
+    /* Colour swatches */
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 7px;
+    }
+
+    .swatch {
+      aspect-ratio: 1;
+      padding: 0;
+      border: 2px solid #171717;
+      min-height: 34px;
+    }
+
+    .swatch:hover {
+      transform: scale(1.08);
+      box-shadow: none;
+    }
+
+    /* Main random buttons */
+    .big-button {
+      margin-top: 8px;
+      padding: 13px 10px;
+      font-size: 14px;
+    }
+
+    .weird-button {
+      background: #e7ae32;
+    }
+
+    .surprise-button {
+      background: #f38b83;
+    }
+
+    .save-button {
+      background: #3887c9;
+      color: white;
+    }
+
+    /* Canvas panel */
+    .art-area {
+      background: #fffaf0;
+      border: 2px solid #171717;
+      padding: 14px;
+      box-shadow: 8px 8px 0 #171717;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      background: #f5ead0;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    canvas.dragging {
+      cursor: grabbing;
+    }
+
+    .tip {
+      margin: 14px 4px 0;
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.7;
+    }
+
+    /* Mobile layout */
+    @media (max-width: 800px) {
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .art-area {
+        order: -1;
+      }
+
+      h1 {
+        letter-spacing: -2px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- --------------------------------
+       HEADER / NAVIGATION
+  --------------------------------- -->
+
+  <header class="topbar">
+    <div class="brand">Tiny Apps</div>
+
+    <nav class="nav-links">
+      <a href="https://charyamon.com/">← Home</a>
+      <a href="https://charyamon.substack.com/" target="_blank">
+        Blog ↗
+      </a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <section class="intro">
+      <h1>🎭 Cubist<br>Face Maker</h1>
+
+      <p>
+        Assemble a wonderfully wonky portrait.
+        Drag things around. Rotate an ear into complete nonsense.
+        There are no mistakes here, only increasingly confident artistic decisions.
+      </p>
+    </section>
+
+    <section class="app">
+
+      <!-- --------------------------------
+           CONTROL PANEL
+      --------------------------------- -->
+
+      <aside class="controls">
+
+        <div class="selected-label">
+          Selected:
+          <strong id="selectedName">Face</strong>
+        </div>
+
+        <!-- Face shape -->
+        <div class="control-group">
+          <h2>Face Shape</h2>
+
+          <select id="faceShape">
+            <option value="oval">Oval</option>
+            <option value="square">Square</option>
+            <option value="triangle">Triangle</option>
+            <option value="blob">Lopsided Blob</option>
+          </select>
+        </div>
+
+        <!-- Feature styles -->
+        <div class="control-group">
+          <h2>Change Features</h2>
+
+          <div class="button-grid">
+            <button class="feature-button" data-feature="leftEye">
+              👁 Left Eye
+            </button>
+
+            <button class="feature-button" data-feature="rightEye">
+              👁 Right Eye
+            </button>
+
+            <button class="feature-button" data-feature="nose">
+              👃 Nose
+            </button>
+
+            <button class="feature-button" data-feature="mouth">
+              👄 Mouth
+            </button>
+
+            <button class="feature-button" data-feature="leftEar">
+              👂 Left Ear
+            </button>
+
+            <button class="feature-button" data-feature="rightEar">
+              👂 Right Ear
+            </button>
+          </div>
+        </div>
+
+        <!-- Rotation -->
+        <div class="control-group">
+          <h2>Rotate Selected</h2>
+
+          <div class="button-grid">
+            <button id="rotateLeft">↶ -15°</button>
+            <button id="rotateRight">↷ +15°</button>
+          </div>
+        </div>
+
+        <!-- Colours -->
+        <div class="control-group">
+          <h2>Colour Selected</h2>
+
+          <div class="swatches">
+            <button
+              class="swatch"
+              data-color="#f07f73"
+              style="background:#f07f73"
+              title="Coral"
+            ></button>
+
+            <button
+              class="swatch"
+              data-color="#2f83c4"
+              style="background:#2f83c4"
+              title="Blue"
+            ></button>
+
+            <button
+              class="swatch"
+              data-color="#e7ae32"
+              style="background:#e7ae32"
+              title="Mustard"
+            ></button>
+
+            <button
+              class="swatch"
+              data-color="#e89ab8"
+              style="background:#e89ab8"
+              title="Pink"
+            ></button>
+
+            <button
+              class="swatch"
+              data-color="#f7e8c6"
+              style="background:#f7e8c6"
+              title="Cream"
+            ></button>
+
+            <button
+              class="swatch"
+              data-color="#171717"
+              style="background:#171717"
+              title="Black"
+            ></button>
+          </div>
+        </div>
+
+        <!-- Random stuff -->
+        <div class="control-group">
+          <h2>Abandon Control</h2>
+
+          <button id="weirderButton" class="big-button weird-button">
+            🎲 Make It Weirder
+          </button>
+
+          <button id="surpriseButton" class="big-button surprise-button">
+            ✨ Surprise Me
+          </button>
+
+          <button id="saveButton" class="big-button save-button">
+            ↓ Save Artwork
+          </button>
+        </div>
+
+      </aside>
+
+      <!-- --------------------------------
+           ARTWORK CANVAS
+      --------------------------------- -->
+
+      <section class="art-area">
+        <div class="canvas-wrap">
+          <canvas
+            id="artCanvas"
+            width="900"
+            height="900"
+          ></canvas>
+        </div>
+
+        <p class="tip">
+          💡 Click a feature to select it, then drag it anywhere.
+          Use the colour and rotation controls to further upset conventional portraiture.
+        </p>
+      </section>
+
+    </section>
+  </main>
+
+
+  <script>
+    /* ==========================================================
+       CUBIST FACE MAKER
+       Everything below controls the artwork.
+       ========================================================== */
+
+    const canvas = document.getElementById("artCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const selectedName = document.getElementById("selectedName");
+    const faceShapeSelect = document.getElementById("faceShape");
+
+    /* ----------------------------------------------------------
+       COLOUR PALETTE
+    ---------------------------------------------------------- */
+
+    const palette = [
+      "#f07f73", // coral
+      "#2f83c4", // blue
+      "#e7ae32", // mustard
+      "#e89ab8", // pink
+      "#f7e8c6", // cream
+      "#171717"  // black
+    ];
+
+    /* ----------------------------------------------------------
+       ARTWORK DATA
+
+       Each feature has:
+       x / y       = position
+       angle       = rotation
+       style       = which drawing style is used
+       color       = fill colour
+       hitRadius   = clickable area
+    ---------------------------------------------------------- */
+
+    const art = {
+      face: {
+        shape: "oval",
+        color: "#f7e8c6"
+      },
+
+      leftEye: {
+        x: 345,
+        y: 350,
+        angle: -8,
+        style: 0,
+        color: "#2f83c4",
+        hitRadius: 80
+      },
+
+      rightEye: {
+        x: 545,
+        y: 330,
+        angle: 12,
+        style: 2,
+        color: "#e89ab8",
+        hitRadius: 80
+      },
+
+      nose: {
+        x: 455,
+        y: 470,
+        angle: 12,
+        style: 0,
+        color: "#e7ae32",
+        hitRadius: 75
+      },
+
+      mouth: {
+        x: 475,
+        y: 620,
+        angle: -8,
+        style: 0,
+        color: "#f07f73",
+        hitRadius: 90
+      },
+
+      leftEar: {
+        x: 185,
+        y: 450,
+        angle: -20,
+        style: 0,
+        color: "#e89ab8",
+        hitRadius: 70
+      },
+
+      rightEar: {
+        x: 715,
+        y: 430,
+        angle: 22,
+        style: 2,
+        color: "#2f83c4",
+        hitRadius: 70
+      }
+    };
+
+    /* What is currently selected? */
+    let selected = "face";
+
+    /* Dragging variables */
+    let dragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+
+    /* ----------------------------------------------------------
+       HELPER FUNCTIONS
+    ---------------------------------------------------------- */
+
+    function degreesToRadians(degrees) {
+      return degrees * Math.PI / 180;
+    }
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function randomItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function randomColour() {
+      return randomItem(palette);
+    }
+
+    function setSelected(name) {
+      selected = name;
+
+      const names = {
+        face: "Face",
+        leftEye: "Left Eye",
+        rightEye: "Right Eye",
+        nose: "Nose",
+        mouth: "Mouth",
+        leftEar: "Left Ear",
+        rightEar: "Right Ear"
+      };
+
+      selectedName.textContent = names[name];
+      draw();
+    }
+
+
+    /* ==========================================================
+       DRAW FACE
+       ========================================================== */
+
+    function drawFace() {
+      ctx.save();
+
+      ctx.fillStyle = art.face.color;
+      ctx.strokeStyle = "#171717";
+      ctx.lineWidth = 12;
+      ctx.lineJoin = "round";
+
+      ctx.beginPath();
+
+      if (art.face.shape === "oval") {
+        ctx.ellipse(
+          450,
+          450,
+          265,
+          325,
+          degreesToRadians(-5),
+          0,
+          Math.PI * 2
+        );
+      }
+
+      if (art.face.shape === "square") {
+        ctx.roundRect(
+          190,
+          155,
+          525,
+          605,
+          45
+        );
+      }
+
+      if (art.face.shape === "triangle") {
+        ctx.moveTo(455, 120);
+        ctx.lineTo(735, 745);
+        ctx.lineTo(170, 675);
+        ctx.closePath();
+      }
+
+      if (art.face.shape === "blob") {
+        ctx.moveTo(430, 120);
+
+        ctx.bezierCurveTo(
+          635, 110,
+          735, 240,
+          690, 410
+        );
+
+        ctx.bezierCurveTo(
+          760, 590,
+          580, 790,
+          410, 755
+        );
+
+        ctx.bezierCurveTo(
+          195, 790,
+          130, 590,
+          190, 430
+        );
+
+        ctx.bezierCurveTo(
+          115, 230,
+          255, 145,
+          430, 120
+        );
+
+        ctx.closePath();
+      }
+
+      ctx.fill();
+      ctx.stroke();
+
+      /* Little selection indicator */
+      if (selected === "face") {
+        ctx.setLineDash([12, 12]);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+
+    /* ==========================================================
+       DRAW EYES
+       ========================================================== */
+
+    function drawEye(feature) {
+      ctx.save();
+
+      ctx.translate(feature.x, feature.y);
+      ctx.rotate(degreesToRadians(feature.angle));
+
+      ctx.strokeStyle = "#171717";
+      ctx.lineWidth = 9;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      /* Style 0: almond eye */
+      if (feature.style === 0) {
+        ctx.fillStyle = feature.color;
+
+        ctx.beginPath();
+        ctx.moveTo(-70, 0);
+        ctx.quadraticCurveTo(0, -55, 70, 0);
+        ctx.quadraticCurveTo(0, 55, -70, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#171717";
+        ctx.beginPath();
+        ctx.arc(5, 0, 20, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      /* Style 1: giant round eye */
+      if (feature.style === 1) {
+        ctx.fillStyle = feature.color;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 58, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#fffaf0";
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 29, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#171717";
+
+        ctx.beginPath();
+        ctx.arc(8, 5, 13, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      /* Style 2: diamond */
+      if (feature.style === 2) {
+        ctx.fillStyle = feature.color;
+
+        ctx.beginPath();
+        ctx.moveTo(0, -58);
+        ctx.lineTo(72, 0);
+        ctx.lineTo(0, 58);
+        ctx.lineTo(-72, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#171717";
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 17, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      /* Style 3: strange sleepy eye */
+      if (feature.style === 3) {
+        ctx.fillStyle = feature.color;
+
+        ctx.beginPath();
+        ctx.arc(0, 6, 49, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(-70, 8);
+        ctx.quadraticCurveTo(0, -35, 75, 3);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-38, -25);
+        ctx.lineTo(-53, -48);
+
+        ctx.moveTo(0, -34);
+        ctx.lineTo(0, -62);
+
+        ctx.moveTo(38, -25);
+        ctx.lineTo(54, -48);
+
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+
+    /* ==========================================================
+       DRAW NOSE
+       ========================================================== */
+
+    function drawNose(feature) {
+      ctx.save();
+
+      ctx.translate(feature.x, feature.y);
+      ctx.rotate(degreesToRadians(feature.angle));
+
+      ctx.strokeStyle = "#171717";
+      ctx.fillStyle = feature.color;
+      ctx.lineWidth = 10;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      /* Triangle */
+      if (feature.style === 0) {
+        ctx.beginPath();
+        ctx.moveTo(0, -75);
+        ctx.lineTo(65, 65);
+        ctx.lineTo(-35, 55);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      /* Long sideways nose */
+      if (feature.style === 1) {
+        ctx.beginPath();
+        ctx.moveTo(-20, -75);
+        ctx.lineTo(10, 20);
+        ctx.lineTo(82, 45);
+        ctx.lineTo(5, 68);
+        ctx.stroke();
+      }
+
+      /* Block nose */
+      if (feature.style === 2) {
+        ctx.beginPath();
+        ctx.rect(-36, -70, 75, 120);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(35, 55, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      /* Hook */
+      if (feature.style === 3) {
+        ctx.beginPath();
+        ctx.moveTo(-15, -75);
+        ctx.lineTo(-5, 30);
+        ctx.quadraticCurveTo(
+          45, 75,
+          85, 30
+        );
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+
+    /* ==========================================================
+       DRAW MOUTH
+       ========================================================== */
+
+    function drawMouth(feature) {
+      ctx.save();
+
+      ctx.translate(feature.x, feature.y);
+      ctx.rotate(degreesToRadians(feature.angle));
+
+      ctx.strokeStyle = "#171717";
+      ctx.fillStyle = feature.color;
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      /* Lips */
+      if (feature.style === 0) {
+        ctx.beginPath();
+        ctx.moveTo(-85, 0);
+        ctx.quadraticCurveTo(-25, -55, 0, -12);
+        ctx.quadraticCurveTo(35, -55, 90, 0);
+        ctx.quadraticCurveTo(20, 70, -85, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-72, 2);
+        ctx.lineTo(74, 2);
+        ctx.stroke();
+      }
+
+      /* Zigzag */
+      if (feature.style === 1) {
+        ctx.beginPath();
+        ctx.moveTo(-85, 0);
+        ctx.lineTo(-45, -30);
+        ctx.lineTo(-5, 15);
+        ctx.lineTo(38, -25);
+        ctx.lineTo(85, 12);
+        ctx.stroke();
+      }
+
+      /* Oval mouth */
+      if (feature.style === 2) {
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          0,
+          55,
+          75,
+          0,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      /* Crooked smile */
+      if (feature.style === 3) {
+        ctx.beginPath();
+        ctx.moveTo(-85, -12);
+        ctx.quadraticCurveTo(
+          5,
+          72,
+          100,
+          -35
+        );
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(-86, -12, 12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+
+    /* ==========================================================
+       DRAW EAR
+       ========================================================== */
+
+    function drawEar(feature) {
+      ctx.save();
+
+      ctx.translate(feature.x, feature.y);
+      ctx.rotate(degreesToRadians(feature.angle));
+
+      ctx.strokeStyle = "#171717";
+      ctx.fillStyle = feature.color;
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      /* Round ear */
+      if (feature.style === 0) {
+        ctx.beginPath();
+
+        ctx.ellipse(
+          0,
+          0,
+          55,
+          80,
+          0,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(5, 8, 26, 0.6, Math.PI * 1.8);
+        ctx.stroke();
+      }
+
+      /* Triangle ear */
+      if (feature.style === 1) {
+        ctx.beginPath();
+        ctx.moveTo(-45, 65);
+        ctx.lineTo(0, -75);
+        ctx.lineTo(58, 55);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      /* Loop */
+      if (feature.style === 2) {
+        ctx.beginPath();
+
+        ctx.ellipse(
+          0,
+          0,
+          48,
+          75,
+          0,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+          5,
+          5,
+          20,
+          40,
+          0,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      /* Tiny strange ear */
+      if (feature.style === 3) {
+        ctx.beginPath();
+        ctx.arc(0, 0, 35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-10, 0);
+        ctx.lineTo(20, -15);
+        ctx.lineTo(8, 20);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+
+    /* ==========================================================
+       SELECTED FEATURE INDICATOR
+       ========================================================== */
+
+    function drawSelection(feature) {
+      ctx.save();
+
+      ctx.translate(feature.x, feature.y);
+
+      ctx.setLineDash([9, 8]);
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+
+      ctx.arc(
+        0,
+        0,
+        feature.hitRadius + 10,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+
+    /* ==========================================================
+       DRAW EVERYTHING
+       ========================================================== */
+
+    function draw() {
+      /* Background */
+      ctx.fillStyle = "#f3dfb8";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      /* Decorative shapes */
+      ctx.fillStyle = "#2f83c4";
+      ctx.fillRect(45, 90, 110, 110);
+
+      ctx.fillStyle = "#f07f73";
+
+      ctx.beginPath();
+      ctx.arc(820, 720, 75, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#e7ae32";
+
+      ctx.beginPath();
+      ctx.moveTo(740, 70);
+      ctx.lineTo(860, 145);
+      ctx.lineTo(745, 210);
+      ctx.closePath();
+      ctx.fill();
+
+      /* Main face */
+      drawFace();
+
+      /* Features */
+      drawEar(art.leftEar);
+      drawEar(art.rightEar);
+
+      drawEye(art.leftEye);
+      drawEye(art.rightEye);
+
+      drawNose(art.nose);
+      drawMouth(art.mouth);
+
+      /* Selection outline */
+      if (selected !== "face") {
+        drawSelection(art[selected]);
+      }
+    }
+
+
+    /* ==========================================================
+       CHANGE FEATURE STYLE
+       ========================================================== */
+
+    document.querySelectorAll(".feature-button").forEach(button => {
+
+      button.addEventListener("click", () => {
+        const featureName = button.dataset.feature;
+        const feature = art[featureName];
+
+        /* Move to next of four styles */
+        feature.style = (feature.style + 1) % 4;
+
+        setSelected(featureName);
+      });
+
+    });
+
+
+    /* ==========================================================
+       CHANGE FACE SHAPE
+       ========================================================== */
+
+    faceShapeSelect.addEventListener("change", () => {
+      art.face.shape = faceShapeSelect.value;
+
+      setSelected("face");
+    });
+
+
+    /* ==========================================================
+       CHANGE COLOUR
+       ========================================================== */
+
+    document.querySelectorAll(".swatch").forEach(swatch => {
+
+      swatch.addEventListener("click", () => {
+        const colour = swatch.dataset.color;
+
+        if (selected === "face") {
+          art.face.color = colour;
+        } else {
+          art[selected].color = colour;
+        }
+
+        draw();
+      });
+
+    });
+
+
+    /* ==========================================================
+       ROTATE SELECTED FEATURE
+       ========================================================== */
+
+    document.getElementById("rotateLeft").addEventListener("click", () => {
+
+      if (selected === "face") return;
+
+      art[selected].angle -= 15;
+
+      draw();
+    });
+
+
+    document.getElementById("rotateRight").addEventListener("click", () => {
+
+      if (selected === "face") return;
+
+      art[selected].angle += 15;
+
+      draw();
+    });
+
+
+    /* ==========================================================
+       FIND WHICH FEATURE WAS CLICKED
+       ========================================================== */
+
+    function getCanvasPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+
+      return {
+        x:
+          (event.clientX - rect.left) *
+          (canvas.width / rect.width),
+
+        y:
+          (event.clientY - rect.top) *
+          (canvas.height / rect.height)
+      };
+    }
+
+
+    function findFeatureAt(x, y) {
+
+      /* Reverse order means front items get clicked first */
+      const featureNames = [
+        "mouth",
+        "nose",
+        "rightEye",
+        "leftEye",
+        "rightEar",
+        "leftEar"
+      ];
+
+      for (const name of featureNames) {
+        const feature = art[name];
+
+        const dx = x - feature.x;
+        const dy = y - feature.y;
+
+        const distance = Math.sqrt(
+          dx * dx + dy * dy
+        );
+
+        if (distance <= feature.hitRadius) {
+          return name;
+        }
+      }
+
+      return null;
+    }
+
+
+    /* ==========================================================
+       DRAG FEATURES
+       Works with mouse AND touchscreen.
+       ========================================================== */
+
+    canvas.addEventListener("pointerdown", event => {
+
+      const point = getCanvasPosition(event);
+
+      const featureName = findFeatureAt(
+        point.x,
+        point.y
+      );
+
+      if (featureName) {
+
+        setSelected(featureName);
+
+        dragging = true;
+
+        dragOffsetX =
+          point.x - art[featureName].x;
+
+        dragOffsetY =
+          point.y - art[featureName].y;
+
+        canvas.classList.add("dragging");
+
+        canvas.setPointerCapture(event.pointerId);
+
+      } else {
+
+        setSelected("face");
+
+      }
+    });
+
+
+    canvas.addEventListener("pointermove", event => {
+
+      if (!dragging || selected === "face") {
+        return;
+      }
+
+      const point = getCanvasPosition(event);
+
+      art[selected].x =
+        point.x - dragOffsetX;
+
+      art[selected].y =
+        point.y - dragOffsetY;
+
+      draw();
+    });
+
+
+    function stopDragging() {
+      dragging = false;
+      canvas.classList.remove("dragging");
+    }
+
+    canvas.addEventListener("pointerup", stopDragging);
+    canvas.addEventListener("pointercancel", stopDragging);
+
+
+    /* ==========================================================
+       🎲 MAKE IT WEIRDER
+
+       Keeps the feature styles, but throws their locations
+       and rotations into mild artistic chaos.
+       ========================================================== */
+
+    document
+      .getElementById("weirderButton")
+      .addEventListener("click", () => {
+
+        const featureNames = [
+          "leftEye",
+          "rightEye",
+          "nose",
+          "mouth",
+          "leftEar",
+          "rightEar"
+        ];
+
+        featureNames.forEach(name => {
+
+          art[name].x = randomBetween(155, 745);
+          art[name].y = randomBetween(175, 725);
+
+          art[name].angle =
+            randomBetween(-100, 100);
+
+        });
+
+        setSelected("face");
+      });
+
+
+    /* ==========================================================
+       ✨ SURPRISE ME
+
+       Randomises absolutely everything.
+
+       A tiny digital art director who has had too much coffee.
+       ========================================================== */
+
+    document
+      .getElementById("surpriseButton")
+      .addEventListener("click", () => {
+
+        const shapes = [
+          "oval",
+          "square",
+          "triangle",
+          "blob"
+        ];
+
+        /* Random face */
+        art.face.shape = randomItem(shapes);
+        art.face.color = randomColour();
+
+        faceShapeSelect.value = art.face.shape;
+
+
+        /* Random left eye */
+        art.leftEye.x = randomBetween(250, 420);
+        art.leftEye.y = randomBetween(250, 430);
+        art.leftEye.angle = randomBetween(-55, 55);
+        art.leftEye.style = Math.floor(Math.random() * 4);
+        art.leftEye.color = randomColour();
+
+
+        /* Random right eye */
+        art.rightEye.x = randomBetween(470, 665);
+        art.rightEye.y = randomBetween(230, 440);
+        art.rightEye.angle = randomBetween(-55, 55);
+        art.rightEye.style = Math.floor(Math.random() * 4);
+        art.rightEye.color = randomColour();
+
+
+        /* Random nose */
+        art.nose.x = randomBetween(350, 585);
+        art.nose.y = randomBetween(390, 545);
+        art.nose.angle = randomBetween(-55, 55);
+        art.nose.style = Math.floor(Math.random() * 4);
+        art.nose.color = randomColour();
+
+
+        /* Random mouth */
+        art.mouth.x = randomBetween(330, 625);
+        art.mouth.y = randomBetween(550, 690);
+        art.mouth.angle = randomBetween(-45, 45);
+        art.mouth.style = Math.floor(Math.random() * 4);
+        art.mouth.color = randomColour();
+
+
+        /* Random ears */
+        art.leftEar.x = randomBetween(120, 280);
+        art.leftEar.y = randomBetween(300, 610);
+        art.leftEar.angle = randomBetween(-90, 90);
+        art.leftEar.style = Math.floor(Math.random() * 4);
+        art.leftEar.color = randomColour();
+
+        art.rightEar.x = randomBetween(620, 780);
+        art.rightEar.y = randomBetween(300, 610);
+        art.rightEar.angle = randomBetween(-90, 90);
+        art.rightEar.style = Math.floor(Math.random() * 4);
+        art.rightEar.color = randomColour();
+
+        setSelected("face");
+      });
+
+
+    /* ==========================================================
+       SAVE ARTWORK AS PNG
+       ========================================================== */
+
+    document
+      .getElementById("saveButton")
+      .addEventListener("click", () => {
+
+        /*
+          Temporarily remove the selection outline
+          before saving the artwork.
+        */
+
+        const previousSelection = selected;
+
+        selected = "";
+
+        draw();
+
+        const image =
+          canvas.toDataURL("image/png");
+
+        const downloadLink =
+          document.createElement("a");
+
+        downloadLink.href = image;
+
+        downloadLink.download =
+          "cubist-face.png";
+
+        downloadLink.click();
+
+        /* Put selection back */
+        selected = previousSelection;
+
+        draw();
+      });
+
+
+    /* First drawing when the page opens */
+    draw();
+
+  </script>
+
+</body>
+</html>
